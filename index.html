@@ -1943,7 +1943,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v21.0';
+const VERSION = 'v21.1';
 
 const SLIDES = [
   {
@@ -2380,7 +2380,7 @@ const SLIDES = [
         cam: [264, 387, 1326, -2.020, 0.532],
         x: 331, y: 450, base: 430, tone: '' },
       { follow: 0, nowrap: true, text: 'visão submicroscópica',
-        x: 264, y: 530, base: 19, tone: '' },
+        x: 264, y: 551, base: 19, tone: '' },
       /* o cubo vem no segundo clique; tface 23 é a letra do texto azul */
       { id: 'cuboprop', kind: 'cube', tface: 23,
         x: 909, y: 438, base: 535.4, tone: '',
@@ -2389,9 +2389,9 @@ const SLIDES = [
         /* top: o texto encosta no alto da face e deixa o resto dela
            livre para o que vier depois. Duas linhas, no máximo. */
         faces: [
-          { n: '', top: true, t: '1. São sólidos cristalinos rígidos\nà temperatura ambiente' },
-          { n: '', top: true, t: '2. Altos pontos de fusão\ne ebulição',
+          { n: '', top: true, t: '1. São sólidos cristalinos rígidos\nà temperatura ambiente',
             extra: FOGAO() },
+          { n: '', top: true, t: '2. Altos pontos de fusão\ne ebulição' },
           { n: '', top: true, t: '3. Conduzem eletricidade\nfundidos ou em água' },
           { n: '', top: true, t: '4. São quebradiços' } ] }
     ]
