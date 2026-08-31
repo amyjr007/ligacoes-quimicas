@@ -1285,7 +1285,7 @@ body{
    A fusão é lenta de propósito — dá tempo de olhar. */
 .bk-sal{
   transform-box:fill-box;transform-origin:50% 100%;
-  transition:transform 2.2s ease,fill 2.2s ease,filter 2.2s ease;
+  transition:transform 3.3s ease,fill 3.3s ease,filter 3.3s ease;
   fill:#EDF3F6;
 }
 .bk.derreteu .bk-sal{
@@ -1966,7 +1966,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v21.3';
+const VERSION = 'v21.4';
 
 const SLIDES = [
   {
@@ -2449,7 +2449,7 @@ function BICO(){
         </defs>
 
         <!-- pé de trás, atrás do bico -->
-        <path d="M128 78 L143 176" stroke="url(#bkMet)" stroke-width="4"
+        <path d="M118 50 L146 176" stroke="url(#bkMet)" stroke-width="4"
               fill="none" stroke-linecap="round"/>
         <!-- base do bico -->
         <path d="M70 176 L130 176 L138 190 L62 190 Z"
@@ -2462,28 +2462,30 @@ function BICO(){
 
         <!-- a chama, entre a boca do bico e o fundo da cápsula -->
         <g class="bk-chama"><g class="bk-chama-i">
-          <ellipse cx="100" cy="86" rx="19" ry="27" fill="url(#bkFogo)"/>
-          <ellipse cx="100" cy="98" rx="8"  ry="14" fill="#7FD4FF" opacity=".75"/>
+          <ellipse cx="100" cy="92" rx="19" ry="24" fill="url(#bkFogo)"/>
+          <ellipse cx="100" cy="102" rx="8" ry="13" fill="#7FD4FF" opacity=".75"/>
         </g></g>
 
-        <!-- aro do tripé -->
-        <ellipse cx="100" cy="78" rx="64" ry="16"
+        <!-- Aro do tripé. rx 38 e cy 56 é exatamente onde a parede da
+             cápsula tem 38 de meia-largura: eles se tocam de verdade. -->
+        <ellipse cx="100" cy="56" rx="38" ry="10.3"
                  fill="none" stroke="url(#bkMet)" stroke-width="4.5"/>
-        <!-- pés da frente -->
-        <path d="M38 80 L26 180" stroke="url(#bkMet)" stroke-width="4"
+        <!-- pés da frente, saindo do aro -->
+        <path d="M63 58 L28 180" stroke="url(#bkMet)" stroke-width="4"
               fill="none" stroke-linecap="round"/>
-        <path d="M162 80 L174 180" stroke="url(#bkMet)" stroke-width="4"
+        <path d="M137 58 L172 180" stroke="url(#bkMet)" stroke-width="4"
               fill="none" stroke-linecap="round"/>
 
-        <!-- cápsula de porcelana apoiada no aro -->
-        <path d="M52 48 Q100 88 148 48 L148 46 Q100 84 52 46 Z" fill="#AEBAC2"/>
-        <path d="M52 47 Q100 86 148 47" fill="url(#bkPorc)" stroke="#A8B4BC"
+        <!-- cápsula de porcelana, apoiada no aro; o fundo desceu para ela
+             assentar dentro dele em vez de flutuar por cima -->
+        <path d="M52 49 Q100 98 148 49 L148 47 Q100 96 52 47 Z" fill="#AEBAC2"/>
+        <path d="M52 47 Q100 96 148 47" fill="url(#bkPorc)" stroke="#A8B4BC"
               stroke-width="1.2"/>
         <ellipse cx="100" cy="46" rx="48" ry="13"
                  fill="#0C1B27" stroke="#E6EDF1" stroke-width="2.4"/>
 
         <!-- o sal, dentro da cápsula -->
-        <ellipse class="bk-sal" cx="100" cy="52" rx="20" ry="8"/>
+        <ellipse class="bk-sal" cx="100" cy="55" rx="20" ry="8"/>
       </svg>
       <button class="bk-liga" type="button" tabindex="-1"
               title="Acender ou apagar o bico"></button>
