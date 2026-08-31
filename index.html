@@ -1866,7 +1866,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v19.8';
+const VERSION = 'v19.9';
 
 const SLIDES = [
   {
@@ -2912,18 +2912,22 @@ const splashHTML = (i) => SPLASH.map(p => {
 }).join('');
 
 const SPLIT_W = 320, SPLIT_H = 232;
-const SPLIT_SPREAD = 1.44;                 /* afasta os átomos para a ligação aparecer */
-const SPLIT_R = 5.6;                       /* raio, em relação ao da receita */
+/* Uma escala só para as duas direções: a receita antiga esticava x e y
+   por larguras diferentes e a molécula saía deformada. */
+const SPLIT_K = 1.72;
 
+/* A molécula que se desmonta usa a MESMA geometria do desenho do slide
+   15: ângulo de verdade e átomos encostados. A vareta da ligação fica
+   escondida dentro das esferas e só aparece quando se puxa um átomo. */
 function splitMol(key, x, y){
-  const rec = RECIPES[key] || RECIPES.h2o;
-  const c = rec[rec.length - 1];           /* o central é sempre o último da receita */
-  const cx = c[1] / 100 * SPLIT_W, cy = c[2] / 100 * SPLIT_H;
+  const g = MOLGEO[key] || MOLGEO.h2o;
+  const c = g[g.length - 1];               /* o central é sempre o último */
+  const cx = SPLIT_W / 2, cy = SPLIT_H / 2;
 
   let bonds = '', atoms = '';
-  rec.slice(0, -1).forEach(([el, px, py, r], i) => {
-    const ox = (px / 100 * SPLIT_W - cx) * SPLIT_SPREAD;
-    const oy = (py / 100 * SPLIT_H - cy) * SPLIT_SPREAD;
+  g.slice(0, -1).forEach(([el, px, py, r], i) => {
+    const ox = (px - c[1]) * SPLIT_K;
+    const oy = (py - c[2]) * SPLIT_K;
     const len = Math.hypot(ox, oy), rot = Math.atan2(oy, ox) * 180 / Math.PI;
     bonds += `<i class="qbond" data-for="${i}" style="`
            + `--x:${cx.toFixed(1)}px;--y:${cy.toFixed(1)}px;`
@@ -2936,10 +2940,10 @@ function splitMol(key, x, y){
     atoms += `<b class="qat end" data-i="${i}"`
            + ` data-hx="${(cx + ox).toFixed(1)}" data-hy="${(cy + oy).toFixed(1)}"`
            + ` style="left:${(cx + ox).toFixed(1)}px;top:${(cy + oy).toFixed(1)}px;`
-           + `--r:${(r * SPLIT_R).toFixed(1)}px;background:${sphereBg(EL_COLOR[el])}"></b>`;
+           + `--r:${(r * SPLIT_K).toFixed(1)}px;background:${sphereBg(EL_COLOR[el])}"></b>`;
   });
   const nucleo = `<b class="qat core" style="left:${cx}px;top:${cy}px;`
-    + `--r:${(c[3] * SPLIT_R).toFixed(1)}px;background:${sphereBg(EL_COLOR[c[0]])}"></b>`;
+    + `--r:${(c[3] * SPLIT_K).toFixed(1)}px;background:${sphereBg(EL_COLOR[c[0]])}"></b>`;
 
   return `<div class="qmol" style="left:${x}px;top:${y}px">${bonds}${nucleo}${atoms}</div>`;
 }
