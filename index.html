@@ -1866,7 +1866,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v20.0';
+const VERSION = 'v20.1';
 
 const SLIDES = [
   {
@@ -2282,6 +2282,19 @@ const SLIDES = [
       { follow: 0, kind: 'painel', estilo: 'molecular', tit: 'H<sub>2</sub>O',
         corpo: 'glass', campo: 'h2o',
         x: 933, y: 398, base: 592.5, tone: '' }
+    ]
+  },
+  {
+    /* a montar: o texto de abertura e, depois, a lista de propriedades */
+    title: 'Propriedades dos compostos iônicos',
+    tsize: 40,
+    content: '',
+    reveals: [
+      { nowrap: true,
+        text: 'As propriedades desses compostos são consequências\n'
+            + 'diretas das ligações entre os íons no retículo\n'
+            + 'cristalino. São elas:',
+        x: 640, y: 230, base: 23, tone: 'aqua' }
     ]
   }
 ];
