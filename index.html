@@ -1137,6 +1137,14 @@ body{
 }
 .caco.voltando-grao.sumindo{opacity:0}
 
+/* Retículo montado no próprio slide, sem o escuro do mundo quântico: a
+   caixa só marca a região, e a cena 3D é recortada nela. */
+.rd-stage{
+  width:calc(var(--base) * 1px * var(--k));
+  height:calc(var(--base) * 0.78px * var(--k));
+  pointer-events:none;
+}
+
 /* ---------- tabela periódica dos representativos ---------- */
 .tp-stage{
   position:relative;width:507px;height:262px;
@@ -1866,7 +1874,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v20.2';
+const VERSION = 'v20.4';
 
 const SLIDES = [
   {
@@ -2293,7 +2301,20 @@ const SLIDES = [
       { nowrap: true,
         text: 'As propriedades desses compostos são consequências diretas das\n'
             + 'ligações entre os íons no retículo cristalino. São elas:',
-        x: 616, y: 156, base: 23, tone: 'aqua' }
+        x: 616, y: 156, base: 23, tone: 'aqua' },
+      /* o retículo à esquerda e o cubo das propriedades à direita,
+         os dois no mesmo clique do texto */
+      { follow: 0, kind: 'reticulo', rede: 'nacl',
+        x: 330, y: 450, base: 430, tone: '' },
+      { follow: 0, id: 'cuboprop', kind: 'cube',
+        x: 930, y: 450, base: 380, tone: '',
+        /* n vazio: sem o rótulo automático "Postulado N", que é do cubo
+           de Dalton — aqui a numeração já está no próprio texto */
+        faces: [
+          { n: '', t: '1. São sólidos cristalinos\nrígidos à temperatura\nambiente' },
+          { n: '', t: '2. Altos pontos de fusão\ne ebulição' },
+          { n: '', t: '3. Conduzem eletricidade\nfundidos ou em água' },
+          { n: '', t: '4. São quebradiços' } ] }
     ]
   }
 ];
@@ -3279,6 +3300,7 @@ const REVEALS = (list, cfg) => {
                                   ? `<button class="pn-sair" type="button" tabindex="-1"
                                              title="Sair">&#8592; Voltar</button>` : '')
                               + `</div>`
+      : r.kind === 'reticulo' ? `<div class="rd-stage"></div>`
       : r.kind === 'tabela'   ? TABELA()
       : r.kind === 'lewis'    ? `<div class="lw-stage">${LEWIS_VAZIO}</div>`
       : r.kind === 'acao'     ? ''
@@ -3331,7 +3353,8 @@ const REVEALS = (list, cfg) => {
   const comZoom = list.filter(r => r.kind === 'glass' || r.kind === 'vessel');
   const temPedra = list.some(r => r.kind === 'rock');
   const temGrao  = list.some(r => r.fixo);      /* imagem que solta grãos */
-  const temPnRede = list.some(r => r.kind === 'painel' && r.rede);
+  const temPnRede = list.some(r => (r.kind === 'painel' && r.rede)
+                                || r.kind === 'reticulo');
   /* a pedra usa o mesmo fundo, mas sem o campo de moléculas: o conteúdo
      ali é a rede 3D desenhada na GPU */
   const cfgQ = comZoom.find(r => r.field) || (comZoom.length ? null : { field: 'bare' });
@@ -3361,7 +3384,8 @@ function render(){
   SLIDES.forEach((s, i) => {
     const el = document.createElement('section');
     el.className = 'slide' + (s.kind === 'cover' ? ' cover' : '')
-      + ((s.reveals || []).some(r => r.kind === 'painel' && (r.rede || r.campo))
+      + ((s.reveals || []).some(r => (r.kind === 'painel' && (r.rede || r.campo))
+                                  || r.kind === 'reticulo')
           ? ' q-confinado' : '');
     el.setAttribute('role','group');
     el.setAttribute('aria-label', `Slide ${i+1} de ${SLIDES.length}: ${s.title}`);
@@ -5476,6 +5500,25 @@ function retanguloPainel(pn){
   return { x0, y0, x1: x0 + r.width / k, y1: y0 + r.height / k - SAIDA_PN };
 }
 
+/* O retículo que faz parte do slide: nasce junto com o elemento e fica.
+   Aproveita tudo o que a cena 3D já sabe fazer — girar com um dedo,
+   arrastar com dois, pinçar e arrancar a célula unitária. */
+function abreReticulo(it){
+  const slide = it.closest('.slide');
+  const cv = slide && slide.querySelector('.q3d');
+  if (!cv) return;
+  const r = it.getBoundingClientRect(), st = stage.getBoundingClientRect();
+  const k = fitScale || 1;
+  const x0 = (r.left - st.left) / k, y0 = (r.top - st.top) / k;
+  const x1 = x0 + r.width / k,       y1 = y0 + r.height / k;
+  cv.style.clipPath =
+    `inset(${y0.toFixed(0)}px ${(1280 - x1).toFixed(0)}px `
+    + `${(720 - y1).toFixed(0)}px ${x0.toFixed(0)}px)`;
+  slide.classList.add('quantum-on');
+  abreRede(it, it.dataset.rede || 'nacl', (x0 + x1) / 2, (y0 + y1) / 2,
+           (x1 - x0) * 0.9, (y1 - y0) * 0.9);
+}
+
 function abrePainel(pn){
   const slide = pn.closest('.slide');
   if (!slide || pn.classList.contains('q-on')) return;
@@ -5592,6 +5635,8 @@ function revealItem(slide, it){
   void it.offsetWidth;                     /* reinicia a animação de entrada */
   it.classList.add('pop');
   it.querySelectorAll('.cx-corpo[data-txt]').forEach(digita);
+  /* o retículo do slide sobe assim que o elemento entra */
+  if (it.classList.contains('reticulo')) setTimeout(() => abreReticulo(it), 60);
   aplicaAcao(slide, it.dataset.acao, true);
   syncReveals(slide);
 
@@ -6221,7 +6266,7 @@ function coordsFor(slide){
     const img  = it.querySelector('img');
     const txt  = it.querySelector('.txt');
     const kind = ['rock','lego','sphere','cube','molecule','glass','vessel','gas',
-                  'painel','tabela','lewis']
+                  'painel','tabela','lewis','reticulo']
       .find(t => it.classList.contains(t));
     const cap = it.querySelector('.cap');
     const capTxt = cap ? `, caption: '${esc(cap.textContent)}'` : '';
