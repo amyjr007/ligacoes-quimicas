@@ -1880,7 +1880,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v20.8';
+const VERSION = 'v20.9';
 
 const SLIDES = [
   {
@@ -2310,7 +2310,11 @@ const SLIDES = [
         x: 673, y: 144, base: 23, tone: 'aqua' },
       /* o retículo à esquerda e o cubo das propriedades à direita,
          os dois no mesmo clique do texto */
+      /* cam: enquadramento afinado na tela — posição, distância da
+         câmera e os dois ângulos. Com ele o retículo já nasce assim,
+         sem o voo de aproximação. */
       { follow: 0, kind: 'reticulo', rede: 'nacl',
+        cam: [264, 387, 1326, -2.020, 0.532],
         x: 331, y: 450, base: 430, tone: '' },
       /* tface 23: a mesma letra do texto em azul acima */
       { follow: 0, id: 'cuboprop', kind: 'cube', tface: 23,
