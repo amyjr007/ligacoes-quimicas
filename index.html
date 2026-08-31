@@ -1406,7 +1406,7 @@ body{
   box-shadow:inset 0 0 70px rgba(69,199,176,.06);
   transform:rotateY(calc(var(--i) * 90deg)) translateZ(180px);
 }
-.face.at-top{justify-content:flex-start}
+.face.at-top{justify-content:flex-start;padding-top:16px}
 /* face de exemplo: o titulo no alto e o par de elementos no meio,
    um de frente para o outro */
 .face.exemplo{justify-content:flex-start;padding:26px 30px}
@@ -1880,7 +1880,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v20.6';
+const VERSION = 'v20.7';
 
 const SLIDES = [
   {
@@ -2314,7 +2314,7 @@ const SLIDES = [
         x: 331, y: 450, base: 430, tone: '' },
       /* tface 23: a mesma letra do texto em azul acima */
       { follow: 0, id: 'cuboprop', kind: 'cube', tface: 23,
-        x: 899, y: 439, base: 535.4, tone: '',
+        x: 909, y: 438, base: 535.4, tone: '',
         /* n vazio: sem o rótulo automático "Postulado N", que é do cubo
            de Dalton — aqui a numeração já está no próprio texto */
         /* top: o texto encosta no alto da face e deixa o resto dela
@@ -3333,6 +3333,7 @@ const REVEALS = (list, cfg) => {
                  ${r.id   ? `data-id="${r.id}"`     : ''}
                  ${r.from ? `data-from="${r.from}"` : ''}
                  ${r.rede ? `data-rede="${r.rede}"` : ''}
+                 ${r.cam  ? `data-cam="${r.cam.join(',')}"` : ''}
                  ${r.esq  ? `data-esq="1"`          : ''}
                  ${r.aberto ? `data-aberto="1"`     : ''}
                  ${r.eatom  ? `data-eatom="${r.eatom}"` : ''}
@@ -5531,6 +5532,14 @@ function abreReticulo(it){
   slide.classList.add('quantum-on', 'rede-livre');
   abreRede(it, it.dataset.rede || 'nacl', (x0 + x1) / 2, (y0 + y1) / 2,
            (x1 - x0) * 0.9, (y1 - y0) * 0.9);
+  /* enquadramento afinado na tela e trazido de volta pelo painel C */
+  const cam = it.dataset.cam && it.dataset.cam.split(',').map(Number);
+  if (cam && cam.length === 5 && cam.every(v => !isNaN(v))){
+    G3.px = cam[0]; G3.py = cam[1];
+    G3.dist = cam[2]; G3.az = cam[3]; G3.el = cam[4];
+    G3.px0 = G3.px; G3.py0 = G3.py; G3.dist0 = G3.dist;
+    G3.voo = 0;                            /* já chega no lugar */
+  }
 }
 
 function abrePainel(pn){
@@ -6323,6 +6332,15 @@ function coordsFor(slide){
          + `${it.dataset.from ? `, from: '${it.dataset.from}'` : ''} }`;
   });
 
+  /* Câmera do retículo: onde ele está, o zoom e o ângulo. Isto não sai
+     das coordenadas do elemento — é estado da cena 3D. */
+  let camTxt = '';
+  if (slide.querySelector('.reveal-item.reticulo') && G3.modo && G3.atomos.length){
+    camTxt = `\n\n    /* retículo — cole como cam: [...] no elemento\n`
+      + `      cam: [${Math.round(G3.px)}, ${Math.round(G3.py)}, `
+      + `${Math.round(G3.dist)}, ${G3.az.toFixed(3)}, ${G3.el.toFixed(3)}]\n    */`;
+  }
+
   /* posição das famílias dentro da face do cubo, para poder fixá-las */
   const fams = [...slide.querySelectorAll('.ex-el .fam')];
   let extra = '';
@@ -6337,7 +6355,7 @@ function coordsFor(slide){
     });
     extra = `\n\n    /* famílias no cubo\n${linhas.join('\n')}\n    */`;
   }
-  return `    reveals: [\n${rows.join(',\n')}\n    ]${extra}`;
+  return `    reveals: [\n${rows.join(',\n')}\n    ]${camTxt}${extra}`;
 }
 
 function showCoords(){
