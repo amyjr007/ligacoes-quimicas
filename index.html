@@ -1149,6 +1149,30 @@ body{
   height:calc(var(--base) * 0.78px * var(--k));
   pointer-events:none;
 }
+/* o item nunca recebe o dedo: quem lê o gesto do retículo é o slide */
+.reveal-item.reticulo{pointer-events:none !important}
+
+/* ---------- lupa: o retículo visto de perto, no escuro ---------- */
+.rd-stage.lupa{position:relative;height:calc(var(--base) * 1px * var(--k))}
+.lupa-vidro{
+  position:absolute;left:3%;top:2%;width:78%;height:78%;border-radius:50%;
+  background:radial-gradient(circle at 34% 26%,#123045 0%,#05131F 60%,#01070C 100%);
+  box-shadow:inset 0 0 70px rgba(69,199,176,.14);
+}
+.lupa-aro{
+  position:absolute;left:3%;top:2%;width:78%;height:78%;border-radius:50%;
+  border:9px solid;
+  border-color:#C2CCD4 #7C8892 #59636B #A6B2BA;
+  box-shadow:0 8px 22px rgba(0,0,0,.65),inset 0 0 0 2px rgba(255,255,255,.14);
+}
+/* o cabo, saindo na diagonal de baixo à direita */
+.lupa-cabo{
+  position:absolute;left:73%;top:72%;width:31%;height:9%;
+  transform-origin:0 50%;transform:rotate(40deg);
+  border-radius:3px 9px 9px 3px;
+  background:linear-gradient(180deg,#8B96A0 0%,#4C555C 55%,#2A3238 100%);
+  box-shadow:0 5px 14px rgba(0,0,0,.6);
+}
 
 /* ---------- tabela periódica dos representativos ---------- */
 .tp-stage{
@@ -1966,7 +1990,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v21.4';
+const VERSION = 'v21.6';
 
 const SLIDES = [
   {
@@ -2399,14 +2423,13 @@ const SLIDES = [
       /* cam: enquadramento afinado na tela — posição, distância da
          câmera e os dois ângulos. Com ele o retículo já nasce assim,
          sem o voo de aproximação. */
-      { follow: 0, kind: 'reticulo', rede: 'nacl',
-        cam: [264, 387, 1326, -2.020, 0.532],
-        x: 331, y: 450, base: 430, tone: '' },
+      { follow: 0, kind: 'reticulo', rede: 'nacl', lupa: true,
+        x: 949, y: 430, base: 400, tone: '' },
       { follow: 0, nowrap: true, text: 'visão submicroscópica',
-        x: 264, y: 572, base: 19, tone: '' },
+        x: 916, y: 632, base: 19, tone: '' },
       /* o cubo vem no segundo clique; tface 23 é a letra do texto azul */
       { id: 'cuboprop', kind: 'cube', tface: 23,
-        x: 909, y: 438, base: 535.4, tone: '',
+        x: 371, y: 438, base: 535.4, tone: '',
         /* n vazio: sem o rótulo automático "Postulado N", que é do cubo
            de Dalton — aqui a numeração já está no próprio texto */
         /* top: o texto encosta no alto da face e deixa o resto dela
@@ -3483,7 +3506,10 @@ const REVEALS = (list, cfg) => {
                                   ? `<button class="pn-sair" type="button" tabindex="-1"
                                              title="Sair">&#8592; Voltar</button>` : '')
                               + `</div>`
-      : r.kind === 'reticulo' ? `<div class="rd-stage"></div>`
+      : r.kind === 'reticulo' ? (r.lupa
+          ? `<div class="rd-stage lupa"><i class="lupa-vidro"></i>`
+            + `<i class="lupa-cabo"></i><i class="lupa-aro"></i></div>`
+          : `<div class="rd-stage"></div>`)
       : r.kind === 'tabela'   ? TABELA()
       : r.kind === 'lewis'    ? `<div class="lw-stage">${LEWIS_VAZIO}</div>`
       : r.kind === 'acao'     ? ''
@@ -3508,6 +3534,7 @@ const REVEALS = (list, cfg) => {
                  ${r.from ? `data-from="${r.from}"` : ''}
                  ${r.rede ? `data-rede="${r.rede}"` : ''}
                  ${r.cam  ? `data-cam="${r.cam.join(',')}"` : ''}
+                 ${r.lupa ? `data-lupa="1"` : ''}
                  ${r.esq  ? `data-esq="1"`          : ''}
                  ${r.aberto ? `data-aberto="1"`     : ''}
                  ${r.eatom  ? `data-eatom="${r.eatom}"` : ''}
@@ -3694,7 +3721,8 @@ const G3 = {
   az: -0.42, el: 0.28, dist: 470, px: 640, py: 360,
   canvas: null,
   modo: 'pedra', celOff: [0, 0, 0], celC: [0, 0, 0], cantos: [], slide: null,
-  volta: 0, pulso: 0, drama: 0, voo: 0, distAlvo: 0, celQ: null
+  volta: 0, pulso: 0, drama: 0, voo: 0, distAlvo: 0, celQ: null,
+  agita: 0, funde: 0, fundeAlvo: 0, t9: 0
 };
 
 /* --- álgebra --- */
@@ -4012,12 +4040,28 @@ const REDES = {
           cation: { cor: CPK.Al, raio:  6 } }
 };
 
+/* Onde cada íon vai parar quando o retículo desaba, e a fase própria do
+   tremor térmico. O chão fica abaixo de tudo, e cada um cai num ponto
+   sorteado por perto — o monte fica irregular, como monte de verdade. */
+function poeChao(c){
+  const rnd = rng(4242);
+  const minY = Math.min(...c.at.map(a => a.rede[1]));
+  const piso = minY - 76;                  /* o monte inteiro abaixo da rede */
+  c.at.forEach(a => {
+    a.fase = rnd() * 6.283;
+    a.chao = [ a.rede[0] + (rnd() - .5) * 130,
+               piso + rnd() * 46,
+               a.rede[2] + (rnd() - .5) * 130 ];
+  });
+  return c;
+}
+
 function cenaRede(tipo){
   const R = REDES[tipo] || REDES.nacl;
-  if (R.forma === 'antifluorita') return redeAntifluorita(R);
-  if (R.forma === 'camadas')      return redeCamadas(R);
-  if (R.forma === 'corindo')      return redeCorindo(R);
-  return redeSalgema(R);
+  if (R.forma === 'antifluorita') return poeChao(redeAntifluorita(R));
+  if (R.forma === 'camadas')      return poeChao(redeCamadas(R));
+  if (R.forma === 'corindo')      return poeChao(redeCorindo(R));
+  return poeChao(redeSalgema(R));
 }
 
 function redeSalgema(R){
@@ -4159,6 +4203,7 @@ function montaCena(modo){
   G3.celC = [0, 0, 0];
   G3.volta = 0; G3.pulso = 0; G3.drama = 0;
   G3.voo = 0; G3.celQ = null;
+  G3.agita = 0; G3.funde = 0; G3.fundeAlvo = 0;
   G3.ext = c.ext || 0;
   G3.nRede = c.n || 0;
   G3.celula = c.celula || { tam: 3, alinha: 0 };
@@ -4244,6 +4289,8 @@ function desenhaG3(canvas){
 
   /* a celula vai para onde o dedo levar; encolhe conforme se afasta,
      para nao ficar do tamanho do reticulo de onde saiu */
+  const ag   = (G3.agita || 0) * 6.5;      /* amplitude do tremor, em unidades */
+  const fu   = G3.funde || 0;
   const off  = G3.celOff;
   const dist = Math.hypot(off[0], off[1], off[2]);
   const enc  = 1 - (1 - CEL_ESC) * Math.min(1, dist / CEL_MAX);
@@ -4255,6 +4302,21 @@ function desenhaG3(canvas){
                 a.pedra[1] + (a.rede[1] - a.pedra[1]) * k,
                 a.pedra[2] + (a.rede[2] - a.pedra[2]) * k ];
     let q = p;
+    /* Desabamento: os alicerces se rompem e cada íon cai para o seu
+       ponto no chão. O quadrado do progresso dá a aceleração da queda. */
+    if (fu > 0.001 && a.chao){
+      const g = fu * fu;
+      p[0] += (a.chao[0] - a.rede[0]) * g;
+      p[1] += (a.chao[1] - a.rede[1]) * g;
+      p[2] += (a.chao[2] - a.rede[2]) * g;
+    }
+    /* Agitação térmica: cresce com a temperatura, some no frio. */
+    if (ag > 0.001){
+      const w = G3.t9, ph = a.fase || 0;
+      p[0] += Math.sin(w * 9.1 + ph) * ag;
+      p[1] += Math.sin(w * 11.3 + ph * 1.7) * ag;
+      p[2] += Math.sin(w * 8.4 + ph * 2.3) * ag;
+    }
     /* o estufado do reencaixe tambem vale com a celula ja no lugar */
     if (a.cel && (dist > 0.5 || G3.pulso > 0.002 || G3.drama > 0.002 || celGirada())){
       const z = enc * (1 + 0.24 * G3.pulso + 0.30 * G3.drama);
@@ -4310,6 +4372,7 @@ function desenhaG3(canvas){
     gl.uniform1f(uCarga, 0.0);
     G3.hastes.forEach(([i, j, r]) => {
       const a = G3.atomos[i], b = G3.atomos[j];
+      if (fu > 0.02) return;                           /* o retículo desabou */
       if (a.solto || b.solto) return;                  /* atomo arrancado */
       if (a.cel !== b.cel && (dist > 4 || G3.drama > 0.02)) return;
       gl.uniformMatrix4fv(uModel, false,
@@ -4335,6 +4398,11 @@ function desenhaG3(canvas){
 function lacoG3(canvas){
   const passo = () => {
     G3.t += (G3.alvo - G3.t) * 0.12;
+    G3.t9 += 0.016;                          /* relógio do tremor */
+    /* a fusão leva os mesmos ~3,3s da poça na cápsula */
+    G3.funde += ((G3.fundeAlvo || 0) - G3.funde) * 0.015;
+    if (Math.abs((G3.fundeAlvo || 0) - G3.funde) < 0.002)
+      G3.funde = G3.fundeAlvo || 0;
     /* voo da camera: entra no grao e recua ate o enquadramento, ou o
        contrario na saida */
     if (G3.voo){
@@ -5504,6 +5572,9 @@ function bicoAnda(bk){
     if (merc) merc.style.height =
       ((T - BK_AMB) / (BK_MAX - BK_AMB) * 100).toFixed(1) + '%';
     bk.classList.toggle('derreteu', T >= FUSAO_NACL);
+    /* em tempo real: o que acontece na cápsula acontece no retículo */
+    G3.agita = Math.max(0, Math.min(1, (T - BK_AMB) / (FUSAO_NACL - BK_AMB)));
+    G3.fundeAlvo = T >= FUSAO_NACL ? 1 : 0;
     bk._t = (T === alvo) ? 0 : requestAnimationFrame(passo);
   };
   passo();
@@ -5783,10 +5854,22 @@ function abreReticulo(it){
   const k = fitScale || 1;
   const x0 = (r.left - st.left) / k, y0 = (r.top - st.top) / k;
   const x1 = x0 + r.width / k,       y1 = y0 + r.height / k;
-  cv.style.clipPath = '';
-  slide.classList.add('quantum-on', 'rede-livre');
-  abreRede(it, it.dataset.rede || 'nacl', (x0 + x1) / 2, (y0 + y1) / 2,
-           (x1 - x0) * 0.9, (y1 - y0) * 0.9);
+  if (it.dataset.lupa){
+    /* dentro da lupa a cena é recortada no vidro: é o que faz parecer
+       que estamos olhando através dela */
+    const v = it.querySelector('.lupa-vidro').getBoundingClientRect();
+    const vx = (v.left - st.left) / k + v.width / k / 2;
+    const vy = (v.top - st.top) / k + v.height / k / 2;
+    const raio = v.width / k / 2 - 9;       /* por dentro do aro */
+    cv.style.clipPath = `circle(${raio.toFixed(0)}px at ${vx.toFixed(0)}px ${vy.toFixed(0)}px)`;
+    slide.classList.add('quantum-on');
+    abreRede(it, it.dataset.rede || 'nacl', vx, vy, raio * 1.6, raio * 1.6);
+  } else {
+    cv.style.clipPath = '';
+    slide.classList.add('quantum-on', 'rede-livre');
+    abreRede(it, it.dataset.rede || 'nacl', (x0 + x1) / 2, (y0 + y1) / 2,
+             (x1 - x0) * 0.9, (y1 - y0) * 0.9);
+  }
   /* enquadramento afinado na tela e trazido de volta pelo painel C */
   const cam = it.dataset.cam && it.dataset.cam.split(',').map(Number);
   if (cam && cam.length === 5 && cam.every(v => !isNaN(v))){
