@@ -1261,27 +1261,31 @@ body{
 
 /* ---------- bico de Meker-Fisher com cápsula de porcelana ---------- */
 .bk{position:relative;flex:1;display:flex;align-items:flex-end;gap:12px;padding-top:2px}
-.bk-cena{flex:1;display:flex;align-items:flex-end;justify-content:center}
+.bk-cena{position:relative;flex:1;display:flex;align-items:flex-end;justify-content:center}
 .bk-svg{width:172px;height:auto;display:block;overflow:visible}
 
-/* a chama cresce a partir da boca do bico, conforme a intensidade */
+/* A chama tem duas camadas: a de fora cuida de crescer e apagar, a de
+   dentro só treme. Assim apagar é o inverso exato de acender — antes o
+   tremor segurava o transform e a chama sumia de supetão. */
 .bk-chama{
   transform-box:fill-box;transform-origin:50% 100%;
   transform:scaleY(0);opacity:0;
-  transition:transform .35s ease,opacity .3s ease;
+  transition:transform .45s cubic-bezier(.3,.7,.4,1),opacity .45s ease;
 }
-.bk.aceso .bk-chama{
-  transform:scaleY(var(--ch,1));opacity:1;
-  animation:bkTremula .34s ease-in-out infinite alternate;
+.bk.aceso .bk-chama{transform:scaleY(var(--ch,1));opacity:1}
+.bk-chama-i{
+  transform-box:fill-box;transform-origin:50% 100%;
 }
+.bk.aceso .bk-chama-i{animation:bkTremula .34s ease-in-out infinite alternate}
 @keyframes bkTremula{
-  from{transform:scaleY(var(--ch,1)) scaleX(1)}
-  to  {transform:scaleY(calc(var(--ch,1) * 1.1)) scaleX(.93)}
+  from{transform:scale(1,1)}
+  to  {transform:scale(.93,1.12)}
 }
-/* o sal: um montinho branco que vira poça ao passar do ponto de fusão */
+/* o sal: um montinho branco que vira poça ao passar do ponto de fusão.
+   A fusão é lenta de propósito — dá tempo de olhar. */
 .bk-sal{
   transform-box:fill-box;transform-origin:50% 100%;
-  transition:transform .9s ease,fill .9s ease,filter .9s ease;
+  transition:transform 2.2s ease,fill 2.2s ease,filter 2.2s ease;
   fill:#EDF3F6;
 }
 .bk.derreteu .bk-sal{
@@ -1301,32 +1305,43 @@ body{
 }
 .bk-num{font-family:var(--mono);font-size:13px;color:var(--amber);white-space:nowrap}
 .bk.derreteu .bk-num{color:#FFD9A0}
-/* os controles */
-.bk-ctl{
-  position:absolute;left:0;right:0;bottom:-6px;
-  display:flex;align-items:center;gap:10px;
+
+/* o botão de acender, na base do aparelho: apagado é escuro, aceso
+   acende em verde */
+.bk-liga{
+  position:absolute;left:63%;bottom:8px;
+  width:23px;height:23px;border-radius:50%;padding:0;
+  border:2px solid #29333A;
+  background:radial-gradient(circle at 38% 30%,#5A666F 0%,#232C33 70%);
+  box-shadow:0 2px 0 rgba(0,0,0,.6),inset 0 -2px 4px rgba(0,0,0,.55);
+  cursor:pointer;
+  transition:background .3s ease,box-shadow .3s ease,border-color .3s ease;
 }
-.bk-btn{
-  padding:5px 13px;border-radius:999px;
-  border:1px solid rgba(240,180,60,.55);
-  background:linear-gradient(180deg,#4A3512,#2A1D08);
-  color:var(--paper);font-family:var(--mono);font-size:11px;letter-spacing:.08em;
-  text-transform:uppercase;cursor:pointer;white-space:nowrap;
+.bk-liga:active{transform:translateY(1px)}
+.bk.aceso .bk-liga{
+  border-color:#1E8E3A;
+  background:radial-gradient(circle at 38% 30%,#C6FFD4 0%,#2ACB52 55%,#0D7A2B 100%);
+  box-shadow:0 0 13px rgba(60,230,110,.95),0 0 30px rgba(60,230,110,.45),
+             inset 0 -2px 4px rgba(0,60,20,.5);
 }
-.bk-btn:hover{border-color:var(--amber)}
-.bk-int{display:flex;align-items:center;gap:6px;flex:1}
-.bk-int span{font-family:var(--mono);font-size:10px;letter-spacing:.1em;
-             text-transform:uppercase;color:var(--paper-dim)}
+/* o registro do gás: barra vertical sobre o tubo de onde sai a chama */
+.bk-val{
+  position:absolute;left:50%;bottom:26px;
+  width:16px;height:50px;transform:translateX(-50%);
+  display:flex;align-items:center;justify-content:center;
+}
 .bk-rng{
-  -webkit-appearance:none;appearance:none;flex:1;height:5px;border-radius:3px;
-  background:linear-gradient(90deg,#4A3512,#F0B44A);cursor:pointer;
+  -webkit-appearance:none;appearance:none;
+  width:50px;height:5px;border-radius:3px;transform:rotate(-90deg);
+  background:linear-gradient(90deg,#3A2A10,#F0B44A);cursor:pointer;
 }
 .bk-rng::-webkit-slider-thumb{
-  -webkit-appearance:none;width:15px;height:15px;border-radius:50%;
+  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
   background:var(--paper);border:2px solid var(--amber);cursor:grab;
+  box-shadow:0 0 8px rgba(240,180,74,.7);
 }
 .bk-rng::-moz-range-thumb{
-  width:15px;height:15px;border-radius:50%;
+  width:14px;height:14px;border-radius:50%;
   background:var(--paper);border:2px solid var(--amber);cursor:grab;
 }
 
@@ -1951,7 +1966,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v21.2';
+const VERSION = 'v21.3';
 
 const SLIDES = [
   {
@@ -2388,7 +2403,7 @@ const SLIDES = [
         cam: [264, 387, 1326, -2.020, 0.532],
         x: 331, y: 450, base: 430, tone: '' },
       { follow: 0, nowrap: true, text: 'visão submicroscópica',
-        x: 264, y: 551, base: 19, tone: '' },
+        x: 264, y: 572, base: 19, tone: '' },
       /* o cubo vem no segundo clique; tface 23 é a letra do texto azul */
       { id: 'cuboprop', kind: 'cube', tface: 23,
         x: 909, y: 438, base: 535.4, tone: '',
@@ -2446,10 +2461,10 @@ function BICO(){
         <circle cx="100" cy="140" r="2.6" fill="#3A444C"/>
 
         <!-- a chama, entre a boca do bico e o fundo da cápsula -->
-        <g class="bk-chama">
+        <g class="bk-chama"><g class="bk-chama-i">
           <ellipse cx="100" cy="86" rx="19" ry="27" fill="url(#bkFogo)"/>
           <ellipse cx="100" cy="98" rx="8"  ry="14" fill="#7FD4FF" opacity=".75"/>
-        </g>
+        </g></g>
 
         <!-- aro do tripé -->
         <ellipse cx="100" cy="78" rx="64" ry="16"
@@ -2470,17 +2485,16 @@ function BICO(){
         <!-- o sal, dentro da cápsula -->
         <ellipse class="bk-sal" cx="100" cy="52" rx="20" ry="8"/>
       </svg>
+      <button class="bk-liga" type="button" tabindex="-1"
+              title="Acender ou apagar o bico"></button>
+      <div class="bk-val">
+        <input class="bk-rng" type="range" min="10" max="100" value="55"
+               tabindex="-1" aria-label="intensidade da chama">
+      </div>
     </div>
     <div class="bk-term">
       <i class="bk-tubo"><s class="bk-merc"></s></i>
       <b class="bk-num">25 °C</b>
-    </div>
-    <div class="bk-ctl">
-      <button class="bk-btn" type="button" tabindex="-1">Acender</button>
-      <label class="bk-int"><span>chama</span>
-        <input class="bk-rng" type="range" min="10" max="100" value="55"
-               tabindex="-1" aria-label="intensidade da chama">
-      </label>
     </div>
   </div>`;
 }
@@ -5495,9 +5509,7 @@ function bicoAnda(bk){
 
 function bicoLiga(bk){
   if (!bk) return;
-  const aceso = bk.classList.toggle('aceso');
-  const btn = bk.querySelector('.bk-btn');
-  if (btn) btn.textContent = aceso ? 'Apagar' : 'Acender';
+  bk.classList.toggle('aceso');            /* o botão acende em verde sozinho */
   bicoIntensidade(bk);
   bicoAnda(bk);
 }
@@ -5923,7 +5935,7 @@ function revealItem(slide, it){
 deck.addEventListener('click', (e) => {
   const redo = e.target.closest('.lego-redo');
   if (redo){ rebuildLego(redo.closest('.reveal-item')); return; }
-  const bkb = e.target.closest('.bk-btn');
+  const bkb = e.target.closest('.bk-liga');
   if (bkb){ bicoLiga(bkb.closest('.bk')); return; }
   const sair = e.target.closest('.pn-sair');
   if (sair){ fechaPainel(sair.closest('.pn')); return; }
