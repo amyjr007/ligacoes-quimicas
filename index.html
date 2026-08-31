@@ -981,6 +981,11 @@ body{
 /* Num slide de mundos confinados, a camada quântica não escurece a tela
    inteira: ela serve só de suporte para a cena 3D. O escuro vem da caixa. */
 .slide.q-confinado .quantum{background:none}
+/* Retículo solto no slide: a tela cobre tudo, então ela não recebe o
+   dedo. Quem lê o gesto é o próprio slide, e só quando o toque cai em
+   cima de um íon — assim o cubo ao lado continua clicável. */
+.slide.rede-livre .q3d{pointer-events:none !important}
+.slide.rede-livre .reveal-item.reticulo{pointer-events:none}
 .slide.q-confinado .q-wash,
 .slide.q-confinado .q-aurora,
 .slide.q-confinado .q-ring,
@@ -1437,7 +1442,8 @@ body{
   color:var(--aqua);margin-bottom:15px;
 }
 .face .t{
-  font-family:var(--display);font-weight:600;font-size:29px;line-height:1.2;
+  font-family:var(--display);font-weight:600;
+  font-size:calc(var(--tf,29) * 1px);line-height:1.32;
   color:var(--paper);white-space:pre-line;
 }
 /* aviso de "tem mais" para o cubo */
@@ -1874,7 +1880,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v20.4';
+const VERSION = 'v20.5';
 
 const SLIDES = [
   {
@@ -2301,13 +2307,14 @@ const SLIDES = [
       { nowrap: true,
         text: 'As propriedades desses compostos são consequências diretas das\n'
             + 'ligações entre os íons no retículo cristalino. São elas:',
-        x: 616, y: 156, base: 23, tone: 'aqua' },
+        x: 673, y: 144, base: 23, tone: 'aqua' },
       /* o retículo à esquerda e o cubo das propriedades à direita,
          os dois no mesmo clique do texto */
       { follow: 0, kind: 'reticulo', rede: 'nacl',
-        x: 330, y: 450, base: 430, tone: '' },
-      { follow: 0, id: 'cuboprop', kind: 'cube',
-        x: 930, y: 450, base: 380, tone: '',
+        x: 331, y: 450, base: 430, tone: '' },
+      /* tface 23: a mesma letra do texto em azul acima */
+      { follow: 0, id: 'cuboprop', kind: 'cube', tface: 23,
+        x: 899, y: 439, base: 535.4, tone: '',
         /* n vazio: sem o rótulo automático "Postulado N", que é do cubo
            de Dalton — aqui a numeração já está no próprio texto */
         faces: [
@@ -3348,7 +3355,11 @@ const REVEALS = (list, cfg) => {
                  ${r.exemplos ? `data-exemplos="1"` : ''}
                  style="left:${r.x}px;top:${r.y}px;--base:${r.base || 40};--k:1${
                    r.wch ? `;--wch:${r.wch}` : ''}${
-                   r.kind === 'cube' ? `;--face:0` : ''}">${inner}</div>`;
+                   r.kind === 'cube' ? `;--face:0` : ''}${
+                   /* tface: tamanho que a letra deve TER NA TELA; a face
+                      é escalada por base/360, então desconta-se isso */
+                   r.tface ? `;--tf:${(r.tface * 360 / (r.base || 360)).toFixed(2)}` : ''
+                 }">${inner}</div>`;
   }).join('');
   const comZoom = list.filter(r => r.kind === 'glass' || r.kind === 'vessel');
   const temPedra = list.some(r => r.kind === 'rock');
@@ -4218,7 +4229,7 @@ function saiDaRede(slide){
 function fechaRede(it){
   const slide = it.closest ? it.closest('.slide') : it;
   if (!slide) return;
-  slide.classList.remove('quantum-on', 'rede-on');
+  slide.classList.remove('quantum-on', 'rede-on', 'rede-livre');
   const rot = slide.querySelector('.cel-rot');
   if (rot) rot.classList.remove('on');
   const rr = slide.querySelector('.rede-rot');
@@ -4763,7 +4774,7 @@ function closeQuantum(it){
   it.classList.remove('zoomed');
   const slide = it.closest('.slide');
   if (!slide) return;
-  slide.classList.remove('quantum-on', 'rede-on');
+  slide.classList.remove('quantum-on', 'rede-on', 'rede-livre');
   paraConflito();
   limpaConflito(slide.querySelector('.quantum'));
   const q = slide.querySelector('.q-board');   /* o quadro não fica para o próximo */
@@ -5503,6 +5514,9 @@ function retanguloPainel(pn){
 /* O retículo que faz parte do slide: nasce junto com o elemento e fica.
    Aproveita tudo o que a cena 3D já sabe fazer — girar com um dedo,
    arrastar com dois, pinçar e arrancar a célula unitária. */
+/* Aqui a cena NÃO é recortada: o retângulo do elemento só diz onde e de
+   que tamanho o retículo nasce. Recortando, ele ficava preso dentro de
+   uma caixa invisível e sumia nas bordas ao ser girado ou afastado. */
 function abreReticulo(it){
   const slide = it.closest('.slide');
   const cv = slide && slide.querySelector('.q3d');
@@ -5511,10 +5525,8 @@ function abreReticulo(it){
   const k = fitScale || 1;
   const x0 = (r.left - st.left) / k, y0 = (r.top - st.top) / k;
   const x1 = x0 + r.width / k,       y1 = y0 + r.height / k;
-  cv.style.clipPath =
-    `inset(${y0.toFixed(0)}px ${(1280 - x1).toFixed(0)}px `
-    + `${(720 - y1).toFixed(0)}px ${x0.toFixed(0)}px)`;
-  slide.classList.add('quantum-on');
+  cv.style.clipPath = '';
+  slide.classList.add('quantum-on', 'rede-livre');
   abreRede(it, it.dataset.rede || 'nacl', (x0 + x1) / 2, (y0 + y1) / 2,
            (x1 - x0) * 0.9, (y1 - y0) * 0.9);
 }
