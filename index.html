@@ -1880,7 +1880,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v20.7';
+const VERSION = 'v20.8';
 
 const SLIDES = [
   {
@@ -3613,11 +3613,17 @@ void main(){
   gl_Position = uProj * uView * p;
 }`;
 
+/* O sinal da carga é desenhado DENTRO da esfera, pelo próprio sombreador:
+   nada de 343 objetos novos na cena. Para cada ponto da superfície,
+   projetamos a normal nos eixos da câmera — dá uma coordenada no disco
+   que está de frente para nós — e ali pintamos a barra do menos ou a
+   cruz do mais. Como os eixos são os da câmera, o sinal sempre encara
+   quem olha, gire a cena para onde girar. */
 const FS = `
 precision mediump float;
 varying vec3 vN, vP;
-uniform vec3 uCor, uCam;
-uniform float uOpaco, uEsp;
+uniform vec3 uCor, uCam, uDir, uCim;
+uniform float uOpaco, uEsp, uCarga;
 void main(){
   vec3 N = normalize(vN);
   vec3 L = normalize(vec3(-0.45, 0.8, 0.62));
@@ -3627,6 +3633,18 @@ void main(){
   float esp = pow(max(dot(N, H), 0.0), 46.0) * uEsp;
   float rim = pow(1.0 - max(dot(N, V), 0.0), 3.0);
   vec3 c = uCor * (0.17 + 0.9 * dif) + vec3(1.0) * esp + vec3(0.5, 0.9, 1.0) * rim * 0.18;
+
+  if (uCarga != 0.0){
+    float frente = dot(N, normalize(uCam - vP));
+    float a = dot(N, uDir), b = dot(N, uCim);
+    float braco = 0.085, comp = 0.30;
+    float barra = step(abs(b), braco) * step(abs(a), comp);
+    float pe    = step(abs(a), braco) * step(abs(b), comp);
+    float marca = (uCarga > 0.0) ? max(barra, pe) : barra;
+    /* só na parte que está de frente, e sumindo perto da silhueta */
+    marca *= smoothstep(0.55, 0.75, frente);
+    c = mix(c, vec3(1.0), marca * 0.92);
+  }
   gl_FragColor = vec4(c, uOpaco);
 }`;
 
@@ -3697,7 +3715,8 @@ function redeCorindo(R){
         if (!ehO && ((i - j) % 3 + 3) % 3 === vaga) continue;
         at.push({ rede: [ i * a + j * a / 2 + off[0], y, j * a * s3 / 2 + off[1] ],
                   pedra: null, atraso: 0, ijk: [i, L, j],
-                  raio: q.raio, cor: q.cor, anion: ehO, cel: false });
+                  raio: q.raio, cor: q.cor, anion: ehO,
+                  carga: ehO ? -1 : 1, cel: false });
       }
   }
   const c = [0,1,2].map(e => at.reduce((sm, x) => sm + x.rede[e], 0) / at.length);
@@ -3743,7 +3762,8 @@ function redeCamadas(R){
                       s * H + dy,
                       j * a * s3 / 2 + off[o][1] ];
           at.push({ rede: p, pedra: p, atraso: 0, ijk: [i, s * 3 + L, j],
-                    raio: q.raio, cor: q.cor, anion: ehCl, cel: false });
+                    raio: q.raio, cor: q.cor, anion: ehCl,
+                    carga: ehCl ? -1 : 1, cel: false });
         }
     });
 
@@ -3839,6 +3859,7 @@ function redeSalgema(R){
         at.push({
           rede: p, pedra: p, atraso: 0, ijk: [i, j, k],
           raio: q.raio, cor: q.cor,
+          carga: par ? -1 : 1,                  /* ânion e cátion */
           cel: false                            /* escolhido na hora do arrasto */
         });
       }
@@ -3879,6 +3900,7 @@ function redeAntifluorita(R){
         at.push({
           rede: p, pedra: p, atraso: 0, ijk: [i, j, k],
           raio: q.raio, cor: q.cor, anion: an,
+          carga: an ? -1 : 1,
           cel: false
         });
       }
@@ -4081,6 +4103,12 @@ function desenhaG3(canvas){
   gl.useProgram(G3.prog);
   const L = (n) => gl.getUniformLocation(G3.prog, n);
   const uModel = L('uModel'), uCor = L('uCor'), uEsp = L('uEsp');
+  const uCarga = L('uCarga');
+  /* eixos da câmera: é neles que o sinal se apoia para encarar quem olha */
+  const ce2 = Math.cos(G3.el), se2 = Math.sin(G3.el);
+  const sa2 = Math.sin(G3.az), ca2 = Math.cos(G3.az);
+  gl.uniform3f(L('uDir'), ca2, 0, -sa2);
+  gl.uniform3f(L('uCim'), -sa2 * se2, ce2, -ca2 * se2);
   gl.uniformMatrix4fv(L('uProj'), false, proj);
   gl.uniformMatrix4fv(L('uView'), false, view);
   gl.uniform3f(L('uCam'), olho[0], olho[1], olho[2]);
@@ -4105,6 +4133,7 @@ function desenhaG3(canvas){
     usa(BAS);
     gl.uniform3f(uCor, 0.62, 0.66, 0.70);
     gl.uniform1f(uEsp, 0.5);
+    gl.uniform1f(uCarga, 0.0);
     G3.hastes.forEach(([i, j, r]) => {
       const a = G3.atomos[i], b = G3.atomos[j];
       if (a.solto || b.solto) return;                  /* atomo arrancado */
@@ -4122,6 +4151,7 @@ function desenhaG3(canvas){
     const fx = a.fx || 0;
     const b = 1 + 2.0 * fx + (a.cel ? 1.2 * G3.pulso + 1.6 * G3.drama : 0);
     gl.uniform3f(uCor, a.cor[0] * b, a.cor[1] * b, a.cor[2] * b);
+    gl.uniform1f(uCarga, a.carga || 0);
     const rc = a.cel ? enc * (1 + 0.24 * G3.pulso + 0.30 * G3.drama) : 1;
     gl.uniformMatrix4fv(uModel, false, m4esfera(pos[i], a.raio * rc * (1 + 0.55 * fx)));
     gl.drawElements(gl.TRIANGLES, ESF.n, gl.UNSIGNED_SHORT, 0);
