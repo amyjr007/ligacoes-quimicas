@@ -1880,7 +1880,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v20.5';
+const VERSION = 'v20.6';
 
 const SLIDES = [
   {
@@ -2317,11 +2317,13 @@ const SLIDES = [
         x: 899, y: 439, base: 535.4, tone: '',
         /* n vazio: sem o rótulo automático "Postulado N", que é do cubo
            de Dalton — aqui a numeração já está no próprio texto */
+        /* top: o texto encosta no alto da face e deixa o resto dela
+           livre para o que vier depois. Duas linhas, no máximo. */
         faces: [
-          { n: '', t: '1. São sólidos cristalinos\nrígidos à temperatura\nambiente' },
-          { n: '', t: '2. Altos pontos de fusão\ne ebulição' },
-          { n: '', t: '3. Conduzem eletricidade\nfundidos ou em água' },
-          { n: '', t: '4. São quebradiços' } ] }
+          { n: '', top: true, t: '1. São sólidos cristalinos rígidos\nà temperatura ambiente' },
+          { n: '', top: true, t: '2. Altos pontos de fusão\ne ebulição' },
+          { n: '', top: true, t: '3. Conduzem eletricidade\nfundidos ou em água' },
+          { n: '', top: true, t: '4. São quebradiços' } ] }
     ]
   }
 ];
