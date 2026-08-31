@@ -1259,6 +1259,69 @@ body{
 }
 .lw-stage.certo .lw-sim{color:#DFFFE8}
 
+/* ---------- o sal no fogo, dentro da face do cubo ---------- */
+.fg{position:relative;flex:1;display:flex;align-items:flex-end;gap:16px;padding-top:4px}
+.fg-cena{
+  position:relative;flex:1;height:152px;
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-end;
+}
+/* o pedaço de sal: sólido e opaco; derretido, uma poça brilhante */
+.fg-sal{
+  width:48px;height:32px;border-radius:5px 5px 3px 3px;margin-bottom:3px;
+  background:linear-gradient(160deg,#F4F8FA 0%,#D5DFE6 55%,#A8B6BF 100%);
+  box-shadow:inset 0 -5px 9px rgba(0,0,0,.28),0 3px 7px rgba(0,0,0,.5);
+  transition:width .9s ease,height .9s ease,border-radius .9s ease,
+             background .9s ease,box-shadow .9s ease;
+}
+.fg.derreteu .fg-sal{
+  width:86px;height:9px;border-radius:50%;
+  background:linear-gradient(180deg,#FFF6DA,#EFC468);
+  box-shadow:0 0 22px rgba(255,200,90,.85),inset 0 -2px 4px rgba(150,90,0,.4);
+}
+.fg-boca{
+  width:126px;height:15px;border-radius:8px;position:relative;
+  background:linear-gradient(180deg,#3B454F,#1B232A);
+  box-shadow:0 3px 0 rgba(0,0,0,.45);
+}
+.fg-chama{
+  position:absolute;left:50%;bottom:9px;width:58px;height:0;
+  transform:translateX(-50%);opacity:0;pointer-events:none;
+  border-radius:50% 50% 42% 42%;
+  background:radial-gradient(ellipse at 50% 100%,
+    #FFF3B0 0%,#FFBB44 38%,#FF6D22 68%,rgba(255,80,20,0) 100%);
+  transition:height .35s ease,opacity .3s ease;
+}
+.fg.aceso .fg-chama{
+  height:50px;opacity:1;
+  animation:chama .36s ease-in-out infinite alternate;
+}
+@keyframes chama{
+  from{transform:translateX(-50%) scale(1,1)}
+  to  {transform:translateX(-50%) scale(.92,1.2)}
+}
+/* o termômetro */
+.fg-term{display:flex;flex-direction:column;align-items:center;gap:6px;width:58px}
+.fg-tubo{
+  position:relative;display:block;width:13px;height:118px;border-radius:7px;
+  background:rgba(232,241,245,.12);border:1px solid rgba(232,241,245,.32);
+  overflow:hidden;
+}
+.fg-merc{
+  position:absolute;left:0;right:0;bottom:0;height:0;display:block;
+  background:linear-gradient(180deg,#FF9A66,#DC3617);
+}
+.fg-num{font-family:var(--mono);font-size:14px;color:var(--amber);white-space:nowrap}
+.fg.derreteu .fg-num{color:#FFD9A0}
+.fg-btn{
+  position:absolute;left:0;bottom:-4px;
+  padding:6px 14px;border-radius:999px;
+  border:1px solid rgba(240,180,60,.55);
+  background:linear-gradient(180deg,#4A3512,#2A1D08);
+  color:var(--paper);font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;cursor:pointer;
+}
+.fg-btn:hover{border-color:var(--amber)}
+
 /* ---------- o elétron que se entrega ao átomo ---------- */
 .eletron{
   position:absolute;z-index:9;width:26px;height:26px;
@@ -1880,7 +1943,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v20.9';
+const VERSION = 'v21.0';
 
 const SLIDES = [
   {
@@ -2316,8 +2379,10 @@ const SLIDES = [
       { follow: 0, kind: 'reticulo', rede: 'nacl',
         cam: [264, 387, 1326, -2.020, 0.532],
         x: 331, y: 450, base: 430, tone: '' },
-      /* tface 23: a mesma letra do texto em azul acima */
-      { follow: 0, id: 'cuboprop', kind: 'cube', tface: 23,
+      { follow: 0, nowrap: true, text: 'visão submicroscópica',
+        x: 264, y: 530, base: 19, tone: '' },
+      /* o cubo vem no segundo clique; tface 23 é a letra do texto azul */
+      { id: 'cuboprop', kind: 'cube', tface: 23,
         x: 909, y: 438, base: 535.4, tone: '',
         /* n vazio: sem o rótulo automático "Postulado N", que é do cubo
            de Dalton — aqui a numeração já está no próprio texto */
@@ -2325,12 +2390,31 @@ const SLIDES = [
            livre para o que vier depois. Duas linhas, no máximo. */
         faces: [
           { n: '', top: true, t: '1. São sólidos cristalinos rígidos\nà temperatura ambiente' },
-          { n: '', top: true, t: '2. Altos pontos de fusão\ne ebulição' },
+          { n: '', top: true, t: '2. Altos pontos de fusão\ne ebulição',
+            extra: FOGAO() },
           { n: '', top: true, t: '3. Conduzem eletricidade\nfundidos ou em água' },
           { n: '', top: true, t: '4. São quebradiços' } ] }
     ]
   }
 ];
+
+/* O sal sobre a boca do fogão, com termômetro. O fogo é ligado no botão
+   e a temperatura sobe até passar do ponto de fusão, quando o pedaço
+   vira poça. Desligando, ele esfria e volta a ser sólido. */
+const FUSAO_NACL = 801;                    /* °C, o ponto de fusão do NaCl */
+function FOGAO(){
+  return `<div class="fg">`
+    + `<div class="fg-cena">`
+    +   `<b class="fg-sal"></b>`
+    +   `<div class="fg-boca"><i class="fg-chama"></i></div>`
+    + `</div>`
+    + `<div class="fg-term">`
+    +   `<i class="fg-tubo"><s class="fg-merc"></s></i>`
+    +   `<b class="fg-num">25 °C</b>`
+    + `</div>`
+    + `<button class="fg-btn" type="button" tabindex="-1">Ligar o fogo</button>`
+    + `</div>`;
+}
 
 /* Uma face de exemplo: o título no alto e, no meio, os dois elementos
    um de frente para o outro, cada um com a sua família. */
@@ -3215,7 +3299,8 @@ function faceHTML(f, i){
   const n = typeof f === 'string' ? `Postulado ${i + 1}` : f.n;
   const t = typeof f === 'string' ? f : f.t;
   if (!t) return '';
-  return (n ? `<div class="n">${n}</div>` : '') + `<div class="t">${t}</div>`;
+  return (n ? `<div class="n">${n}</div>` : '') + `<div class="t">${t}</div>`
+       + (f && f.extra ? f.extra : '');
 }
 
 /* face com top:true encosta o texto no alto em vez de centralizar */
@@ -5305,6 +5390,35 @@ deck.addEventListener('pointerup', (e) => {
 });
 
 /* ------------------------------------------------------------
+   O SAL NO FOGO
+   A temperatura persegue o alvo — o fogo aceso puxa para cima do ponto
+   de fusão, apagado puxa de volta ao ambiente. O sal derrete quando
+   passa dos 801 °C e volta a endurecer quando cai abaixo disso.
+   ------------------------------------------------------------ */
+function fogao(fg){
+  if (!fg) return;
+  const aceso = fg.classList.toggle('aceso');
+  const btn = fg.querySelector('.fg-btn');
+  if (btn) btn.textContent = aceso ? 'Desligar' : 'Ligar o fogo';
+  if (fg._t) cancelAnimationFrame(fg._t);
+
+  const num = fg.querySelector('.fg-num'), merc = fg.querySelector('.fg-merc');
+  const T0 = 25, TMAX = FUSAO_NACL + 70;
+  let T = +fg.dataset.temp || T0;
+  const passo = () => {
+    const alvo = fg.classList.contains('aceso') ? TMAX : T0;
+    T += (alvo - T) * 0.013;
+    if (Math.abs(alvo - T) < 0.6) T = alvo;
+    fg.dataset.temp = T.toFixed(1);
+    if (num) num.textContent = Math.round(T) + ' °C';
+    if (merc) merc.style.height = ((T - T0) / (TMAX - T0) * 100).toFixed(1) + '%';
+    fg.classList.toggle('derreteu', T >= FUSAO_NACL);
+    fg._t = (T === alvo) ? 0 : requestAnimationFrame(passo);
+  };
+  passo();
+}
+
+/* ------------------------------------------------------------
    O ELÉTRON QUE SE ENTREGA
    Nos exemplos em que o átomo GANHA elétrons, segurar o dedo no vazio
    faz nascer um elétron. Arrastando-o até a bola, ele entra: a bola
@@ -5716,6 +5830,8 @@ function revealItem(slide, it){
 deck.addEventListener('click', (e) => {
   const redo = e.target.closest('.lego-redo');
   if (redo){ rebuildLego(redo.closest('.reveal-item')); return; }
+  const fgb = e.target.closest('.fg-btn');
+  if (fgb){ fogao(fgb.closest('.fg')); return; }
   const sair = e.target.closest('.pn-sair');
   if (sair){ fechaPainel(sair.closest('.pn')); return; }
   const volt = e.target.closest('.q-voltar');
@@ -5855,6 +5971,8 @@ deck.addEventListener('pointerdown', (e) => {
   if (e.target.closest('.ex-el .fam')) return;
   /* na tabela periódica o toque escolhe, não arrasta */
   if (e.target.closest('.tp')) return;
+  /* o fogão tem os seus próprios botões: o cubo não gira por causa dele */
+  if (e.target.closest('.fg')) return;
   /* O átomo do octeto é fixo: a bola arranca elétron e o resto da área
      dele serve para fazer nascer um elétron. Nada ali move o átomo. */
   if (e.target.closest('.reveal-item[data-eatom]')) return;
