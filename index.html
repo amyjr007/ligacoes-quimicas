@@ -2127,7 +2127,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v24.5';
+const VERSION = 'v24.6';
 
 const SLIDES = [
   {
@@ -3600,8 +3600,14 @@ function QUANTUM(cfg, extra){
     <span class="q-wash"></span>
     <span class="q-aurora"></span>
     <span class="q-ring r1"></span><span class="q-ring r2"></span><span class="q-ring r3"></span>
-    <div class="q-zoom">${mols}${parts}</div>
+    <!-- O quadro vem antes de tudo que é conteúdo: no mundo quântico ele
+         fica ATRÁS dos objetos, seja o retículo desenhado na GPU, sejam
+         as moléculas. Ele é o fundo onde se escreve, não uma folha por
+         cima da cena. Continua pegável: as moléculas não capturam o
+         dedo fora delas, e sobre o retículo quem devolve o toque ao
+         quadro é sobreQuadro(). -->
     ${BOARD()}
+    <div class="q-zoom">${mols}${parts}</div>
     ${extra || ''}
     <button class="q-board-btn" type="button" tabindex="-1"
             title="Abrir o quadro branco">Quadro</button>
