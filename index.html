@@ -2064,7 +2064,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v23.2';
+const VERSION = 'v23.3';
 
 const SLIDES = [
   {
@@ -2492,8 +2492,8 @@ const SLIDES = [
         text: 'As propriedades desses compostos são consequências diretas das\n'
             + 'ligações entre os íons no retículo cristalino. São elas:',
         x: 673, y: 144, base: 23, tone: 'aqua' },
-      /* Segundo clique: o cubo, a lupa e a legenda entram juntos, na
-         mesma animação. O texto acima fica sozinho no primeiro. */
+      /* Segundo clique: só o cubo. Depois vêm as amostras dentro dele,
+         depois a lupa, e só então ele vira. Um passo por clique. */
       { id: 'cuboprop', kind: 'cube', tface: 23,
         x: 371, y: 438, base: 535.4, tone: '',
         /* n vazio: sem o rótulo automático "Postulado N", que é do cubo
@@ -2502,10 +2502,25 @@ const SLIDES = [
            livre para o que vier depois. Duas linhas, no máximo. */
         faces: [
           { n: '', top: true, t: '1. São sólidos cristalinos rígidos\nà temperatura ambiente' },
-          { n: '', top: true, t: '2. Altos pontos de fusão\ne ebulição', extra: BICO },
+          { n: '', top: true, t: '2. Possuem altos pontos de fusão\ne ebulição', extra: BICO },
           { n: '', top: true, t: '3. São quebradiços', extra: PEDRA },
           { n: '', top: true, t: '4. Conduzem eletricidade\nfundidos ou em água' } ] },
-      { follow: 0, kind: 'reticulo', rede: 'nacl', lupa: true,
+      /* Terceiro clique: as quatro amostras, dentro da face 1. Todas com
+         a mesma altura (78px), então os quadros se alinham como uma
+         prateleira de amostras — que é o que a face está afirmando: são
+         todos sólidos, e todos cristalinos. As larguras saem da
+         proporção de cada foto. face 0 prende à primeira face: elas se
+         recolhem quando o cubo vira. */
+      { kind: 'img', face: 0, img: 'imagens/NaCl.png',
+        caption: 'NaCl',  x: 196, y: 470, base: 78, tone: '' },
+      { follow: 0, kind: 'img', face: 0, img: 'imagens/Al2O3.jpg',
+        caption: 'Al<sub>2</sub>O<sub>3</sub>', x: 312, y: 470, base: 123, tone: '' },
+      { follow: 0, kind: 'img', face: 0, img: 'imagens/MgO.png',
+        caption: 'MgO',   x: 453, y: 470, base: 127, tone: '' },
+      { follow: 0, kind: 'img', face: 0, img: 'imagens/Na2O.jpg',
+        caption: 'Na<sub>2</sub>O', x: 559, y: 470, base: 54, tone: '' },
+      /* Quarto clique: a lupa com o retículo. Quinto: o cubo vira. */
+      { kind: 'reticulo', rede: 'nacl', lupa: true,
         x: 949, y: 430, base: 400, tone: '' },
       { follow: 0, nowrap: true, text: 'visão submicroscópica',
         x: 916, y: 632, base: 19, tone: '' },
