@@ -332,6 +332,9 @@ body{
   border:1px solid rgba(69,199,176,.3);
   box-shadow:0 0 30px rgba(3,12,22,.55);   /* sem deslocamento: igual dos quatro lados */
 }
+/* Imagem recortada, que já vem com a própria borda e sombra. Emoldurar
+   de novo desenharia um retângulo em volta de um recorte redondo. */
+.reveal-item.nua img{border:none;box-shadow:none}
 /* --dx/--dy sao calculados no clique: distancia da caixa ate a posicao final */
 /* ponto que avisa: ainda há algo guardado dentro desta palavra */
 .reveal-item.has-more .txt::after{
@@ -2055,7 +2058,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v22.6';
+const VERSION = 'v22.7';
 
 const SLIDES = [
   {
@@ -2500,7 +2503,15 @@ const SLIDES = [
       { follow: 0, kind: 'reticulo', rede: 'nacl', lupa: true,
         x: 949, y: 430, base: 400, tone: '' },
       { follow: 0, nowrap: true, text: 'visão submicroscópica',
-        x: 916, y: 632, base: 19, tone: '' }
+        x: 916, y: 632, base: 19, tone: '' },
+      /* Terceiro clique: a foto do gesto real, ao lado da lupa — o que a
+         mão faz, logo ali do lado do que acontece entre os íons. Fica na
+         faixa livre à direita do vidro, a única larga o bastante (o vão
+         entre o cubo e a lupa tem só 122px). nu: a imagem já vem
+         recortada, com a própria borda e sombra. */
+      { kind: 'img', nu: true, img: 'imagens/clivagem.png',
+        caption: 'clivagem', alt: 'martelo e talhadeira clivando um cristal',
+        x: 1163, y: 372, base: 165, tone: '' }
     ]
   }
 ];
@@ -3686,7 +3697,7 @@ const REVEALS = (list, cfg) => {
       + (r.caption ? `<div class="cap">${r.caption}</div>` : '');
     const zoomable = (r.kind === 'glass' || r.kind === 'vessel') ? ' zoomable' : '';
     return `<div class="reveal-item ${r.kind || ''} ${r.tone || ''}${r.nowrap ? ' nowrap' : ''}${r.bullet ? ' bullet' : ''}${r.flip ? ' flip' : ''}${
-  r.aberto ? ' aberto' : ''}${r.fixo ? ' fixo' : ''}${zoomable}" hidden
+  r.aberto ? ' aberto' : ''}${r.fixo ? ' fixo' : ''}${r.nu ? ' nua' : ''}${zoomable}" hidden
                  data-x="${r.x}" data-y="${r.y}"
                  ${r.id   ? `data-id="${r.id}"`     : ''}
                  ${r.from ? `data-from="${r.from}"` : ''}
