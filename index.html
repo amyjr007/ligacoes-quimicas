@@ -1361,6 +1361,35 @@ body{
   background:var(--paper);border:2px solid var(--amber);cursor:grab;
 }
 
+/* ---------- o pedaço de sal que se quebra ---------- */
+.pd{position:relative;flex:1;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;user-select:none;-webkit-user-select:none}
+.pd-svg{width:210px;height:auto;display:block;overflow:visible}
+/* Cada caco anda para fora e para baixo conforme --q, que é o quanto a
+   pedra já foi quebrada. Um só número move as doze peças. */
+.pd .pc{
+  transform-box:fill-box;transform-origin:50% 50%;
+  transform:translate(calc(var(--dx) * var(--q,0)),calc(var(--dy) * var(--q,0)))
+            rotate(calc(var(--rr) * var(--q,0)));
+  transition:transform .8s cubic-bezier(.25,.85,.35,1);
+  stroke:#8FA0AC;stroke-width:.4;
+}
+/* a batida do dedo sacode o conjunto */
+.pd-bloco{transform-box:fill-box;transform-origin:50% 100%}
+.pd.bate .pd-bloco{animation:pdBate .22s ease-out}
+@keyframes pdBate{
+  0%  {transform:translate(0,0)}
+  30% {transform:translate(2px,3px) scaleY(.94)}
+  100%{transform:translate(0,0)}
+}
+.pd-dica{
+  position:absolute;left:0;right:0;bottom:-2px;text-align:center;
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--paper-dim);pointer-events:none;
+  transition:opacity .4s ease;
+}
+.pd.quebrando .pd-dica{opacity:0}
+
 /* ---------- o elétron que se entrega ao átomo ---------- */
 .eletron{
   position:absolute;z-index:9;width:26px;height:26px;
@@ -1982,7 +2011,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v22.1';
+const VERSION = 'v22.2';
 
 const SLIDES = [
   {
@@ -2421,7 +2450,7 @@ const SLIDES = [
         faces: [
           { n: '', top: true, t: '1. São sólidos à temperatura ambiente\ncom altos pontos de fusão e ebulição',
             extra: BICO() },
-          { n: '', top: true, t: '2. Altos pontos de fusão\ne ebulição' },
+          { n: '', top: true, t: '2. São quebradiços', extra: PEDRA() },
           { n: '', top: true, t: '3. Conduzem eletricidade\nfundidos ou em água' },
           { n: '', top: true, t: '4. São quebradiços' } ] },
       { follow: 0, kind: 'reticulo', rede: 'nacl', lupa: true,
@@ -2509,6 +2538,51 @@ function BICO(){
       <i class="bk-tubo"><s class="bk-merc"></s></i>
       <b class="bk-num">25 °C</b>
     </div>
+  </div>`;
+}
+
+/* Um pedaço grande de sal num prato. Ele é uma grade de doze cacos que
+   juntos formam o bloco; a cada batida do dedo eles se afastam mais e a
+   pedra se desfaz. Quatro batidas: três quebrando e a última refazendo. */
+function PEDRA(){
+  const rnd = rng(9182);
+  const cols = 4, fil = 3;
+  const W = 138, H = 76, cx = 100, cy = 90;
+  let cacos = '';
+  for (let r = 0; r < fil; r++)
+    for (let c = 0; c < cols; c++){
+      const w = W / cols, h = H / fil;
+      const x0 = cx - W / 2 + c * w, y0 = cy - H / 2 + r * h;
+      const j = () => (rnd() - .5) * 5.5;
+      const pts = [[x0 + j(), y0 + j()], [x0 + w + j(), y0 + j()],
+                   [x0 + w + j(), y0 + h + j()], [x0 + j(), y0 + h + j()]]
+        .map(q => q[0].toFixed(1) + ',' + q[1].toFixed(1)).join(' ');
+      /* para onde este caco vai: para fora do centro e para baixo */
+      const dx = ((x0 + w / 2) - cx) * 0.6 + (rnd() - .5) * 16;
+      const dy = 14 + rnd() * 20 + (cy - (y0 + h / 2)) * 0.3;
+      const rr = (rnd() - .5) * 46;
+      const t  = 0.80 + rnd() * 0.20;       /* cada caco com o seu tom */
+      cacos += `<polygon class="pc" points="${pts}" style="`
+             + `--dx:${dx.toFixed(1)}px;--dy:${dy.toFixed(1)}px;--rr:${rr.toFixed(0)}deg;`
+             + `fill:rgb(${Math.round(238*t)},${Math.round(245*t)},${Math.round(250*t)})"/>`;
+    }
+  return `<div class="pd">
+    <svg class="pd-svg" viewBox="0 0 200 152" aria-hidden="true">
+      <defs>
+        <linearGradient id="pdPrato" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#EDF2F5"/>
+          <stop offset="1" stop-color="#9BA8B2"/>
+        </linearGradient>
+      </defs>
+      <!-- o prato, em perspectiva -->
+      <ellipse cx="100" cy="126" rx="90" ry="24" fill="#0A1622" opacity=".55"/>
+      <path d="M12 120 Q100 150 188 120 L188 116 Q100 146 12 116 Z" fill="#8593A0"/>
+      <ellipse cx="100" cy="117" rx="88" ry="23" fill="url(#pdPrato)"
+               stroke="#7C8A96" stroke-width="1.2"/>
+      <ellipse cx="100" cy="118" rx="70" ry="17" fill="#C9D4DC" opacity=".55"/>
+      <g class="pd-bloco">${cacos}</g>
+    </svg>
+    <span class="pd-dica">bata com o dedo na pedra</span>
   </div>`;
 }
 
@@ -5293,6 +5367,10 @@ function resetReveals(slide){
   if (aj) aj.classList.remove('on');
   slide.classList.remove('acertou');       /* some o brilho de acerto */
   slide.querySelectorAll('.eletron, .rastro-e, .onda-e').forEach(x => x.remove());
+  slide.querySelectorAll('.pd').forEach(p => {
+    p.dataset.q = 0; p.style.setProperty('--q', 0);
+    p.classList.remove('quebrando', 'bate');
+  });
   const b = slide.querySelector('.reveal-btn');
   if (b) b.classList.remove('emit');
   syncReveals(slide);
@@ -5531,6 +5609,20 @@ deck.addEventListener('pointerup', (e) => {
   if (noCab || !col.classList.contains('sobe')) levantaFamilia(col);
   else if (cel) mostraLewis(cel);
 });
+
+/* Cada batida quebra mais um pouco. Na quarta a pedra se refaz, para a
+   demonstração poder ser repetida na aula. */
+function bateNaPedra(pd){
+  if (!pd) return;
+  const q = Math.round((+pd.dataset.q || 0) * 3);
+  const novo = q >= 3 ? 0 : (q + 1) / 3;
+  pd.dataset.q = novo;
+  pd.style.setProperty('--q', novo.toFixed(3));
+  pd.classList.toggle('quebrando', novo > 0);
+  pd.classList.remove('bate');
+  void pd.offsetWidth;
+  pd.classList.add('bate');
+}
 
 /* ------------------------------------------------------------
    O SAL NO FOGO
@@ -6034,6 +6126,8 @@ function revealItem(slide, it){
 deck.addEventListener('click', (e) => {
   const redo = e.target.closest('.lego-redo');
   if (redo){ rebuildLego(redo.closest('.reveal-item')); return; }
+  const pdr = e.target.closest('.pd');
+  if (pdr){ bateNaPedra(pdr); return; }
   const bkb = e.target.closest('.bk-liga');
   if (bkb){ bicoLiga(bkb.closest('.bk')); return; }
   const sair = e.target.closest('.pn-sair');
@@ -6175,8 +6269,8 @@ deck.addEventListener('pointerdown', (e) => {
   if (e.target.closest('.ex-el .fam')) return;
   /* na tabela periódica o toque escolhe, não arrasta */
   if (e.target.closest('.tp')) return;
-  /* o bico tem os seus próprios controles: o cubo não gira por causa dele */
-  if (e.target.closest('.bk')) return;
+  /* o bico e a pedra têm interação própria: o cubo não gira por causa deles */
+  if (e.target.closest('.bk, .pd')) return;
   /* O átomo do octeto é fixo: a bola arranca elétron e o resto da área
      dele serve para fazer nascer um elétron. Nada ali move o átomo. */
   if (e.target.closest('.reveal-item[data-eatom]')) return;
