@@ -2127,7 +2127,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v24.3';
+const VERSION = 'v24.4';
 
 const SLIDES = [
   {
@@ -2595,7 +2595,11 @@ const SLIDES = [
     tsize: 40,
     virada: 'cube',
     content: '',
-    reveals: []
+    reveals: [
+      { nowrap: true,
+        text: 'É a ligação feita pelo compartilhamento de pares de elétrons',
+        x: 640, y: 150, base: 23, tone: 'aqua' }
+    ]
   }
 ];
 
