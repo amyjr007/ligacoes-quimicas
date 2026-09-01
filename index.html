@@ -2143,7 +2143,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v23.6';
+const VERSION = 'v23.7';
 
 const SLIDES = [
   {
@@ -6077,15 +6077,21 @@ const REDE_DA_FACE = ['na2o', 'nacl', 'mgo', 'mgo'];
 
 /* Troca o retículo sem o voo de aproximação: ele já nasce montado e
    enquadrado no vidro, porque quem está entrando em cena é a face nova,
-   não o cristal. */
-function trocaRedeDaLupa(slide, tipo){
+   não o cristal.
+
+   O enquadramento vem medido de fora (g). Medir aqui dentro daria
+   errado: a troca acontece no meio do giro, com a lente de perfil, e
+   nesse instante ela projeta menos de um quinto da largura real — o
+   retículo sairia enquadrado num quadro de 40px em vez de 235. */
+function trocaRedeDaLupa(slide, tipo, g){
   const it = slide && slide.querySelector('.reveal-item.reticulo[data-lupa]');
   const cv = slide && slide.querySelector('.q3d');
   if (!it || !cv || !iniciaG3(cv)) return;
+  const geo = (g && g.r > 40) ? g : geoLupa();
+  if (!(geo.r > 40)) return;             /* lente de perfil: não enquadra */
   montaCena(tipo);
   it.dataset.rede = tipo;
-  const g = geoLupa();
-  enquadraRede(g.x, g.y, g.r * 1.6, g.r * 1.6);
+  enquadraRede(geo.x, geo.y, geo.r * 1.6, geo.r * 1.6);
   G3.voo = 0; G3.distAlvo = G3.dist;
   G3.t = 1; G3.alvo = 1;
   poeRotuloRede(slide);
@@ -6098,6 +6104,9 @@ function viraLupa(slide, face){
   const cv = slide && slide.querySelector('.q3d');
   const tipo = REDE_DA_FACE[face];
   if (!it || it.hidden || !cv || !tipo || G3.modo === tipo) return;
+  /* a medida da lente é tirada agora, de frente, e guardada para a
+     troca lá no meio do giro */
+  const g = geoLupa();
   it.classList.remove('virando');
   void it.offsetWidth;
   it.classList.add('virando');
@@ -6105,7 +6114,7 @@ function viraLupa(slide, face){
   /* enquanto a lente gira, o vidro fica estreito: se o recorte
      acompanhasse, o retículo encolheria junto */
   G3.lupaPara = 1;
-  setTimeout(() => { trocaRedeDaLupa(slide, tipo); }, 340);
+  setTimeout(() => { trocaRedeDaLupa(slide, tipo, g); }, 340);
   setTimeout(() => { cv.classList.remove('trocando'); }, 430);
   setTimeout(() => {
     it.classList.remove('virando');
