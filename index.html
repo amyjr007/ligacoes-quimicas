@@ -1382,6 +1382,8 @@ body{
 .pd[data-e="1"] .pc{transform:translate(var(--x1),var(--y1)) rotate(var(--r1))}
 .pd[data-e="2"] .pc{transform:translate(var(--x2),var(--y2)) rotate(var(--r2))}
 .pd[data-e="3"] .pc{transform:translate(var(--x3),var(--y3)) rotate(var(--r3))}
+.pd[data-e="4"] .pc{transform:translate(var(--x4),var(--y4)) rotate(var(--r4))}
+.pd[data-e="5"] .pc{transform:translate(var(--x5),var(--y5)) rotate(var(--r5))}
 
 /* a batida do dedo sacode o bloco todo */
 .pd-bloco{transform-box:fill-box;transform-origin:50% 100%}
@@ -2062,7 +2064,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v22.8';
+const VERSION = 'v22.9';
 
 const SLIDES = [
   {
@@ -2610,14 +2612,17 @@ function BICO(){
    longo de um plano reto. Por isso o bloco sai em pedaços de faces
    planas, e não em migalhas — e é isso que significa "quebradiço".
 
-   O bloco é um cubo 2x2x2 desenhado em perspectiva isométrica. Cada
-   batida abre mais um plano de clivagem. */
+   O bloco é um cubo 4x4x2 desenhado em perspectiva isométrica. Cada
+   batida abre mais um plano de clivagem: primeiro os três que partem o
+   bloco ao meio, depois os dois que repartem cada metade. Cinco
+   batidas, trinta e dois pedaços — e todos de faces planas, que é o que
+   a aula quer mostrar. */
 function PEDRA(){
-  const a = 24, b = 12, h = 22;          /* largura, profundidade, altura */
+  const nx = 4, a = 12, b = 6, h = 22;   /* largura, profundidade, altura */
   const cx = 100, cy = 70;
   /* x cresce para a direita-frente, z para a esquerda-frente, y para cima */
   const P = (x, z, y) => [ cx + (x - z) * a,
-                           cy + (x + z - 2) * b - (y - 1) * h ];
+                           cy + (x + z - nx) * b - (y - 1) * h ];
   const pts = arr => arr.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
   const rgb = (r, g, bl, t) => `rgb(${Math.round(r*t)},${Math.round(g*t)},${Math.round(bl*t)})`;
 
@@ -2626,35 +2631,46 @@ function PEDRA(){
   const ux = [  a / n, b / n ];
   const uz = [ -a / n, b / n ];
 
+  /* Quanto cada plano já abriu, estágio a estágio. Os três primeiros
+     partem o bloco ao meio (A); os dois últimos repartem cada metade,
+     empurrando só o quarto de fora (B). Os números são o limite: mais
+     do que isso e os pedaços caem do prato. */
+  const XA = [0,  7, 11, 13, 14, 14];
+  const ZA = [0,  0, 11, 13, 14, 14];
+  const XB = [0,  0,  0,  0,  6,  6];
+  const ZB = [0,  0,  0,  0,  0,  6];
+  const DY = [0,  0,  0,  1,  1,  1];   /* liga a queda da camada de cima */
+
   const pecas = [];
-  for (let i = 0; i < 2; i++)
-    for (let k = 0; k < 2; k++)
+  for (let i = 0; i < nx; i++)
+    for (let k = 0; k < nx; k++)
       for (let j = 0; j < 2; j++){
-        const si = i ? 1 : -1, sk = k ? 1 : -1;
+        const si = i >= nx / 2 ? 1 : -1, sk = k >= nx / 2 ? 1 : -1;
+        /* o quarto de fora de cada metade: é ele que se destaca depois */
+        const fi = (i === 0 || i === nx - 1) ? 1 : 0;
+        const fk = (k === 0 || k === nx - 1) ? 1 : 0;
         /* as três faces visíveis do bloquinho */
         const topo = [P(i,k,j+1), P(i+1,k,j+1), P(i+1,k+1,j+1), P(i,k+1,j+1)];
         const dir  = [P(i+1,k,j+1), P(i+1,k+1,j+1), P(i+1,k+1,j), P(i+1,k,j)];
         const esq  = [P(i,k+1,j+1), P(i+1,k+1,j+1), P(i+1,k+1,j), P(i,k+1,j)];
-        const t = 1 - (i + k) * 0.02 - (1 - j) * 0.03;
+        const t = 1 - (i + k) * 0.012 - (1 - j) * 0.03;
 
-        /* estágio 1: abre só o plano perpendicular a x
-           estágio 2: abre também o plano perpendicular a z
-           estágio 3: tudo separado e a camada de cima desce para o prato */
-        const o1 = [ si * 8 * ux[0], si * 8 * ux[1] ];
-        const o2 = [ si * 13 * ux[0] + sk * 13 * uz[0],
-                     si * 13 * ux[1] + sk * 13 * uz[1] ];
-        /* no estágio 3 as peças ainda têm de caber no prato: 18 é o
-           quanto elas podem abrir sem passar da borda */
-        const o3 = [ si * 18 * ux[0] + sk * 18 * uz[0],
-                     si * 18 * ux[1] + sk * 18 * uz[1] + (j ? 13 : 2) ];
+        const vars = [1,2,3,4,5].map(e => {
+          const dx = si * XA[e] * ux[0] + sk * ZA[e] * uz[0]
+                   + si * fi * XB[e] * ux[0] + sk * fk * ZB[e] * uz[0];
+          const dy = si * XA[e] * ux[1] + sk * ZA[e] * uz[1]
+                   + si * fi * XB[e] * ux[1] + sk * fk * ZB[e] * uz[1]
+                   + DY[e] * (j ? 13 : 2);
+          const rr = (si + sk) * 0.7 * e + (j && DY[e] ? si * 4 : 0)
+                   + (fi * si + fk * sk) * (XB[e] || ZB[e] ? 1.6 : 0);
+          return `--x${e}:${dx.toFixed(1)}px;--y${e}:${dy.toFixed(1)}px;`
+               + `--r${e}:${rr.toFixed(1)}deg;`;
+        }).join('');
         const c = P(i + 0.5, k + 0.5, j + 0.5);
 
         pecas.push({ z: i + k + j * (2 * b / h), html:
           `<g class="pc" style="transform-origin:${c[0].toFixed(1)}px ${c[1].toFixed(1)}px;`
-        + `--x1:${o1[0].toFixed(1)}px;--y1:${o1[1].toFixed(1)}px;--r1:0deg;`
-        + `--x2:${o2[0].toFixed(1)}px;--y2:${o2[1].toFixed(1)}px;--r2:${(si*1.5).toFixed(1)}deg;`
-        + `--x3:${o3[0].toFixed(1)}px;--y3:${o3[1].toFixed(1)}px;`
-        + `--r3:${((si + sk) * 3 + (j ? si * 5 : 0)).toFixed(1)}deg">`
+        + vars + `">`
         + `<polygon points="${pts(esq)}" fill="${rgb(201,214,223,t)}"/>`
         + `<polygon points="${pts(dir)}" fill="${rgb(169,184,195,t)}"/>`
         + `<polygon points="${pts(topo)}" fill="${rgb(242,247,250,t)}"/>`
@@ -2665,9 +2681,17 @@ function PEDRA(){
      i + k + j*(2b/h): pintar em ordem crescente põe o de trás primeiro. */
   pecas.sort((p, q) => p.z - q.z);
 
-  /* os dois riscos que marcam onde o cristal partiu */
-  const rachaA = pts([P(1,0,2), P(1,2,2), P(1,2,0)]);
-  const rachaB = pts([P(0,1,2), P(2,1,2), P(2,1,0)]);
+  /* Onde cada plano corta a superfície do bloco. Os verticais descem do
+     topo pela face lateral; o horizontal atravessa as duas faces. */
+  const cortaX = x => pts([P(x,0,2), P(x,nx,2), P(x,nx,0)]);
+  const cortaZ = z => pts([P(0,z,2), P(nx,z,2), P(nx,z,0)]);
+  const rachas = [
+    [cortaX(2)], [cortaZ(2)],
+    [pts([P(0,nx,1), P(nx,nx,1), P(nx,0,1)])],
+    [cortaX(1), cortaX(3)],
+    [cortaZ(1), cortaZ(3)]
+  ].map((g, e) => g.map(p => `<polyline class="pd-rach r${e+1}" points="${p}"/>`).join(''))
+   .join('');
 
   return `<div class="pd" data-e="0">
     <svg class="pd-svg" viewBox="0 0 200 152" aria-hidden="true">
@@ -2684,8 +2708,7 @@ function PEDRA(){
                stroke="#7C8A96" stroke-width="1.2"/>
       <ellipse cx="100" cy="118" rx="70" ry="17" fill="#C9D4DC" opacity=".55"/>
       <g class="pd-bloco">${pecas.map(p => p.html).join('')}</g>
-      <polyline class="pd-rach a" points="${rachaA}"/>
-      <polyline class="pd-rach b" points="${rachaB}"/>
+      ${rachas}
     </svg>
     <div class="pd-pe">
       <span class="pd-dica">bata na pedra</span>
@@ -4236,6 +4259,16 @@ function poeChao(c){
     return (v[m] + v[m - 1]) / 2;
   };
   const corte = [vao(0), vao(1), vao(2)];
+  /* E, dentro de cada metade, onde passa o plano que a reparte: são os
+     dois últimos golpes, os que fazem os pedaços menores. */
+  const subVao = (eixo, sinal) => {
+    const v = [...new Set(c.at.filter(a => (a.rede[eixo] > corte[eixo] ? 1 : -1) === sinal)
+                              .map(a => a.rede[eixo]))].sort((p, q) => p - q);
+    if (v.length < 2) return sinal > 0 ? Infinity : -Infinity;
+    const m = v.length >> 1;
+    return (v[m] + v[m - 1]) / 2;
+  };
+  const sub = [0,1,2].map(e => [subVao(e, -1), subVao(e, 1)]);
   c.at.forEach(a => {
     a.fase = rnd() * 6.283;
     a.chao = [ a.rede[0] + (rnd() - .5) * 130,
@@ -4244,6 +4277,12 @@ function poeChao(c){
     a.lado = [ a.rede[0] > corte[0] ? 1 : -1,
                a.rede[1] > corte[1] ? 1 : -1,
                a.rede[2] > corte[2] ? 1 : -1 ];
+    /* +1 é o quarto de fora da metade, o que se destaca nos dois
+       últimos golpes; -1 é o de dentro, que fica onde está */
+    a.quarto = [0,1,2].map(e => {
+      const s = a.lado[e], corteQ = s > 0 ? sub[e][1] : sub[e][0];
+      return (s > 0 ? a.rede[e] > corteQ : a.rede[e] < corteQ) ? 1 : -1;
+    });
   });
   return c;
 }
@@ -4493,7 +4532,15 @@ function desenhaG3(canvas){
      razão física de o cristal iônico ser quebradiço. */
   const desliza = c => Math.min(1, Math.max(0, c) / 0.45) * 27;
   const afasta  = c => Math.max(0, (c - 0.45) / 0.55) * 35;
-  const c1 = Math.min(1, cl), c2 = Math.min(1, cl - 1), c3 = Math.min(1, cl - 2);
+  /* Nos dois últimos planos vale a mesma regra, em escala menor: os
+     dois quartos deslizam meia distância cada um — 54 no total, de novo
+     exatamente um íon — e depois se afastam. Simétrico, e não de um
+     lado só: assim nenhum pedaço é atirado para fora da lupa. */
+  const deslizaQ = c => Math.min(1, Math.max(0, c) / 0.45) * 27;
+  const afastaQ  = c => Math.max(0, (c - 0.45) / 0.55) * 13;
+  const c1 = Math.min(1, cl),     c2 = Math.min(1, cl - 1);
+  const c3 = Math.min(1, cl - 2), c4 = Math.min(1, cl - 3);
+  const c5 = Math.min(1, cl - 4);
   const off  = G3.celOff;
   const dist = Math.hypot(off[0], off[1], off[2]);
   const enc  = 1 - (1 - CEL_ESC) * Math.min(1, dist / CEL_MAX);
@@ -4524,10 +4571,13 @@ function desenhaG3(canvas){
        Primeiro plano perpendicular a x, depois a z, depois a y — os
        mesmos três da pedra, na mesma ordem. */
     if (cl > 0.001 && a.lado){
-      const L = a.lado;
+      const L = a.lado, Q = a.quarto || [-1, -1, -1];
       p[0] += L[0] * afasta(c1);   p[1] += L[0] * desliza(c1);
       p[2] += L[2] * afasta(c2);   p[1] += L[2] * desliza(c2);
       p[1] += L[1] * afasta(c3);   p[0] += L[1] * desliza(c3);
+      /* os dois planos que repartem cada metade */
+      p[0] += L[0] * Q[0] * afastaQ(c4);  p[2] += L[0] * Q[0] * deslizaQ(c4);
+      p[2] += L[2] * Q[2] * afastaQ(c5);  p[0] += L[2] * Q[2] * deslizaQ(c5);
     }
     /* o estufado do reencaixe tambem vale com a celula ja no lugar */
     if (a.cel && (dist > 0.5 || G3.pulso > 0.002 || G3.drama > 0.002 || celGirada())){
@@ -4590,7 +4640,9 @@ function desenhaG3(canvas){
       if (cl > 0.02 && a.lado && b.lado &&
           ((a.lado[0] !== b.lado[0]) ||
            (cl > 1.02 && a.lado[2] !== b.lado[2]) ||
-           (cl > 2.02 && a.lado[1] !== b.lado[1]))) return;
+           (cl > 2.02 && a.lado[1] !== b.lado[1]) ||
+           (cl > 3.02 && a.quarto[0] !== b.quarto[0]) ||
+           (cl > 4.02 && a.quarto[2] !== b.quarto[2]))) return;
       if (a.cel !== b.cel && (dist > 4 || G3.drama > 0.02)) return;
       gl.uniformMatrix4fv(uModel, false,
         m4haste(pos[i], pos[j], a.cel && b.cel ? r * enc : r));
@@ -5781,7 +5833,9 @@ const PD_DICAS = [
   'bata na pedra',
   'os planos de íons deslizaram',
   'cargas iguais frente a frente se repelem',
-  'o cristal clivou em faces planas'
+  'o cristal clivou em faces planas',
+  'e continua clivando, sempre em planos retos',
+  'por menor que seja o pedaço, as faces são planas'
 ];
 
 /* a onda do impacto e o pó que salta do ponto onde o dedo bateu */
@@ -5833,12 +5887,14 @@ function bateNaPedra(pd, ev){
   pd.classList.remove('bate');
   void pd.offsetWidth;
   pd.classList.add('bate');
-  if (e >= 3) return;                     /* já partiu: só o refazer volta */
+  if (e >= 5) return;                     /* já partiu: só o refazer volta */
   const novo = e + 1;
   pd.dataset.e = novo;
-  if (novo <= 2){
-    const l = pd.querySelector(novo === 1 ? '.pd-rach.a' : '.pd-rach.b');
-    if (l){ l.classList.remove('flash'); void pd.offsetWidth; l.classList.add('flash'); }
+  const riscos = pd.querySelectorAll('.pd-rach.r' + novo);
+  if (riscos.length){
+    riscos.forEach(l => l.classList.remove('flash'));
+    void pd.offsetWidth;
+    riscos.forEach(l => l.classList.add('flash'));
   }
   /* o retículo dentro da lupa parte no mesmo instante */
   G3.clivaAlvo = novo;
