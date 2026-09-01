@@ -2064,7 +2064,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v23.0';
+const VERSION = 'v23.2';
 
 const SLIDES = [
   {
@@ -2501,21 +2501,20 @@ const SLIDES = [
         /* top: o texto encosta no alto da face e deixa o resto dela
            livre para o que vier depois. Duas linhas, no máximo. */
         faces: [
-          { n: '', top: true, t: '1. São sólidos à temperatura ambiente\ncom altos pontos de fusão e ebulição',
-            extra: BICO },
-          { n: '', top: true, t: '2. São quebradiços', extra: PEDRA },
-          { n: '', top: true, t: '3. Conduzem eletricidade\nfundidos ou em água' },
-          { n: '', top: true, t: '4. São quebradiços' } ] },
+          { n: '', top: true, t: '1. São sólidos cristalinos rígidos\nà temperatura ambiente' },
+          { n: '', top: true, t: '2. Altos pontos de fusão\ne ebulição', extra: BICO },
+          { n: '', top: true, t: '3. São quebradiços', extra: PEDRA },
+          { n: '', top: true, t: '4. Conduzem eletricidade\nfundidos ou em água' } ] },
       { follow: 0, kind: 'reticulo', rede: 'nacl', lupa: true,
         x: 949, y: 430, base: 400, tone: '' },
       { follow: 0, nowrap: true, text: 'visão submicroscópica',
         x: 916, y: 632, base: 19, tone: '' },
-      /* A foto do gesto real. face 1 é a segunda do cubo, a dos
+      /* A foto do gesto real. face 2 é a terceira do cubo, a dos
          quebradiços: ela só sai quando o cubo está mostrando essa face e
          se recolhe quando ele vira. nu: a imagem já vem recortada, com a
          própria borda e sombra; capsobe traz a legenda para junto dela,
          que senão nasceria 114px abaixo do círculo. */
-      { kind: 'img', face: 1, nu: true, capsobe: 0.315,
+      { kind: 'img', face: 2, nu: true, capsobe: 0.315,
         img: 'imagens/clivagem.png',
         caption: 'clivagem', alt: 'martelo e talhadeira clivando um cristal',
         x: 632, y: 354, base: 264.2, tone: '' }
@@ -5461,6 +5460,7 @@ function stepBack(slide){
 
   if (cube && !cube.hidden && +cube.dataset.face > 0){
     const back = +cube.dataset.face - 1;
+    esfriaBico(slide);
     cube.dataset.face = back;
     cube.style.setProperty('--face', back);
     paintCube(cube, back);
@@ -5535,6 +5535,7 @@ function stepBackward(){
 /* gira o cubo: recolhe o que era do postulado que sai */
 function turnCube(slide, cube){
   const face = +cube.dataset.face;
+  esfriaBico(slide);
   itemsOf(slide).forEach(it => {
     if (it.dataset.of !== undefined && +it.dataset.of === face && !it.hidden) retractItem(it);
   });
@@ -5949,6 +5950,27 @@ function bicoAnda(bk){
     bk._t = (T === alvo) ? 0 : requestAnimationFrame(passo);
   };
   passo();
+}
+
+/* Virar a face troca de assunto, e cada assunto pede o retículo inteiro.
+   Se o sal ficou derretido na face anterior, o próximo golpe na pedra
+   não teria o que clivar: uma poça não tem planos. Então a face que sai
+   leva o fogo consigo — a chama se apaga com a animação de sempre, a
+   cápsula esfria, e o retículo volta na hora, pronto para a interação
+   seguinte. */
+function esfriaBico(slide){
+  const bk = slide && slide.querySelector('.bk');
+  if (!bk) return;
+  const estava = bk.classList.contains('aceso') || (+bk.dataset.temp || BK_AMB) > BK_AMB + 1;
+  bk.classList.remove('aceso', 'derreteu');
+  if (bk._t){ cancelAnimationFrame(bk._t); bk._t = 0; }
+  bk.dataset.temp = BK_AMB;
+  const num = bk.querySelector('.bk-num'), merc = bk.querySelector('.bk-merc');
+  if (num) num.textContent = BK_AMB + ' °C';
+  if (merc) merc.style.height = '0%';
+  if (!estava) return;
+  /* o retículo não espera os 3,3s do resfriamento: ele reassume inteiro */
+  G3.agita = 0; G3.funde = 0; G3.fundeAlvo = 0;
 }
 
 function bicoLiga(bk){
