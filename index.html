@@ -2064,7 +2064,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v23.3';
+const VERSION = 'v23.4';
 
 const SLIDES = [
   {
@@ -2505,20 +2505,18 @@ const SLIDES = [
           { n: '', top: true, t: '2. Possuem altos pontos de fusão\ne ebulição', extra: BICO },
           { n: '', top: true, t: '3. São quebradiços', extra: PEDRA },
           { n: '', top: true, t: '4. Conduzem eletricidade\nfundidos ou em água' } ] },
-      /* Terceiro clique: as quatro amostras, dentro da face 1. Todas com
-         a mesma altura (78px), então os quadros se alinham como uma
-         prateleira de amostras — que é o que a face está afirmando: são
-         todos sólidos, e todos cristalinos. As larguras saem da
-         proporção de cada foto. face 0 prende à primeira face: elas se
-         recolhem quando o cubo vira. */
+      /* Terceiro clique: as quatro amostras, espalhadas sobre a face 1 e
+         transbordando um pouco das bordas do cubo, como fotos largadas
+         na mesa. face 0 prende à primeira face: elas se recolhem quando
+         o cubo vira. */
       { kind: 'img', face: 0, img: 'imagens/NaCl.png',
-        caption: 'NaCl',  x: 196, y: 470, base: 78, tone: '' },
+        caption: 'NaCl',  x: 164, y: 434, base: 168.8, tone: '' },
       { follow: 0, kind: 'img', face: 0, img: 'imagens/Al2O3.jpg',
-        caption: 'Al<sub>2</sub>O<sub>3</sub>', x: 312, y: 470, base: 123, tone: '' },
+        caption: 'Al<sub>2</sub>O<sub>3</sub>', x: 312, y: 558, base: 242.6, tone: '' },
       { follow: 0, kind: 'img', face: 0, img: 'imagens/MgO.png',
-        caption: 'MgO',   x: 453, y: 470, base: 127, tone: '' },
+        caption: 'MgO',   x: 464, y: 411, base: 217.3, tone: '' },
       { follow: 0, kind: 'img', face: 0, img: 'imagens/Na2O.jpg',
-        caption: 'Na<sub>2</sub>O', x: 559, y: 470, base: 54, tone: '' },
+        caption: 'Na<sub>2</sub>O', x: 598, y: 528, base: 124.6, tone: '' },
       /* Quarto clique: a lupa com o retículo. Quinto: o cubo vira. */
       { kind: 'reticulo', rede: 'nacl', lupa: true,
         x: 949, y: 430, base: 400, tone: '' },
