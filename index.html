@@ -2055,7 +2055,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v22.5';
+const VERSION = 'v22.6';
 
 const SLIDES = [
   {
@@ -3885,7 +3885,7 @@ const G3 = {
   canvas: null, lupa: null, lupaCv: null, lupaClip: '',
   modo: 'pedra', celOff: [0, 0, 0], celC: [0, 0, 0], cantos: [], slide: null,
   volta: 0, pulso: 0, drama: 0, voo: 0, distAlvo: 0, celQ: null,
-  agita: 0, funde: 0, fundeAlvo: 0, t9: 0
+  agita: 0, funde: 0, fundeAlvo: 0, t9: 0, cliva: 0, clivaAlvo: 0
 };
 
 /* --- álgebra --- */
@@ -4210,11 +4210,23 @@ function poeChao(c){
   const rnd = rng(4242);
   const minY = Math.min(...c.at.map(a => a.rede[1]));
   const piso = minY - 76;                  /* o monte inteiro abaixo da rede */
+  /* Onde passam os planos de clivagem: no vão entre as duas camadas
+     centrais de cada eixo. O corte nunca atravessa uma camada de íons —
+     o cristal parte entre planos, não pelo meio deles. */
+  const vao = eixo => {
+    const v = [...new Set(c.at.map(a => a.rede[eixo]))].sort((p, q) => p - q);
+    const m = v.length >> 1;
+    return (v[m] + v[m - 1]) / 2;
+  };
+  const corte = [vao(0), vao(1), vao(2)];
   c.at.forEach(a => {
     a.fase = rnd() * 6.283;
     a.chao = [ a.rede[0] + (rnd() - .5) * 130,
                piso + rnd() * 46,
                a.rede[2] + (rnd() - .5) * 130 ];
+    a.lado = [ a.rede[0] > corte[0] ? 1 : -1,
+               a.rede[1] > corte[1] ? 1 : -1,
+               a.rede[2] > corte[2] ? 1 : -1 ];
   });
   return c;
 }
@@ -4367,6 +4379,7 @@ function montaCena(modo){
   G3.volta = 0; G3.pulso = 0; G3.drama = 0;
   G3.voo = 0; G3.celQ = null;
   G3.agita = 0; G3.funde = 0; G3.fundeAlvo = 0;
+  G3.cliva = 0; G3.clivaAlvo = 0;
   G3.ext = c.ext || 0;
   G3.nRede = c.n || 0;
   G3.celula = c.celula || { tam: 3, alinha: 0 };
@@ -4454,6 +4467,16 @@ function desenhaG3(canvas){
      para nao ficar do tamanho do reticulo de onde saiu */
   const ag   = (G3.agita || 0) * 6.5;      /* amplitude do tremor, em unidades */
   const fu   = G3.funde || 0;
+  /* fundido não cliva: um retículo derretido já não tem planos */
+  const cl   = (G3.cliva || 0) * (1 - fu);
+  /* Cada plano abre em dois tempos. Primeiro os dois lados DESLIZAM um
+     sobre o outro meia distância entre íons — é nesse instante que
+     cátion fica de frente para cátion e ânion para ânion. Aí a repulsão
+     entre cargas iguais empurra, e só então os lados se AFASTAM. É a
+     razão física de o cristal iônico ser quebradiço. */
+  const desliza = c => Math.min(1, Math.max(0, c) / 0.45) * 27;
+  const afasta  = c => Math.max(0, (c - 0.45) / 0.55) * 35;
+  const c1 = Math.min(1, cl), c2 = Math.min(1, cl - 1), c3 = Math.min(1, cl - 2);
   const off  = G3.celOff;
   const dist = Math.hypot(off[0], off[1], off[2]);
   const enc  = 1 - (1 - CEL_ESC) * Math.min(1, dist / CEL_MAX);
@@ -4479,6 +4502,15 @@ function desenhaG3(canvas){
       p[0] += Math.sin(w * 9.1 + ph) * ag;
       p[1] += Math.sin(w * 11.3 + ph * 1.7) * ag;
       p[2] += Math.sin(w * 8.4 + ph * 2.3) * ag;
+    }
+    /* Clivagem: o mesmo golpe que parte a pedra parte o retículo.
+       Primeiro plano perpendicular a x, depois a z, depois a y — os
+       mesmos três da pedra, na mesma ordem. */
+    if (cl > 0.001 && a.lado){
+      const L = a.lado;
+      p[0] += L[0] * afasta(c1);   p[1] += L[0] * desliza(c1);
+      p[2] += L[2] * afasta(c2);   p[1] += L[2] * desliza(c2);
+      p[1] += L[1] * afasta(c3);   p[0] += L[1] * desliza(c3);
     }
     /* o estufado do reencaixe tambem vale com a celula ja no lugar */
     if (a.cel && (dist > 0.5 || G3.pulso > 0.002 || G3.drama > 0.002 || celGirada())){
@@ -4537,6 +4569,11 @@ function desenhaG3(canvas){
       const a = G3.atomos[i], b = G3.atomos[j];
       if (fu > 0.02) return;                           /* o retículo desabou */
       if (a.solto || b.solto) return;                  /* atomo arrancado */
+      /* nenhuma haste atravessa um plano que já se rompeu */
+      if (cl > 0.02 && a.lado && b.lado &&
+          ((a.lado[0] !== b.lado[0]) ||
+           (cl > 1.02 && a.lado[2] !== b.lado[2]) ||
+           (cl > 2.02 && a.lado[1] !== b.lado[1]))) return;
       if (a.cel !== b.cel && (dist > 4 || G3.drama > 0.02)) return;
       gl.uniformMatrix4fv(uModel, false,
         m4haste(pos[i], pos[j], a.cel && b.cel ? r * enc : r));
@@ -4573,6 +4610,13 @@ function lacoG3(canvas){
     G3.funde += ((G3.fundeAlvo || 0) - G3.funde) * 0.015;
     if (Math.abs((G3.fundeAlvo || 0) - G3.funde) < 0.002)
       G3.funde = G3.fundeAlvo || 0;
+    /* A clivagem do retículo segue a da pedra no mesmo compasso: 0,10
+       por quadro leva ~1s por plano, que é a duração da transição das
+       peças de sal na face do cubo. O que se vê na mão e o que se vê na
+       lupa acontecem juntos. */
+    G3.cliva += ((G3.clivaAlvo || 0) - G3.cliva) * 0.10;
+    if (Math.abs((G3.clivaAlvo || 0) - G3.cliva) < 0.002)
+      G3.cliva = G3.clivaAlvo || 0;
     /* voo da camera: entra no grao e recua ate o enquadramento, ou o
        contrario na saida */
     if (G3.voo){
@@ -5779,6 +5823,8 @@ function bateNaPedra(pd, ev){
     const l = pd.querySelector(novo === 1 ? '.pd-rach.a' : '.pd-rach.b');
     if (l){ l.classList.remove('flash'); void pd.offsetWidth; l.classList.add('flash'); }
   }
+  /* o retículo dentro da lupa parte no mesmo instante */
+  G3.clivaAlvo = novo;
   const d = pd.querySelector('.pd-dica');
   if (d) d.textContent = PD_DICAS[novo];
 }
@@ -5789,6 +5835,7 @@ function refazPedra(pd){
   pd.dataset.e = 0;
   pd.classList.remove('bate');
   pd.querySelectorAll('.pd-rach').forEach(l => l.classList.remove('flash'));
+  G3.clivaAlvo = 0;                     /* o retículo se refaz junto */
   const d = pd.querySelector('.pd-dica');
   if (d) d.textContent = PD_DICAS[0];
 }
@@ -6142,6 +6189,12 @@ function abreReticulo(it){
     abreRede(it, it.dataset.rede || 'nacl', (x0 + x1) / 2, (y0 + y1) / 2,
              (x1 - x0) * 0.9, (y1 - y0) * 0.9);
   }
+  /* Montar a cena zera o estado, mas a pedra do cubo pode já estar
+     partida: quem sai do slide e volta tem de reencontrar o retículo no
+     mesmo estado em que deixou a pedra. Aqui ele reassume, sem animar. */
+  const pd = slide.querySelector('.pd');
+  if (pd){ G3.clivaAlvo = +pd.dataset.e || 0; G3.cliva = G3.clivaAlvo; }
+
   /* enquadramento afinado na tela e trazido de volta pelo painel C */
   const cam = it.dataset.cam && it.dataset.cam.split(',').map(Number);
   if (cam && cam.length === 5 && cam.every(v => !isNaN(v))){
