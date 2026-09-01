@@ -2011,7 +2011,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v22.3';
+const VERSION = 'v22.4';
 
 const SLIDES = [
   {
@@ -2449,8 +2449,8 @@ const SLIDES = [
            livre para o que vier depois. Duas linhas, no máximo. */
         faces: [
           { n: '', top: true, t: '1. São sólidos à temperatura ambiente\ncom altos pontos de fusão e ebulição',
-            extra: BICO() },
-          { n: '', top: true, t: '2. São quebradiços', extra: PEDRA() },
+            extra: BICO },
+          { n: '', top: true, t: '2. São quebradiços', extra: PEDRA },
           { n: '', top: true, t: '3. Conduzem eletricidade\nfundidos ou em água' },
           { n: '', top: true, t: '4. São quebradiços' } ] },
       { follow: 0, kind: 'reticulo', rede: 'nacl', lupa: true,
@@ -3469,8 +3469,12 @@ function faceHTML(f, i){
   const n = typeof f === 'string' ? `Postulado ${i + 1}` : f.n;
   const t = typeof f === 'string' ? f : f.t;
   if (!t) return '';
+  /* extra pode ser uma função: assim ela só é chamada na montagem do
+     slide, e não enquanto a lista de slides ainda está sendo criada —
+     onde ainda faltava metade do arquivo para ser lida. */
+  const ex = f && f.extra;
   return (n ? `<div class="n">${n}</div>` : '') + `<div class="t">${t}</div>`
-       + (f && f.extra ? f.extra : '');
+       + (typeof ex === 'function' ? ex() : (ex || ''));
 }
 
 /* face com top:true encosta o texto no alto em vez de centralizar */
