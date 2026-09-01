@@ -2127,7 +2127,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v24.2';
+const VERSION = 'v24.3';
 
 const SLIDES = [
   {
@@ -2586,6 +2586,16 @@ const SLIDES = [
         caption: 'clivagem', alt: 'martelo e talhadeira clivando um cristal',
         x: 632, y: 354, base: 264.2, tone: '' }
     ]
+  },
+  {
+    /* Vira a página como a abertura: virada 'cube' pede a mesma
+       transição em caixa que leva do slide 1 para o 2 — é uma troca de
+       assunto, não mais um passo dentro do mesmo. A montar. */
+    title: 'A ligação covalente ou molecular',
+    tsize: 40,
+    virada: 'cube',
+    content: '',
+    reveals: []
   }
 ];
 
@@ -3011,7 +3021,8 @@ function alvoLewis(sim, val){
 }
 
 /* símbolo do elemento = número do slide */
-const ELEMENTS = ['H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca'];
+const ELEMENTS = ['H','He','Li','Be','B','C','N','O','F','Ne','Na','Mg','Al','Si','P','S','Cl','Ar','K','Ca',
+                  'Sc','Ti','V','Cr','Mn','Fe','Co','Ni','Cu','Zn'];
 
 const stage = document.getElementById('stage');
 const deck = document.getElementById('deck');
@@ -4019,7 +4030,11 @@ function go(n, instant){
 
   if (animate){
     const dir  = to > from ? 'next' : 'prev';
-    const cube = from === 0 || to === 0;
+    /* A transição em caixa é a de abertura, e serve para marcar começo
+       de assunto: vale para o slide 1 e para todo slide que peça
+       virada 'cube', entrando ou saindo dele. */
+    const emCaixa = i => i === 0 || (SLIDES[i] && SLIDES[i].virada === 'cube');
+    const cube = emCaixa(from) || emCaixa(to);
     const kind = cube ? 'cube' : 'desl';       /* os dois seguem o sentido */
     /* A passagem entre o slide 3 e o 4 corre a 60% da velocidade das
        outras — 0,62s viram 1,03s. Vale nos dois sentidos. */
