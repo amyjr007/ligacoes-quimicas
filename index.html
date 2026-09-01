@@ -1399,53 +1399,37 @@ body{
 .q3d{transition:opacity .2s ease}
 .q3d.trocando{opacity:0;transition:opacity .14s ease}
 
-/* ---------- o vídeo dentro da face, com um player mínimo ----------
-   Tocar, pausar e arrastar o tempo. Nada mais: a aula é sobre
-   solubilidade, não sobre o player. As medidas aqui são as da face sem
-   escala; o cubo inteiro é escalado depois por base/360. */
-.vd{flex:1;display:flex;flex-direction:column;justify-content:center;
-    align-items:center;gap:7px}
-.vd-tela{
-  position:relative;width:200px;border-radius:4px;overflow:hidden;
-  border:1px solid rgba(69,199,176,.3);background:#05121C;
-  box-shadow:0 0 26px rgba(3,12,22,.55);
+/* ---------- o béquer, a pedra de sal e o dedo na água ----------
+   Medidas da face sem escala: o cubo é escalado depois por base/360.
+   O quadro tem 292x150 e o SVG usa exatamente esse sistema, então a
+   posição do dedo vira coordenada do desenho por regra de três. */
+.bq{position:relative;width:292px;height:150px;flex:none;align-self:center}
+.bq-svg{position:absolute;inset:0;width:292px;height:150px;overflow:visible}
+/* o líquido inteiro inclina quando o dedo mexe */
+.bq-liquido{transform-box:fill-box;transform-origin:50% 100%;
+            transform:rotate(calc(var(--slosh,0) * 4.5deg));
+            transition:transform .18s ease-out}
+/* a pedra: arrastável, e some à medida que dissolve */
+.bq-sal{
+  position:absolute;width:60px;height:62px;margin:0;
+  transform:translate(-50%,-50%) scale(calc(1 - var(--sal,0) * .9));
+  opacity:calc(1 - var(--sal,0) * .88);
+  cursor:grab;touch-action:none;
+  filter:drop-shadow(0 3px 7px rgba(0,0,0,.55));
+  transition:opacity .2s linear;
 }
-.vd-v{display:block;width:100%;height:auto;cursor:pointer}
-/* o botão grande cobre a tela e some quando o vídeo anda */
-.vd-play{
-  position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;
-  background:rgba(4,14,22,.34);cursor:pointer;
-  display:grid;place-items:center;transition:opacity .25s ease;
+.bq.pegando .bq-sal{cursor:grabbing;filter:drop-shadow(0 9px 16px rgba(0,0,0,.6))}
+.bq.molhado .bq-sal{cursor:default;pointer-events:none}
+/* a área do copo recebe o dedo que mexe */
+.bq-copo{position:absolute;left:26px;top:16px;width:100px;height:118px;
+         cursor:ew-resize;touch-action:none}
+/* o brilho que corre na água quando ela é agitada */
+.bq-brilho{opacity:calc(var(--agita,0) * .5)}
+.bq-dica{
+  position:absolute;left:0;right:0;bottom:-11px;text-align:center;
+  font-family:var(--mono);font-size:9.4px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--paper-dim);pointer-events:none;
 }
-.vd-play::after{
-  content:'';width:0;height:0;margin-left:5px;
-  border-left:19px solid rgba(255,255,255,.94);
-  border-top:12px solid transparent;border-bottom:12px solid transparent;
-  filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));
-}
-.vd.tocando .vd-play{opacity:0;pointer-events:none}
-/* a barra: o botão pequeno, o trilho e o tempo corrido */
-.vd-barra{display:flex;align-items:center;gap:7px;width:200px}
-.vd-pp{width:16px;height:16px;flex:none;padding:0;border:0;background:none;
-       cursor:pointer;position:relative}
-.vd-pp::before{
-  content:'';position:absolute;inset:0;margin:auto;width:0;height:0;
-  border-left:11px solid var(--paper-dim);
-  border-top:7px solid transparent;border-bottom:7px solid transparent;
-}
-/* tocando, o triângulo vira as duas barras da pausa */
-.vd.tocando .vd-pp::before{
-  border:0;width:10px;height:13px;
-  background:linear-gradient(90deg,var(--paper-dim) 0 3.6px,
-             transparent 3.6px 6.4px,var(--paper-dim) 6.4px 10px);
-}
-.vd-pp:hover::before{filter:brightness(1.7)}
-.vd-trilho{flex:1;height:4px;border-radius:2px;cursor:pointer;position:relative;
-           background:rgba(232,241,245,.2)}
-.vd-trilho i{position:absolute;left:0;top:0;bottom:0;width:0;
-             border-radius:2px;background:var(--aqua)}
-.vd-t{font-family:var(--mono);font-size:9px;letter-spacing:.06em;
-      color:var(--paper-dim);flex:none;min-width:32px;text-align:right}
 
 /* ---------- o pedaço de sal que se quebra ---------- */
 .pd{position:relative;flex:1;display:flex;align-items:center;justify-content:center;
@@ -2143,7 +2127,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v23.7';
+const VERSION = 'v24.1';
 
 const SLIDES = [
   {
@@ -2584,7 +2568,7 @@ const SLIDES = [
             extra: AMOSTRAS },
           { n: '', top: true, t: '2. Possuem altos pontos de fusão\ne ebulição', extra: BICO },
           { n: '', top: true, t: '3. São quebradiços', extra: PEDRA },
-          { n: '', top: true, t: '4. São geralmente solúveis\nna água', extra: VIDEO } ] },
+          { n: '', top: true, t: '4. São geralmente solúveis\nna água', extra: BEQUER } ] },
       /* Terceiro clique: a lupa. O cristal que ela mostra é o da face —
          começa no óxido de sódio e troca a cada virada. */
       { kind: 'reticulo', rede: 'na2o', lupa: true,
@@ -2814,21 +2798,56 @@ function AMOSTRAS(){
     + `<figcaption>${rot}</figcaption></figure>`).join('') + `</div>`;
 }
 
-/* O vídeo da dissolução, com o player acima. O arquivo mora numa pasta
-   de nome sem acento: caminho com "í" chega a viajar mal entre o
-   Windows e o servidor, e um vídeo que não carrega derruba a aula. */
-function VIDEO(){
-  return `<div class="vd">
-    <div class="vd-tela">
-      <video class="vd-v" preload="metadata" playsinline
-             src="videos/solubilidade_8ca9.mp4"></video>
-      <button class="vd-play" type="button" aria-label="Tocar"></button>
-    </div>
-    <div class="vd-barra">
-      <button class="vd-pp" type="button" aria-label="Tocar ou pausar"></button>
-      <div class="vd-trilho"><i></i></div>
-      <span class="vd-t">0:00</span>
-    </div>
+/* Um béquer com água e, ao lado, uma pedra de sal que se pode arrastar.
+   Caindo na água ela começa a dissolver devagar; passar o dedo na água,
+   de um lado para o outro, acelera. É o gesto que a lupa traduz em
+   moléculas de água arrancando íons. */
+function BEQUER(){
+  /* a pedra, um bloquinho isométrico como o da face 3, em miniatura */
+  const a = 15, b = 7.5, h = 16, cx = 30, cy = 31;
+  const P = (x, z, y) => [ cx + (x - z) * a, cy + (x + z - 2) * b - (y - 1) * h ];
+  const pt = q => q.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  const pedra =
+      `<polygon points="${pt([P(0,2,2),P(2,2,2),P(2,2,0),P(0,2,0)])}" fill="#C9D6DF"/>`
+    + `<polygon points="${pt([P(2,0,2),P(2,2,2),P(2,2,0),P(2,0,0)])}" fill="#A9B8C3"/>`
+    + `<polygon points="${pt([P(0,0,2),P(2,0,2),P(2,2,2),P(0,2,2)])}" fill="#F2F7FA"/>`;
+
+  return `<div class="bq" data-sal="0" data-agita="0">
+    <svg class="bq-svg" viewBox="0 0 292 150" aria-hidden="true">
+      <defs>
+        <linearGradient id="bqAgua" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#2E7FA8" stop-opacity=".78"/>
+          <stop offset="1" stop-color="#14496B" stop-opacity=".92"/>
+        </linearGradient>
+        <clipPath id="bqDentro">
+          <path d="M28 18 L28 116 Q28 129 46 129 L106 129 Q124 129 124 116 L124 18 Z"/>
+        </clipPath>
+      </defs>
+      <!-- a parede de trás, que se vê através da água -->
+      <path d="M26 18 L26 117 Q26 131 46 131 L106 131 Q126 131 126 117 L126 18"
+            fill="#0A1C29" opacity=".55"/>
+      <g clip-path="url(#bqDentro)">
+        <g class="bq-liquido">
+          <rect x="10" y="58" width="132" height="96" fill="url(#bqAgua)"/>
+          <ellipse cx="76" cy="58" rx="52" ry="7" fill="#5AA8CC" opacity=".5"/>
+          <ellipse class="bq-brilho" cx="76" cy="58" rx="40" ry="5" fill="#BFE7FF"/>
+        </g>
+      </g>
+      <!-- o vidro por cima -->
+      <path d="M26 18 L26 117 Q26 131 46 131 L106 131 Q126 131 126 117 L126 18"
+            fill="none" stroke="#9FB6C4" stroke-width="2.4" stroke-linecap="round"/>
+      <ellipse cx="76" cy="18" rx="50" ry="7"
+               fill="none" stroke="#9FB6C4" stroke-width="2.4"/>
+      <path d="M120 15 Q133 13 134 20" fill="none" stroke="#9FB6C4"
+            stroke-width="2.4" stroke-linecap="round"/>
+      <!-- as marcas de volume -->
+      <path d="M34 76 L48 76 M34 96 L48 96 M34 116 L44 116"
+            stroke="#9FB6C4" stroke-width="1.4" opacity=".55" stroke-linecap="round"/>
+    </svg>
+    <div class="bq-copo"></div>
+    <svg class="bq-sal" data-x="212" data-y="86" style="left:212px;top:86px"
+         viewBox="0 0 60 62" aria-hidden="true">${pedra}</svg>
+    <span class="bq-dica">arraste o sal até a água</span>
   </div>`;
 }
 
@@ -3949,7 +3968,7 @@ function render(){
   slides.forEach(sl => {
     if (sl.querySelector('.reveal-item.cube[data-exemplos]')) poeExemplo(sl, 0);
   });
-  ligaVideos();
+  ligaBequer();
 
   grid.innerHTML = SLIDES.map((s,i) => `
     <button class="card" data-go="${i}">
@@ -3989,7 +4008,7 @@ function go(n, instant){
 
   clearTimeout(fxTimer);
   clearFx();
-  paraVideos();                              /* nada toca fora da tela */
+  descansaBequer();                          /* a experiência recomeça */
   current = to;
   slides.forEach((el, i) => el.classList.toggle('is-active', i === to));
 
@@ -4042,7 +4061,7 @@ const G3 = {
   canvas: null, lupa: null, lupaCv: null, lupaClip: '', lupaPara: 0,
   modo: 'pedra', celOff: [0, 0, 0], celC: [0, 0, 0], cantos: [], slide: null,
   volta: 0, pulso: 0, drama: 0, voo: 0, distAlvo: 0, celQ: null,
-  agita: 0, funde: 0, fundeAlvo: 0, t9: 0, cliva: 0, clivaAlvo: 0
+  agita: 0, funde: 0, fundeAlvo: 0, t9: 0, cliva: 0, clivaAlvo: 0, dissolve: 0
 };
 
 /* --- álgebra --- */
@@ -4363,6 +4382,26 @@ const REDES = {
 /* Onde cada íon vai parar quando o retículo desaba, e a fase própria do
    tremor térmico. O chão fica abaixo de tudo, e cada um cai num ponto
    sorteado por perto — o monte fica irregular, como monte de verdade. */
+/* A VEZ DE CADA ÍON NA DISSOLUÇÃO
+   A água só alcança quem está na superfície, então o cristal se desfaz
+   de fora para dentro. Mas ordenar pela profundidade crua não serve: num
+   bloco 7x7x7 a casca de fora sozinha tem 218 dos 343 íons, e o cristal
+   sumiria de uma vez e depois ficaria um resto se arrastando. Aqui a
+   ordem é pela profundidade e a vez é pela POSIÇÃO nessa ordem, o que dá
+   uma dissolução de ritmo constante, ainda de fora para dentro. O ruído
+   somado à profundidade mistura um pouco as cascas vizinhas, senão elas
+   descascariam em blocos certinhos demais.
+
+   O teto de 0,82 deixa espaço para os 0,16 que o íon leva para sair:
+   assim o último também termina de sair antes de a pedra acabar. */
+function poeVezNaAgua(c, rnd){
+  const fundo = a => Math.max(Math.abs(a.rede[0]), Math.abs(a.rede[1]), Math.abs(a.rede[2]));
+  const ordem = c.at.map(a => ({ a, k: fundo(a) - rnd() * 26 }))
+                    .sort((p, q) => q.k - p.k);
+  const N = Math.max(1, ordem.length - 1);
+  ordem.forEach((o, i) => { o.a.limiar = i / N * 0.82; });
+}
+
 function poeChao(c){
   const rnd = rng(4242);
   const minY = Math.min(...c.at.map(a => a.rede[1]));
@@ -4400,7 +4439,13 @@ function poeChao(c){
       const s = a.lado[e], corteQ = s > 0 ? sub[e][1] : sub[e][0];
       return (s > 0 ? a.rede[e] > corteQ : a.rede[e] < corteQ) ? 1 : -1;
     });
+    /* por onde o íon sai quando a água o arranca: o caminho mais curto
+       para fora, que é o raio */
+    const L = Math.hypot(a.rede[0], a.rede[1], a.rede[2]);
+    a.saida = L > 1 ? [a.rede[0] / L, a.rede[1] / L, a.rede[2] / L] : [0, 1, 0];
+    a.qSai = 0;
   });
+  poeVezNaAgua(c, rnd);
   return c;
 }
 
@@ -4552,7 +4597,7 @@ function montaCena(modo){
   G3.volta = 0; G3.pulso = 0; G3.drama = 0;
   G3.voo = 0; G3.celQ = null;
   G3.agita = 0; G3.funde = 0; G3.fundeAlvo = 0;
-  G3.cliva = 0; G3.clivaAlvo = 0;
+  G3.cliva = 0; G3.clivaAlvo = 0; G3.dissolve = 0;
   G3.ext = c.ext || 0;
   G3.nRede = c.n || 0;
   G3.celula = c.celula || { tam: 3, alinha: 0 };
@@ -4655,6 +4700,8 @@ function desenhaG3(canvas){
      lado só: assim nenhum pedaço é atirado para fora da lupa. */
   const deslizaQ = c => Math.min(1, Math.max(0, c) / 0.45) * 27;
   const afastaQ  = c => Math.max(0, (c - 0.45) / 0.55) * 13;
+  /* A dissolução não amortece nada: ela é o próprio desmanche. */
+  const dis = G3.dissolve || 0;
   const c1 = Math.min(1, cl),     c2 = Math.min(1, cl - 1);
   const c3 = Math.min(1, cl - 2), c4 = Math.min(1, cl - 3);
   const c5 = Math.min(1, cl - 4);
@@ -4696,6 +4743,20 @@ function desenhaG3(canvas){
       p[0] += L[0] * Q[0] * afastaQ(c4);  p[2] += L[0] * Q[0] * deslizaQ(c4);
       p[2] += L[2] * Q[2] * afastaQ(c5);  p[0] += L[2] * Q[2] * deslizaQ(c5);
     }
+    /* Dissolução: quando chega a vez do íon, a água o arranca e ele se
+       afasta para dentro do líquido, subindo um pouco enquanto se
+       hidrata. O quadrado do progresso dá a partida lenta de quem
+       ainda está preso e a saída rápida de quem já se soltou. */
+    if (dis > 0.001 && a.limiar !== undefined){
+      const q = Math.max(0, Math.min(1, (dis - a.limiar) / 0.16));
+      a.qSai = q;
+      if (q > 0){
+        const e = q * q * 300;
+        p[0] += a.saida[0] * e;
+        p[1] += a.saida[1] * e + q * 42;
+        p[2] += a.saida[2] * e;
+      }
+    } else if (a.qSai) a.qSai = 0;
     /* o estufado do reencaixe tambem vale com a celula ja no lugar */
     if (a.cel && (dist > 0.5 || G3.pulso > 0.002 || G3.drama > 0.002 || celGirada())){
       const z = enc * (1 + 0.24 * G3.pulso + 0.30 * G3.drama);
@@ -4760,6 +4821,8 @@ function desenhaG3(canvas){
            (cl > 2.02 && a.lado[1] !== b.lado[1]) ||
            (cl > 3.02 && a.quarto[0] !== b.quarto[0]) ||
            (cl > 4.02 && a.quarto[2] !== b.quarto[2]))) return;
+      /* íon que a água já levou não segura mais ninguém */
+      if ((a.qSai || 0) > 0.02 || (b.qSai || 0) > 0.02) return;
       if (a.cel !== b.cel && (dist > 4 || G3.drama > 0.02)) return;
       gl.uniformMatrix4fv(uModel, false,
         m4haste(pos[i], pos[j], a.cel && b.cel ? r * enc : r));
@@ -4779,6 +4842,53 @@ function desenhaG3(canvas){
     gl.uniformMatrix4fv(uModel, false, m4esfera(pos[i], a.raio * rc * (1 + 0.55 * fx)));
     gl.drawElements(gl.TRIANGLES, ESF.n, gl.UNSIGNED_SHORT, 0);
   });
+
+  /* AS MOLÉCULAS DE ÁGUA QUE ARRANCAM OS ÍONS
+     Cada uma se encosta no íon pelo lado certo: o oxigênio, que é o polo
+     negativo da molécula, vira-se para o cátion; os hidrogênios, que são
+     o polo positivo, viram-se para o ânion. É essa atração que vence a
+     ligação iônica e tira o íon do retículo — o motivo de o sal se
+     dissolver na água.
+
+     Só são desenhadas as que estão na frente do ataque: as que já
+     levaram o seu íon saem de cena com ele. */
+  if (dis > 0.001){
+    const meio = 52.25 * Math.PI / 180;          /* metade dos 104,5° da água */
+    const dOH = 19, rO = 12.5, rH = 7.5;
+    const branco = [0.95, 0.97, 0.99];
+    gl.uniform1f(uCarga, 0);
+    let n = 0;
+    for (let i = 0; i < G3.atomos.length && n < 120; i++){
+      const a = G3.atomos[i];
+      if (a.limiar === undefined) continue;
+      const q = (dis - a.limiar) / 0.16;
+      if (q < -0.6 || q > 0.85) continue;
+      n++;
+      const p = pos[i], u = a.saida;
+      /* um perpendicular estável a u, para abrir o ângulo da molécula */
+      const t = Math.abs(u[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0];
+      let v = [ u[1]*t[2] - u[2]*t[1], u[2]*t[0] - u[0]*t[2], u[0]*t[1] - u[1]*t[0] ];
+      const Lv = Math.hypot(v[0], v[1], v[2]) || 1;
+      v = [v[0]/Lv, v[1]/Lv, v[2]/Lv];
+      const cat = (a.carga || 0) > 0;
+      /* no cátion é o oxigênio que encosta; no ânion, os hidrogênios */
+      const d = a.raio + (cat ? rO + 3 : rO + 17);
+      const c = [ p[0] + u[0]*d, p[1] + u[1]*d, p[2] + u[2]*d ];
+      const hb = cat ? 1 : -1;                   /* para onde vão os H */
+      gl.uniform3f(uCor, CPK.O[0], CPK.O[1], CPK.O[2]);
+      gl.uniformMatrix4fv(uModel, false, m4esfera(c, rO));
+      gl.drawElements(gl.TRIANGLES, ESF.n, gl.UNSIGNED_SHORT, 0);
+      gl.uniform3f(uCor, branco[0], branco[1], branco[2]);
+      for (let k = 0; k < 2; k++){
+        const co = Math.cos(meio), si = Math.sin(meio) * (k ? -1 : 1);
+        gl.uniformMatrix4fv(uModel, false, m4esfera(
+          [ c[0] + (u[0]*hb*co + v[0]*si) * dOH,
+            c[1] + (u[1]*hb*co + v[1]*si) * dOH,
+            c[2] + (u[2]*hb*co + v[2]*si) * dOH ], rH));
+        gl.drawElements(gl.TRIANGLES, ESF.n, gl.UNSIGNED_SHORT, 0);
+      }
+    }
+  }
 }
 
 function lacoG3(canvas){
@@ -5579,7 +5689,7 @@ function stepBack(slide){
   if (cube && !cube.hidden && +cube.dataset.face > 0){
     const back = +cube.dataset.face - 1;
     esfriaBico(slide);
-    paraVideos(slide);
+    descansaBequer(slide);
     cube.dataset.face = back;
     cube.style.setProperty('--face', back);
     paintCube(cube, back);
@@ -5656,7 +5766,7 @@ function stepBackward(){
 function turnCube(slide, cube){
   const face = +cube.dataset.face;
   esfriaBico(slide);
-  paraVideos(slide);
+  descansaBequer(slide);
   itemsOf(slide).forEach(it => {
     if (it.dataset.of !== undefined && +it.dataset.of === face && !it.hidden) retractItem(it);
   });
@@ -6025,55 +6135,133 @@ function bateNaPedra(pd, ev){
   if (d) d.textContent = PD_DICAS[novo];
 }
 
-/* Liga os players. São poucos eventos: o tempo que corre, o estado que
-   troca o ícone, e o trilho que se deixa arrastar. */
-function ligaVideos(){
-  document.querySelectorAll('.vd').forEach(vd => {
-    const v = vd.querySelector('.vd-v');
-    if (!v || v._ligado) return;
-    v._ligado = 1;
-    const tr = vd.querySelector('.vd-trilho');
-    const barra = tr && tr.querySelector('i');
-    const rel = vd.querySelector('.vd-t');
-    const mmss = t => {
-      if (!isFinite(t) || t < 0) return '0:00';
-      return Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
+/* onde fica a água, no sistema de coordenadas do desenho do béquer */
+const BQ_AGUA = { x0: 30, x1: 122, y0: 44, y1: 128 };
+const BQ_DICAS = [
+  'arraste o sal até a água',
+  'passe o dedo na água para acelerar',
+  'todo o sal se dissolveu'
+];
+
+/* A dissolução anda sozinha, devagar; cada vaivém do dedo na água lhe
+   dá um empurrão que decai em pouco menos de meio segundo. Sozinha ela
+   leva uns 27s; agitada sem parar, uns 8s. O mesmo número vai para o
+   retículo na lupa: é o que faz a água arrancar os íons lá dentro no
+   compasso do que a mão faz aqui. */
+function bqAnda(bq){
+  if (bq._t) cancelAnimationFrame(bq._t);
+  const passo = () => {
+    let sal = +bq.dataset.sal || 0, ag = +bq.dataset.agita || 0;
+    ag *= 0.972;
+    if (ag < 0.004) ag = 0;
+    if (bq.classList.contains('molhado') && sal < 1)
+      sal = Math.min(1, sal + 0.00062 + 0.0016 * ag);
+    bq.dataset.sal = sal.toFixed(4);
+    bq.dataset.agita = ag.toFixed(4);
+    bq.style.setProperty('--sal', sal.toFixed(3));
+    bq.style.setProperty('--agita', ag.toFixed(3));
+    G3.dissolve = sal;
+    const d = bq.querySelector('.bq-dica');
+    if (d) d.textContent = BQ_DICAS[sal >= 1 ? 2 : (sal > 0 ? 1 : 0)];
+    bq._t = (sal >= 1 && ag === 0) ? 0 : requestAnimationFrame(passo);
+  };
+  passo();
+}
+
+/* Arrastar a pedra e mexer o dedo na água. A posição do dedo vira
+   coordenada do desenho pela proporção do retângulo do quadro — assim
+   não importa quanto o cubo esteja escalado nem a que distância a face
+   esteja da câmera. */
+function ligaBequer(){
+  document.querySelectorAll('.bq').forEach(bq => {
+    if (bq._ligado) return;
+    bq._ligado = 1;
+    const sal = bq.querySelector('.bq-sal'), copo = bq.querySelector('.bq-copo');
+    if (!sal || !copo) return;
+    const local = e => {
+      const r = bq.getBoundingClientRect();
+      if (!r.width || !r.height) return { x: 0, y: 0 };
+      return { x: (e.clientX - r.left) / r.width * 292,
+               y: (e.clientY - r.top) / r.height * 150 };
     };
-    const pinta = () => {
-      const d = v.duration || 0;
-      if (barra) barra.style.width = (d ? v.currentTime / d * 100 : 0).toFixed(2) + '%';
-      if (rel) rel.textContent = mmss(v.currentTime);
-    };
-    v.addEventListener('timeupdate', pinta);
-    v.addEventListener('loadedmetadata', pinta);
-    v.addEventListener('play',  () => vd.classList.add('tocando'));
-    v.addEventListener('pause', () => vd.classList.remove('tocando'));
-    v.addEventListener('ended', () => { vd.classList.remove('tocando'); v.currentTime = 0; pinta(); });
-    if (!tr) return;
-    const procura = e => {
-      const r = tr.getBoundingClientRect();
-      if (!r.width || !v.duration) return;
-      v.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * v.duration;
-      pinta();
-    };
-    tr.addEventListener('pointerdown', e => {
-      tr._puxa = 1; tr.setPointerCapture(e.pointerId); procura(e);
+    sal.addEventListener('pointerdown', e => {
+      if (bq.classList.contains('molhado')) return;
+      sal._pega = 1; sal.setPointerCapture(e.pointerId);
+      bq.classList.add('pegando');
       e.preventDefault(); e.stopPropagation();
     });
-    tr.addEventListener('pointermove', e => { if (tr._puxa) procura(e); });
-    const solta = e => {
-      tr._puxa = 0;
-      if (tr.hasPointerCapture && tr.hasPointerCapture(e.pointerId))
-        tr.releasePointerCapture(e.pointerId);
+    sal.addEventListener('pointermove', e => {
+      if (!sal._pega) return;
+      const p = local(e);
+      sal.style.left = p.x.toFixed(1) + 'px';
+      sal.style.top  = p.y.toFixed(1) + 'px';
+      e.stopPropagation();
+    });
+    const larga = e => {
+      if (!sal._pega) return;
+      sal._pega = 0;
+      bq.classList.remove('pegando');
+      const p = local(e);
+      /* caiu dentro do copo, na altura da água ou logo acima dela */
+      if (p.x > BQ_AGUA.x0 && p.x < BQ_AGUA.x1 &&
+          p.y > BQ_AGUA.y0 && p.y < BQ_AGUA.y1){
+        sal.style.left = Math.max(BQ_AGUA.x0 + 18,
+                          Math.min(BQ_AGUA.x1 - 18, p.x)).toFixed(1) + 'px';
+        sal.style.top = '104px';               /* assenta no fundo */
+        bq.classList.add('molhado');
+        bqAnda(bq);
+      }
     };
-    tr.addEventListener('pointerup', solta);
-    tr.addEventListener('pointercancel', solta);
+    sal.addEventListener('pointerup', larga);
+    sal.addEventListener('pointercancel', larga);
+
+    copo.addEventListener('pointerdown', e => {
+      copo._mexe = 1; copo._x = e.clientX; copo._dir = 0;
+      copo.setPointerCapture(e.pointerId);
+      e.preventDefault(); e.stopPropagation();
+    });
+    copo.addEventListener('pointermove', e => {
+      if (!copo._mexe) return;
+      const d = e.clientX - copo._x;
+      if (Math.abs(d) < 5) return;
+      const dir = d > 0 ? 1 : -1;
+      copo._x = e.clientX;
+      bq.style.setProperty('--slosh', dir);
+      /* o que agita não é o movimento, é a INVERSÃO do movimento */
+      if (dir !== copo._dir){
+        copo._dir = dir;
+        bq.dataset.agita = Math.min(1, (+bq.dataset.agita || 0) + 0.34);
+        bqAnda(bq);
+      }
+      e.stopPropagation();
+    });
+    const solta = () => { copo._mexe = 0; bq.style.setProperty('--slosh', 0); };
+    copo.addEventListener('pointerup', solta);
+    copo.addEventListener('pointercancel', solta);
   });
 }
 
-/* O cristal de cada propriedade. A face 4 repete o da 3: nada troca, e
-   a lupa nem chega a girar. */
-const REDE_DA_FACE = ['na2o', 'nacl', 'mgo', 'mgo'];
+/* A face que sai leva a experiência consigo: a pedra volta para o lado
+   do béquer e o retículo se refaz, inteiro, para a próxima. */
+function descansaBequer(raiz){
+  (raiz || document).querySelectorAll('.bq').forEach(bq => {
+    if (bq._t){ cancelAnimationFrame(bq._t); bq._t = 0; }
+    bq.dataset.sal = 0; bq.dataset.agita = 0;
+    bq.style.setProperty('--sal', 0);
+    bq.style.setProperty('--agita', 0);
+    bq.style.setProperty('--slosh', 0);
+    bq.classList.remove('molhado', 'pegando');
+    const sal = bq.querySelector('.bq-sal');
+    if (sal){ sal.style.left = sal.dataset.x + 'px'; sal.style.top = sal.dataset.y + 'px'; }
+    const d = bq.querySelector('.bq-dica');
+    if (d) d.textContent = BQ_DICAS[0];
+    G3.dissolve = 0;
+  });
+}
+
+/* O cristal de cada propriedade. A face 4 volta ao NaCl: a pedra que
+   entra no béquer é de sal, e seria estranho a lupa mostrar outro. */
+const REDE_DA_FACE = ['na2o', 'nacl', 'mgo', 'nacl'];
 
 /* Troca o retículo sem o voo de aproximação: ele já nasce montado e
    enquadrado no vidro, porque quem está entrando em cena é a face nova,
@@ -6121,12 +6309,6 @@ function viraLupa(slide, face){
     G3.lupaPara = 0;
     segueLupa();
   }, 740);
-}
-
-/* Nenhum vídeo continua tocando atrás de uma face virada nem de outro
-   slide: o som viria de um lugar que já não está na tela. */
-function paraVideos(raiz){
-  (raiz || document).querySelectorAll('.vd-v').forEach(v => { if (!v.paused) v.pause(); });
 }
 
 /* o cristal se recompõe, para a demonstração poder ser repetida */
@@ -6669,12 +6851,6 @@ function revealItem(slide, it){
 deck.addEventListener('click', (e) => {
   const redo = e.target.closest('.lego-redo');
   if (redo){ rebuildLego(redo.closest('.reveal-item')); return; }
-  const vplay = e.target.closest('.vd-play, .vd-pp, .vd-v');
-  if (vplay){
-    const v = vplay.closest('.vd').querySelector('.vd-v');
-    if (v){ if (v.paused) v.play().catch(() => {}); else v.pause(); }
-    return;
-  }
   const pdz = e.target.closest('.pd-redo');
   if (pdz){ refazPedra(pdz.closest('.pd')); return; }
   const pdr = e.target.closest('.pd');
@@ -6820,9 +6996,9 @@ deck.addEventListener('pointerdown', (e) => {
   if (e.target.closest('.ex-el .fam')) return;
   /* na tabela periódica o toque escolhe, não arrasta */
   if (e.target.closest('.tp')) return;
-  /* o bico, a pedra e o vídeo têm interação própria: o cubo não gira
+  /* o bico, a pedra e o béquer têm interação própria: o cubo não gira
      nem se arrasta por causa deles */
-  if (e.target.closest('.bk, .pd, .vd')) return;
+  if (e.target.closest('.bk, .pd, .bq')) return;
   /* O átomo do octeto é fixo: a bola arranca elétron e o resto da área
      dele serve para fazer nascer um elétron. Nada ali move o átomo. */
   if (e.target.closest('.reveal-item[data-eatom]')) return;
