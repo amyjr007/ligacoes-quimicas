@@ -1165,14 +1165,6 @@ body{
   border-color:#C2CCD4 #7C8892 #59636B #A6B2BA;
   box-shadow:0 8px 22px rgba(0,0,0,.65),inset 0 0 0 2px rgba(255,255,255,.14);
 }
-/* o cabo, saindo na diagonal de baixo à direita */
-.lupa-cabo{
-  position:absolute;left:73%;top:72%;width:31%;height:9%;
-  transform-origin:0 50%;transform:rotate(40deg);
-  border-radius:3px 9px 9px 3px;
-  background:linear-gradient(180deg,#8B96A0 0%,#4C555C 55%,#2A3238 100%);
-  box-shadow:0 5px 14px rgba(0,0,0,.6);
-}
 
 /* ---------- tabela periódica dos representativos ---------- */
 .tp-stage{
@@ -1990,7 +1982,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v21.6';
+const VERSION = 'v21.7';
 
 const SLIDES = [
   {
@@ -2418,16 +2410,8 @@ const SLIDES = [
         text: 'As propriedades desses compostos são consequências diretas das\n'
             + 'ligações entre os íons no retículo cristalino. São elas:',
         x: 673, y: 144, base: 23, tone: 'aqua' },
-      /* o retículo à esquerda e o cubo das propriedades à direita,
-         os dois no mesmo clique do texto */
-      /* cam: enquadramento afinado na tela — posição, distância da
-         câmera e os dois ângulos. Com ele o retículo já nasce assim,
-         sem o voo de aproximação. */
-      { follow: 0, kind: 'reticulo', rede: 'nacl', lupa: true,
-        x: 949, y: 430, base: 400, tone: '' },
-      { follow: 0, nowrap: true, text: 'visão submicroscópica',
-        x: 916, y: 632, base: 19, tone: '' },
-      /* o cubo vem no segundo clique; tface 23 é a letra do texto azul */
+      /* Segundo clique: o cubo, a lupa e a legenda entram juntos, na
+         mesma animação. O texto acima fica sozinho no primeiro. */
       { id: 'cuboprop', kind: 'cube', tface: 23,
         x: 371, y: 438, base: 535.4, tone: '',
         /* n vazio: sem o rótulo automático "Postulado N", que é do cubo
@@ -2439,7 +2423,11 @@ const SLIDES = [
             extra: BICO() },
           { n: '', top: true, t: '2. Altos pontos de fusão\ne ebulição' },
           { n: '', top: true, t: '3. Conduzem eletricidade\nfundidos ou em água' },
-          { n: '', top: true, t: '4. São quebradiços' } ] }
+          { n: '', top: true, t: '4. São quebradiços' } ] },
+      { follow: 0, kind: 'reticulo', rede: 'nacl', lupa: true,
+        x: 949, y: 430, base: 400, tone: '' },
+      { follow: 0, nowrap: true, text: 'visão submicroscópica',
+        x: 916, y: 632, base: 19, tone: '' }
     ]
   }
 ];
@@ -3508,7 +3496,7 @@ const REVEALS = (list, cfg) => {
                               + `</div>`
       : r.kind === 'reticulo' ? (r.lupa
           ? `<div class="rd-stage lupa"><i class="lupa-vidro"></i>`
-            + `<i class="lupa-cabo"></i><i class="lupa-aro"></i></div>`
+            + `<i class="lupa-aro"></i></div>`
           : `<div class="rd-stage"></div>`)
       : r.kind === 'tabela'   ? TABELA()
       : r.kind === 'lewis'    ? `<div class="lw-stage">${LEWIS_VAZIO}</div>`
