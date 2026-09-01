@@ -2011,7 +2011,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v22.2';
+const VERSION = 'v22.3';
 
 const SLIDES = [
   {
@@ -3754,6 +3754,11 @@ function go(n, instant){
     fxTimer = setTimeout(clearFx, cube ? 950 : (lenta ? 1250 : 750));
   }
 
+  /* retículo que mora no slide: o laço 3D retoma ao entrar nele */
+  const sl2 = slides[to];
+  const cv2 = sl2 && sl2.querySelector('.q3d');
+  if (cv2 && sl2.classList.contains('quantum-on') && iniciaG3(cv2)) lacoG3(cv2);
+
   counter.innerHTML = `<b>${current+1}</b> / ${SLIDES.length}`;
   progress.style.width = ((current+1) / SLIDES.length * 100) + '%';
   atualizaBarra();
@@ -4459,6 +4464,12 @@ function desenhaG3(canvas){
 
 function lacoG3(canvas){
   const passo = () => {
+    /* Slide fora de cena não desenha. Sem isto, um retículo que fica
+       aberto no slide (como o da lupa) continuava desenhando mais de mil
+       chamadas por quadro para sempre, em qualquer slide — era o que
+       deixava a apresentação pesada. */
+    const sl = canvas.closest('.slide');
+    if (sl && !sl.classList.contains('is-active')){ G3.laco = 0; return; }
     G3.t += (G3.alvo - G3.t) * 0.12;
     G3.t9 += 0.016;                          /* relógio do tremor */
     segueLupa();                             /* a cena mora na lupa */

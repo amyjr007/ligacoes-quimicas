@@ -1,6 +1,6 @@
 /* Service worker da aula. Guarda tudo na instalação: a aula roda inteira
    sem rede, que é como ela costuma ser dada. */
-const CACHE = 'ligacoes-v22-2';
+const CACHE = 'ligacoes-v22-3';
 const ARQUIVOS = [
   './',
   './index.html',
@@ -29,10 +29,26 @@ self.addEventListener('activate', (e) => {
     .then(() => self.clients.claim()));
 });
 
-/* cache primeiro: abre instantâneo e funciona offline; o que faltar vai
-   para o cache na primeira vez que for pedido */
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
+
+  /* A PÁGINA vem da rede quando há rede. Antes ela vinha do cache, e uma
+     versão nova só aparecia no segundo recarregamento — nem o Ctrl+Shift+R
+     resolvia, porque quem respondia era o cache, não o servidor.
+     Sem rede, o cache assume e a aula abre igual. */
+  if (e.request.mode === 'navigate'){
+    e.respondWith(
+      fetch(e.request).then(resp => {
+        const copia = resp.clone();
+        caches.open(CACHE).then(c => c.put('./index.html', copia));
+        return resp;
+      }).catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
+  /* o resto (imagens, ícones, fontes) sai do cache, que é o que faz a
+     abertura ser instantânea */
   e.respondWith(
     caches.match(e.request).then(r => r || fetch(e.request).then(resp => {
       if (resp && (resp.status === 200 || resp.type === 'opaque')){
