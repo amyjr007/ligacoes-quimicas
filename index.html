@@ -2127,7 +2127,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v24.6';
+const VERSION = 'v24.7';
 
 const SLIDES = [
   {
@@ -2599,14 +2599,14 @@ const SLIDES = [
       { nowrap: true,
         text: 'É a ligação feita pelo compartilhamento de pares de elétrons',
         x: 640, y: 150, base: 23, tone: 'aqua' },
-      /* Segundo clique: o rótulo do exemplo e o cilindro, juntos. Dois
-         toques no cilindro mergulham nele; as moléculas de Cl2 se juntam
-         à esquerda (qx/qy), na mesma altura dele. */
-      { nowrap: true, text: 'Exemplo 01', x: 940, y: 250, base: 26, tone: '' },
+      /* Segundo clique: o cilindro e o rótulo do exemplo, juntos. Dois
+         toques no cilindro mergulham nele, e as moléculas de Cl2 se
+         juntam na direção dele — que é o que o agrupamento já faz
+         sozinho, agora que o cilindro está à esquerda. */
+      { nowrap: true, text: 'Exemplo 01', x: 164, y: 477, base: 17.6, tone: '' },
       { follow: 0, kind: 'vessel', shape: 'cylinder', mol: 'cl2', duplo: true,
         tag: 'GÁS\nCLORO', color: '#8FE08F',
-        qx: 400, qy: 440,
-        x: 940, y: 440, base: 150, tone: '' }
+        x: 163, y: 349, base: 150, tone: '' }
     ]
   }
 ];
