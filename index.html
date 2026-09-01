@@ -1982,7 +1982,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v21.7';
+const VERSION = 'v21.8';
 
 const SLIDES = [
   {
@@ -3707,7 +3707,7 @@ const G3 = {
   gl: null, prog: null, esfera: null, bastao: null,
   atomos: [], hastes: [], laco: 0, t: 0, alvo: 0,
   az: -0.42, el: 0.28, dist: 470, px: 640, py: 360,
-  canvas: null,
+  canvas: null, lupa: null, lupaCv: null, lupaClip: '',
   modo: 'pedra', celOff: [0, 0, 0], celC: [0, 0, 0], cantos: [], slide: null,
   volta: 0, pulso: 0, drama: 0, voo: 0, distAlvo: 0, celQ: null,
   agita: 0, funde: 0, fundeAlvo: 0, t9: 0
@@ -4387,6 +4387,7 @@ function lacoG3(canvas){
   const passo = () => {
     G3.t += (G3.alvo - G3.t) * 0.12;
     G3.t9 += 0.016;                          /* relógio do tremor */
+    segueLupa();                             /* a cena mora na lupa */
     /* a fusão leva os mesmos ~3,3s da poça na cápsula */
     G3.funde += ((G3.fundeAlvo || 0) - G3.funde) * 0.015;
     if (Math.abs((G3.fundeAlvo || 0) - G3.funde) < 0.002)
@@ -4493,6 +4494,7 @@ function fechaRede(it){
   const slide = it.closest ? it.closest('.slide') : it;
   if (!slide) return;
   slide.classList.remove('quantum-on', 'rede-on', 'rede-livre');
+  G3.lupa = null; G3.lupaCv = null; G3.lupaClip = '';
   const rot = slide.querySelector('.cel-rot');
   if (rot) rot.classList.remove('on');
   const rr = slide.querySelector('.rede-rot');
@@ -5831,6 +5833,26 @@ function retanguloPainel(pn){
 /* O retículo que faz parte do slide: nasce junto com o elemento e fica.
    Aproveita tudo o que a cena 3D já sabe fazer — girar com um dedo,
    arrastar com dois, pinçar e arrancar a célula unitária. */
+/* onde está o vidro da lupa, em coordenadas do palco */
+function geoLupa(){
+  const v = G3.lupa.getBoundingClientRect(), st = stage.getBoundingClientRect();
+  const k = fitScale || 1;
+  return { x: (v.left - st.left) / k + v.width / k / 2,
+           y: (v.top  - st.top)  / k + v.height / k / 2,
+           r: v.width / k / 2 - 9 };        /* por dentro do aro */
+}
+/* prende o centro da cena e o recorte ao vidro, quadro a quadro */
+function segueLupa(){
+  if (!G3.lupa || !G3.lupa.isConnected) return;
+  const g = geoLupa();
+  G3.px = g.x; G3.py = g.y;
+  const clip = `circle(${g.r.toFixed(0)}px at ${g.x.toFixed(0)}px ${g.y.toFixed(0)}px)`;
+  if (G3.lupaCv && clip !== G3.lupaClip){
+    G3.lupaCv.style.clipPath = clip;        /* só escreve quando muda */
+    G3.lupaClip = clip;
+  }
+}
+
 /* Aqui a cena NÃO é recortada: o retângulo do elemento só diz onde e de
    que tamanho o retículo nasce. Recortando, ele ficava preso dentro de
    uma caixa invisível e sumia nas bordas ao ser girado ou afastado. */
@@ -5843,15 +5865,16 @@ function abreReticulo(it){
   const x0 = (r.left - st.left) / k, y0 = (r.top - st.top) / k;
   const x1 = x0 + r.width / k,       y1 = y0 + r.height / k;
   if (it.dataset.lupa){
-    /* dentro da lupa a cena é recortada no vidro: é o que faz parecer
-       que estamos olhando através dela */
-    const v = it.querySelector('.lupa-vidro').getBoundingClientRect();
-    const vx = (v.left - st.left) / k + v.width / k / 2;
-    const vy = (v.top - st.top) / k + v.height / k / 2;
-    const raio = v.width / k / 2 - 9;       /* por dentro do aro */
-    cv.style.clipPath = `circle(${raio.toFixed(0)}px at ${vx.toFixed(0)}px ${vy.toFixed(0)}px)`;
+    /* Dentro da lupa a cena é recortada no vidro — é o que faz parecer
+       que olhamos através dela. A lupa vira a dona da cena: o laço
+       recoloca o recorte e o centro nela a cada quadro, então o retículo
+       a acompanha em vez de ficar parado onde ela estava. */
+    const vidro = it.querySelector('.lupa-vidro');
+    G3.lupa = vidro; G3.lupaCv = cv; G3.lupaClip = '';
+    const g = geoLupa();
     slide.classList.add('quantum-on');
-    abreRede(it, it.dataset.rede || 'nacl', vx, vy, raio * 1.6, raio * 1.6);
+    abreRede(it, it.dataset.rede || 'nacl', g.x, g.y, g.r * 1.6, g.r * 1.6);
+    segueLupa();
   } else {
     cv.style.clipPath = '';
     slide.classList.add('quantum-on', 'rede-livre');
@@ -5985,7 +6008,10 @@ function revealItem(slide, it){
   it.classList.add('pop');
   it.querySelectorAll('.cx-corpo[data-txt]').forEach(digita);
   /* o retículo do slide sobe assim que o elemento entra */
-  if (it.classList.contains('reticulo')) setTimeout(() => abreReticulo(it), 60);
+  /* espera a lupa terminar de voar: enquadrar no meio do caminho deixaria
+     a cena parada no lugar por onde ela passou */
+  if (it.classList.contains('reticulo'))
+    setTimeout(() => abreReticulo(it), it.dataset.lupa ? 680 : 60);
   aplicaAcao(slide, it.dataset.acao, true);
   syncReveals(slide);
 
