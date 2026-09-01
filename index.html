@@ -1368,6 +1368,37 @@ body{
   background:var(--paper);border:2px solid var(--amber);cursor:grab;
 }
 
+/* ---------- as amostras coladas na face 1 ----------
+   Coladas mesmo: viram com o cubo em vez de flutuar por cima dele. As
+   medidas são as da face sem escala — o cubo é escalado depois por
+   base/360, e as fotos vão junto. */
+.am{position:absolute;inset:0;pointer-events:none}
+.am-f{position:absolute;margin:0;transform:translate(-50%,-50%)}
+.am-f img{
+  display:block;width:100%;height:auto;
+  border:1px solid rgba(69,199,176,.3);
+  box-shadow:0 0 20px rgba(3,12,22,.55);
+}
+.am-f figcaption{
+  margin-top:7.4px;text-align:center;
+  font-family:var(--mono);font-size:9.4px;letter-spacing:.1em;
+  color:var(--paper-dim);
+}
+
+/* ---------- a lupa dá meia volta e volta com outro cristal ----------
+   Cada propriedade tem o seu composto. A troca acontece de costas, no
+   meio do giro, para o retículo nunca aparecer trocando. */
+.reveal-item.reticulo{perspective:1100px}
+.reveal-item.reticulo.virando .rd-stage.lupa{
+  animation:lupaGira .72s cubic-bezier(.5,0,.5,1);
+}
+@keyframes lupaGira{
+  0%  {transform:rotateY(0deg)}
+  100%{transform:rotateY(180deg)}
+}
+.q3d{transition:opacity .2s ease}
+.q3d.trocando{opacity:0;transition:opacity .14s ease}
+
 /* ---------- o vídeo dentro da face, com um player mínimo ----------
    Tocar, pausar e arrastar o tempo. Nada mais: a aula é sobre
    solubilidade, não sobre o player. As medidas aqui são as da face sem
@@ -2112,7 +2143,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v23.5';
+const VERSION = 'v23.6';
 
 const SLIDES = [
   {
@@ -2549,24 +2580,14 @@ const SLIDES = [
         /* top: o texto encosta no alto da face e deixa o resto dela
            livre para o que vier depois. Duas linhas, no máximo. */
         faces: [
-          { n: '', top: true, t: '1. São sólidos cristalinos rígidos\nà temperatura ambiente' },
+          { n: '', top: true, t: '1. São sólidos cristalinos rígidos\nà temperatura ambiente',
+            extra: AMOSTRAS },
           { n: '', top: true, t: '2. Possuem altos pontos de fusão\ne ebulição', extra: BICO },
           { n: '', top: true, t: '3. São quebradiços', extra: PEDRA },
           { n: '', top: true, t: '4. São geralmente solúveis\nna água', extra: VIDEO } ] },
-      /* Terceiro clique: as quatro amostras, espalhadas sobre a face 1 e
-         transbordando um pouco das bordas do cubo, como fotos largadas
-         na mesa. face 0 prende à primeira face: elas se recolhem quando
-         o cubo vira. */
-      { kind: 'img', face: 0, img: 'imagens/NaCl.png',
-        caption: 'NaCl',  x: 164, y: 434, base: 168.8, tone: '' },
-      { follow: 0, kind: 'img', face: 0, img: 'imagens/Al2O3.jpg',
-        caption: 'Al<sub>2</sub>O<sub>3</sub>', x: 312, y: 558, base: 242.6, tone: '' },
-      { follow: 0, kind: 'img', face: 0, img: 'imagens/MgO.png',
-        caption: 'MgO',   x: 464, y: 411, base: 217.3, tone: '' },
-      { follow: 0, kind: 'img', face: 0, img: 'imagens/Na2O.jpg',
-        caption: 'Na<sub>2</sub>O', x: 598, y: 528, base: 124.6, tone: '' },
-      /* Quarto clique: a lupa com o retículo. Quinto: o cubo vira. */
-      { kind: 'reticulo', rede: 'nacl', lupa: true,
+      /* Terceiro clique: a lupa. O cristal que ela mostra é o da face —
+         começa no óxido de sódio e troca a cada virada. */
+      { kind: 'reticulo', rede: 'na2o', lupa: true,
         x: 949, y: 430, base: 400, tone: '' },
       { follow: 0, nowrap: true, text: 'visão submicroscópica',
         x: 916, y: 632, base: 19, tone: '' },
@@ -2775,6 +2796,22 @@ function PEDRA(){
       <button class="pd-redo" type="button">&#8635; refazer</button>
     </div>
   </div>`;
+}
+
+/* As quatro amostras da face 1. As posições vieram do painel C, em
+   coordenadas do palco, e foram divididas pela escala do cubo (535,4/360)
+   para virarem coordenadas da própria face. */
+function AMOSTRAS(){
+  const fotos = [
+    ['NaCl.png',  'NaCl',                          40.8, 127.3, 113.5],
+    ['Al2O3.jpg', 'Al<sub>2</sub>O<sub>3</sub>',  140.3, 210.7, 163.1],
+    ['MgO.png',   'MgO',                          242.5, 111.8, 146.1],
+    ['Na2O.jpg',  'Na<sub>2</sub>O',              332.6, 190.5,  83.8]
+  ];
+  return `<div class="am">` + fotos.map(([arq, rot, x, y, w]) =>
+      `<figure class="am-f" style="left:${x}px;top:${y}px;width:${w}px">`
+    + `<img src="imagens/${arq}" alt="" draggable="false">`
+    + `<figcaption>${rot}</figcaption></figure>`).join('') + `</div>`;
 }
 
 /* O vídeo da dissolução, com o player acima. O arquivo mora numa pasta
@@ -4002,7 +4039,7 @@ const G3 = {
   gl: null, prog: null, esfera: null, bastao: null,
   atomos: [], hastes: [], laco: 0, t: 0, alvo: 0,
   az: -0.42, el: 0.28, dist: 470, px: 640, py: 360,
-  canvas: null, lupa: null, lupaCv: null, lupaClip: '',
+  canvas: null, lupa: null, lupaCv: null, lupaClip: '', lupaPara: 0,
   modo: 'pedra', celOff: [0, 0, 0], celC: [0, 0, 0], cantos: [], slide: null,
   volta: 0, pulso: 0, drama: 0, voo: 0, distAlvo: 0, celQ: null,
   agita: 0, funde: 0, fundeAlvo: 0, t9: 0, cliva: 0, clivaAlvo: 0
@@ -5546,6 +5583,7 @@ function stepBack(slide){
     cube.dataset.face = back;
     cube.style.setProperty('--face', back);
     paintCube(cube, back);
+    viraLupa(slide, back);
     items.forEach(it => {                    /* o postulado anterior volta como estava */
       if (it.dataset.of !== undefined && +it.dataset.of === back){
         it.classList.remove('pop', 'retract');
@@ -5625,6 +5663,7 @@ function turnCube(slide, cube){
   cube.dataset.face = face + 1;
   cube.style.setProperty('--face', face + 1);
   paintCube(cube, face + 1);
+  viraLupa(slide, face + 1);
   /* cubo de exemplos: o átomo e o gás nobre saem e entram com a face */
   if (cube.dataset.exemplos) trocaExemplo(slide, face + 1, 1);
   syncReveals(slide);
@@ -6032,6 +6071,49 @@ function ligaVideos(){
   });
 }
 
+/* O cristal de cada propriedade. A face 4 repete o da 3: nada troca, e
+   a lupa nem chega a girar. */
+const REDE_DA_FACE = ['na2o', 'nacl', 'mgo', 'mgo'];
+
+/* Troca o retículo sem o voo de aproximação: ele já nasce montado e
+   enquadrado no vidro, porque quem está entrando em cena é a face nova,
+   não o cristal. */
+function trocaRedeDaLupa(slide, tipo){
+  const it = slide && slide.querySelector('.reveal-item.reticulo[data-lupa]');
+  const cv = slide && slide.querySelector('.q3d');
+  if (!it || !cv || !iniciaG3(cv)) return;
+  montaCena(tipo);
+  it.dataset.rede = tipo;
+  const g = geoLupa();
+  enquadraRede(g.x, g.y, g.r * 1.6, g.r * 1.6);
+  G3.voo = 0; G3.distAlvo = G3.dist;
+  G3.t = 1; G3.alvo = 1;
+  poeRotuloRede(slide);
+}
+
+/* A lupa dá meia volta a cada virada do cubo. O retículo some no começo
+   do giro, troca de costas e reaparece do outro lado. */
+function viraLupa(slide, face){
+  const it = slide && slide.querySelector('.reveal-item.reticulo[data-lupa]');
+  const cv = slide && slide.querySelector('.q3d');
+  const tipo = REDE_DA_FACE[face];
+  if (!it || it.hidden || !cv || !tipo || G3.modo === tipo) return;
+  it.classList.remove('virando');
+  void it.offsetWidth;
+  it.classList.add('virando');
+  cv.classList.add('trocando');
+  /* enquanto a lente gira, o vidro fica estreito: se o recorte
+     acompanhasse, o retículo encolheria junto */
+  G3.lupaPara = 1;
+  setTimeout(() => { trocaRedeDaLupa(slide, tipo); }, 340);
+  setTimeout(() => { cv.classList.remove('trocando'); }, 430);
+  setTimeout(() => {
+    it.classList.remove('virando');
+    G3.lupaPara = 0;
+    segueLupa();
+  }, 740);
+}
+
 /* Nenhum vídeo continua tocando atrás de uma face virada nem de outro
    slide: o som viria de um lugar que já não está na tela. */
 function paraVideos(raiz){
@@ -6381,7 +6463,7 @@ function geoLupa(){
 }
 /* prende o centro da cena e o recorte ao vidro, quadro a quadro */
 function segueLupa(){
-  if (!G3.lupa || !G3.lupa.isConnected) return;
+  if (!G3.lupa || !G3.lupa.isConnected || G3.lupaPara) return;
   const g = geoLupa();
   G3.px = g.x; G3.py = g.y;
   const clip = `circle(${g.r.toFixed(0)}px at ${g.x.toFixed(0)}px ${g.y.toFixed(0)}px)`;
