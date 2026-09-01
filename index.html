@@ -2127,7 +2127,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v24.4';
+const VERSION = 'v24.5';
 
 const SLIDES = [
   {
@@ -2598,7 +2598,15 @@ const SLIDES = [
     reveals: [
       { nowrap: true,
         text: 'É a ligação feita pelo compartilhamento de pares de elétrons',
-        x: 640, y: 150, base: 23, tone: 'aqua' }
+        x: 640, y: 150, base: 23, tone: 'aqua' },
+      /* Segundo clique: o rótulo do exemplo e o cilindro, juntos. Dois
+         toques no cilindro mergulham nele; as moléculas de Cl2 se juntam
+         à esquerda (qx/qy), na mesma altura dele. */
+      { nowrap: true, text: 'Exemplo 01', x: 940, y: 250, base: 26, tone: '' },
+      { follow: 0, kind: 'vessel', shape: 'cylinder', mol: 'cl2', duplo: true,
+        tag: 'GÁS\nCLORO', color: '#8FE08F',
+        qx: 400, qy: 440,
+        x: 940, y: 440, base: 150, tone: '' }
     ]
   }
 ];
@@ -3234,6 +3242,7 @@ const RECIPES = {
   h2so4: [['H',10,26,4],['H',90,26,4],['O',24,34,6],['O',76,34,6],
           ['O',30,72,6],['O',70,72,6],['S',50,50,8.5]],
   etoh:  [['H',12,32,4],['H',88,30,4],['C',30,50,7],['C',52,62,7],['O',74,42,6.5]],
+  cl2:   [['Cl',34,50,8],['Cl',66,50,8]],
   /* gases nobres são monoatômicos: uma esfera só, sem ligação nenhuma */
   he: [['He',50,50,13]], ne: [['Ne',50,50,13]], ar: [['Ar',50,50,13]],
   kr: [['Kr',50,50,13]], xe: [['Xe',50,50,13]], rn: [['Rn',50,50,13]]
@@ -3269,6 +3278,11 @@ const MOLGEO = {
          ['H',79,30,14],['H',79,90,14],                   /* os dois do C2 */
          ['H',145,60,14],                                 /* o da hidroxila */
          ['C',40,60,25],['C',79,60,25],['O',116,60,23]],
+  /* Cl2: dois átomos iguais, do mesmo tamanho, encaixados um no outro.
+     Com centros a 40 e raio 26 cada, eles se penetram 12 — a mesma
+     mordida que os hidrogênios dão no oxigênio da água. É o par de
+     elétrons compartilhado, visto de fora. */
+  cl2:  [['Cl',30,50,26],['Cl',70,50,26]],
   he:[['He',50,50,34]], ne:[['Ne',50,50,34]], ar:[['Ar',50,50,34]],
   kr:[['Kr',50,50,34]], xe:[['Xe',50,50,34]], rn:[['Rn',50,50,34]]
 };
@@ -3887,6 +3901,9 @@ const REVEALS = (list, cfg) => {
                  ${r.cam  ? `data-cam="${r.cam.join(',')}"` : ''}
                  ${r.lupa ? `data-lupa="1"` : ''}
                  ${r.esq  ? `data-esq="1"`          : ''}
+                 ${r.qx !== undefined ? `data-qx="${r.qx}"` : ''}
+                 ${r.qy !== undefined ? `data-qy="${r.qy}"` : ''}
+                 ${r.duplo ? `data-duplo="1"`       : ''}
                  ${r.aberto ? `data-aberto="1"`     : ''}
                  ${r.eatom  ? `data-eatom="${r.eatom}"` : ''}
                  ${r.tit    ? `data-tit="${r.tit}"`       : ''}
@@ -5569,8 +5586,12 @@ function openQuantum(it){
       m.style.setProperty('--k', escala);
       m.classList.remove('unstable', 'big');
     });
+    /* A câmera mergulha no recipiente, mas as moléculas podem se juntar
+       noutro canto: qx/qy dizem onde. Sem eles, ficam em volta do
+       próprio recipiente, como sempre foi. */
     agrupaEmVolta([...q.querySelectorAll('.qm, .qmol')],
-                  parseFloat(it.style.left), parseFloat(it.style.top));
+                  it.dataset.qx !== undefined ? +it.dataset.qx : parseFloat(it.style.left),
+                  it.dataset.qy !== undefined ? +it.dataset.qy : parseFloat(it.style.top));
   }
   it.classList.add('zoomed');
   slide.classList.add('quantum-on');
@@ -6959,6 +6980,14 @@ function rebuildLego(it){
 }
 
 /* tocar numa palavra solta o que estiver guardado dentro dela */
+/* true no segundo toque, se ele vier logo depois do primeiro */
+function segundoToque(it){
+  const agora = Date.now(), antes = +it.dataset.tap || 0;
+  if (agora - antes < 460){ it.dataset.tap = 0; return true; }
+  it.dataset.tap = agora;
+  return false;
+}
+
 function tapItem(it){
   /* molécula desmontável: quem manda é o arrasto, o toque não faz nada */
   if (it.classList.contains('qmol') || it.classList.contains('qat')) return;
@@ -7005,9 +7034,14 @@ function tapItem(it){
   }
   /* gás nobre: o toque desenrola a distribuição, e o seguinte recolhe */
   if (it.classList.contains('gas')){ it.classList.toggle('aberto'); return; }
-  /* recipiente: um toque entra no mundo quântico, outro toque volta */
+  /* recipiente: um toque entra no mundo quântico, outro toque volta.
+     Alguns pedem dois toques para entrar, como o grão da imagem — é o
+     gesto de "olhar mais de perto", e evita entrar sem querer ao
+     arrastar o objeto pela tela. */
   if (it.classList.contains('zoomable')){
-    if (it.classList.contains('zoomed')) closeQuantum(it); else openQuantum(it);
+    if (it.classList.contains('zoomed')){ closeQuantum(it); return; }
+    if (it.dataset.duplo !== undefined && !segundoToque(it)) return;
+    openQuantum(it);
     return;
   }
   const slide = it.closest('.slide');
