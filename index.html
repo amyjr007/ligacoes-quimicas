@@ -1368,6 +1368,54 @@ body{
   background:var(--paper);border:2px solid var(--amber);cursor:grab;
 }
 
+/* ---------- o vídeo dentro da face, com um player mínimo ----------
+   Tocar, pausar e arrastar o tempo. Nada mais: a aula é sobre
+   solubilidade, não sobre o player. As medidas aqui são as da face sem
+   escala; o cubo inteiro é escalado depois por base/360. */
+.vd{flex:1;display:flex;flex-direction:column;justify-content:center;
+    align-items:center;gap:7px}
+.vd-tela{
+  position:relative;width:200px;border-radius:4px;overflow:hidden;
+  border:1px solid rgba(69,199,176,.3);background:#05121C;
+  box-shadow:0 0 26px rgba(3,12,22,.55);
+}
+.vd-v{display:block;width:100%;height:auto;cursor:pointer}
+/* o botão grande cobre a tela e some quando o vídeo anda */
+.vd-play{
+  position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;
+  background:rgba(4,14,22,.34);cursor:pointer;
+  display:grid;place-items:center;transition:opacity .25s ease;
+}
+.vd-play::after{
+  content:'';width:0;height:0;margin-left:5px;
+  border-left:19px solid rgba(255,255,255,.94);
+  border-top:12px solid transparent;border-bottom:12px solid transparent;
+  filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));
+}
+.vd.tocando .vd-play{opacity:0;pointer-events:none}
+/* a barra: o botão pequeno, o trilho e o tempo corrido */
+.vd-barra{display:flex;align-items:center;gap:7px;width:200px}
+.vd-pp{width:16px;height:16px;flex:none;padding:0;border:0;background:none;
+       cursor:pointer;position:relative}
+.vd-pp::before{
+  content:'';position:absolute;inset:0;margin:auto;width:0;height:0;
+  border-left:11px solid var(--paper-dim);
+  border-top:7px solid transparent;border-bottom:7px solid transparent;
+}
+/* tocando, o triângulo vira as duas barras da pausa */
+.vd.tocando .vd-pp::before{
+  border:0;width:10px;height:13px;
+  background:linear-gradient(90deg,var(--paper-dim) 0 3.6px,
+             transparent 3.6px 6.4px,var(--paper-dim) 6.4px 10px);
+}
+.vd-pp:hover::before{filter:brightness(1.7)}
+.vd-trilho{flex:1;height:4px;border-radius:2px;cursor:pointer;position:relative;
+           background:rgba(232,241,245,.2)}
+.vd-trilho i{position:absolute;left:0;top:0;bottom:0;width:0;
+             border-radius:2px;background:var(--aqua)}
+.vd-t{font-family:var(--mono);font-size:9px;letter-spacing:.06em;
+      color:var(--paper-dim);flex:none;min-width:32px;text-align:right}
+
 /* ---------- o pedaço de sal que se quebra ---------- */
 .pd{position:relative;flex:1;display:flex;align-items:center;justify-content:center;
     cursor:pointer;user-select:none;-webkit-user-select:none}
@@ -2064,7 +2112,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v23.4';
+const VERSION = 'v23.5';
 
 const SLIDES = [
   {
@@ -2504,7 +2552,7 @@ const SLIDES = [
           { n: '', top: true, t: '1. São sólidos cristalinos rígidos\nà temperatura ambiente' },
           { n: '', top: true, t: '2. Possuem altos pontos de fusão\ne ebulição', extra: BICO },
           { n: '', top: true, t: '3. São quebradiços', extra: PEDRA },
-          { n: '', top: true, t: '4. Conduzem eletricidade\nfundidos ou em água' } ] },
+          { n: '', top: true, t: '4. São geralmente solúveis\nna água', extra: VIDEO } ] },
       /* Terceiro clique: as quatro amostras, espalhadas sobre a face 1 e
          transbordando um pouco das bordas do cubo, como fotos largadas
          na mesa. face 0 prende à primeira face: elas se recolhem quando
@@ -2725,6 +2773,24 @@ function PEDRA(){
     <div class="pd-pe">
       <span class="pd-dica">bata na pedra</span>
       <button class="pd-redo" type="button">&#8635; refazer</button>
+    </div>
+  </div>`;
+}
+
+/* O vídeo da dissolução, com o player acima. O arquivo mora numa pasta
+   de nome sem acento: caminho com "í" chega a viajar mal entre o
+   Windows e o servidor, e um vídeo que não carrega derruba a aula. */
+function VIDEO(){
+  return `<div class="vd">
+    <div class="vd-tela">
+      <video class="vd-v" preload="metadata" playsinline
+             src="videos/solubilidade_8ca9.mp4"></video>
+      <button class="vd-play" type="button" aria-label="Tocar"></button>
+    </div>
+    <div class="vd-barra">
+      <button class="vd-pp" type="button" aria-label="Tocar ou pausar"></button>
+      <div class="vd-trilho"><i></i></div>
+      <span class="vd-t">0:00</span>
     </div>
   </div>`;
 }
@@ -3846,6 +3912,7 @@ function render(){
   slides.forEach(sl => {
     if (sl.querySelector('.reveal-item.cube[data-exemplos]')) poeExemplo(sl, 0);
   });
+  ligaVideos();
 
   grid.innerHTML = SLIDES.map((s,i) => `
     <button class="card" data-go="${i}">
@@ -3885,6 +3952,7 @@ function go(n, instant){
 
   clearTimeout(fxTimer);
   clearFx();
+  paraVideos();                              /* nada toca fora da tela */
   current = to;
   slides.forEach((el, i) => el.classList.toggle('is-active', i === to));
 
@@ -5474,6 +5542,7 @@ function stepBack(slide){
   if (cube && !cube.hidden && +cube.dataset.face > 0){
     const back = +cube.dataset.face - 1;
     esfriaBico(slide);
+    paraVideos(slide);
     cube.dataset.face = back;
     cube.style.setProperty('--face', back);
     paintCube(cube, back);
@@ -5549,6 +5618,7 @@ function stepBackward(){
 function turnCube(slide, cube){
   const face = +cube.dataset.face;
   esfriaBico(slide);
+  paraVideos(slide);
   itemsOf(slide).forEach(it => {
     if (it.dataset.of !== undefined && +it.dataset.of === face && !it.hidden) retractItem(it);
   });
@@ -5914,6 +5984,58 @@ function bateNaPedra(pd, ev){
   G3.clivaAlvo = novo;
   const d = pd.querySelector('.pd-dica');
   if (d) d.textContent = PD_DICAS[novo];
+}
+
+/* Liga os players. São poucos eventos: o tempo que corre, o estado que
+   troca o ícone, e o trilho que se deixa arrastar. */
+function ligaVideos(){
+  document.querySelectorAll('.vd').forEach(vd => {
+    const v = vd.querySelector('.vd-v');
+    if (!v || v._ligado) return;
+    v._ligado = 1;
+    const tr = vd.querySelector('.vd-trilho');
+    const barra = tr && tr.querySelector('i');
+    const rel = vd.querySelector('.vd-t');
+    const mmss = t => {
+      if (!isFinite(t) || t < 0) return '0:00';
+      return Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
+    };
+    const pinta = () => {
+      const d = v.duration || 0;
+      if (barra) barra.style.width = (d ? v.currentTime / d * 100 : 0).toFixed(2) + '%';
+      if (rel) rel.textContent = mmss(v.currentTime);
+    };
+    v.addEventListener('timeupdate', pinta);
+    v.addEventListener('loadedmetadata', pinta);
+    v.addEventListener('play',  () => vd.classList.add('tocando'));
+    v.addEventListener('pause', () => vd.classList.remove('tocando'));
+    v.addEventListener('ended', () => { vd.classList.remove('tocando'); v.currentTime = 0; pinta(); });
+    if (!tr) return;
+    const procura = e => {
+      const r = tr.getBoundingClientRect();
+      if (!r.width || !v.duration) return;
+      v.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * v.duration;
+      pinta();
+    };
+    tr.addEventListener('pointerdown', e => {
+      tr._puxa = 1; tr.setPointerCapture(e.pointerId); procura(e);
+      e.preventDefault(); e.stopPropagation();
+    });
+    tr.addEventListener('pointermove', e => { if (tr._puxa) procura(e); });
+    const solta = e => {
+      tr._puxa = 0;
+      if (tr.hasPointerCapture && tr.hasPointerCapture(e.pointerId))
+        tr.releasePointerCapture(e.pointerId);
+    };
+    tr.addEventListener('pointerup', solta);
+    tr.addEventListener('pointercancel', solta);
+  });
+}
+
+/* Nenhum vídeo continua tocando atrás de uma face virada nem de outro
+   slide: o som viria de um lugar que já não está na tela. */
+function paraVideos(raiz){
+  (raiz || document).querySelectorAll('.vd-v').forEach(v => { if (!v.paused) v.pause(); });
 }
 
 /* o cristal se recompõe, para a demonstração poder ser repetida */
@@ -6456,6 +6578,12 @@ function revealItem(slide, it){
 deck.addEventListener('click', (e) => {
   const redo = e.target.closest('.lego-redo');
   if (redo){ rebuildLego(redo.closest('.reveal-item')); return; }
+  const vplay = e.target.closest('.vd-play, .vd-pp, .vd-v');
+  if (vplay){
+    const v = vplay.closest('.vd').querySelector('.vd-v');
+    if (v){ if (v.paused) v.play().catch(() => {}); else v.pause(); }
+    return;
+  }
   const pdz = e.target.closest('.pd-redo');
   if (pdz){ refazPedra(pdz.closest('.pd')); return; }
   const pdr = e.target.closest('.pd');
@@ -6601,8 +6729,9 @@ deck.addEventListener('pointerdown', (e) => {
   if (e.target.closest('.ex-el .fam')) return;
   /* na tabela periódica o toque escolhe, não arrasta */
   if (e.target.closest('.tp')) return;
-  /* o bico e a pedra têm interação própria: o cubo não gira por causa deles */
-  if (e.target.closest('.bk, .pd')) return;
+  /* o bico, a pedra e o vídeo têm interação própria: o cubo não gira
+     nem se arrasta por causa deles */
+  if (e.target.closest('.bk, .pd, .vd')) return;
   /* O átomo do octeto é fixo: a bola arranca elétron e o resto da área
      dele serve para fazer nascer um elétron. Nada ali move o átomo. */
   if (e.target.closest('.reveal-item[data-eatom]')) return;

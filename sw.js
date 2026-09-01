@@ -1,6 +1,6 @@
 /* Service worker da aula. Guarda tudo na instalação: a aula roda inteira
    sem rede, que é como ela costuma ser dada. */
-const CACHE = 'ligacoes-v23-4';
+const CACHE = 'ligacoes-v23-5';
 const ARQUIVOS = [
   './',
   './index.html',
@@ -15,7 +15,8 @@ const ARQUIVOS = [
   './imagens/Ramsey.png',
   './imagens/john_dalton.png',
   './imagens/lewis.jpg',
-  './imagens/clivagem.png'
+  './imagens/clivagem.png',
+  './videos/solubilidade_8ca9.mp4'
 ];
 
 self.addEventListener('install', (e) => {
