@@ -2127,7 +2127,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v24.1';
+const VERSION = 'v24.2';
 
 const SLIDES = [
   {
@@ -2568,7 +2568,8 @@ const SLIDES = [
             extra: AMOSTRAS },
           { n: '', top: true, t: '2. Possuem altos pontos de fusão\ne ebulição', extra: BICO },
           { n: '', top: true, t: '3. São quebradiços', extra: PEDRA },
-          { n: '', top: true, t: '4. São geralmente solúveis\nna água', extra: BEQUER } ] },
+          { n: '', top: true, t: '4. São geralmente solúveis\nna água', extra: BEQUER },
+          { n: '', top: true, t: '5. Conduzem eletricidade dissolvidos\nem água ou puros no estado líquido' } ] },
       /* Terceiro clique: a lupa. O cristal que ela mostra é o da face —
          começa no óxido de sódio e troca a cada virada. */
       { kind: 'reticulo', rede: 'na2o', lupa: true,
@@ -3769,6 +3770,10 @@ function paintCube(cube, F){
     panes[p].className = 'face' + (dentro ? faceClass(faces[L]) : '');
     panes[p].innerHTML = dentro ? faceHTML(faces[L], L) : '';
   });
+  /* Com mais de quatro propriedades as faces físicas são reescritas a
+     cada giro, e o béquer que sai dali é um elemento novo, sem ouvintes.
+     Religar é barato: quem já está ligado se reconhece e passa. */
+  ligaBequer();
 }
 
 /* ------------------------------------------------------------
@@ -6151,10 +6156,14 @@ const BQ_DICAS = [
 function bqAnda(bq){
   if (bq._t) cancelAnimationFrame(bq._t);
   const passo = () => {
+    /* slide fora de cena não gasta quadro */
+    const sl = bq.closest('.slide');
+    if (sl && !sl.classList.contains('is-active')){ bq._t = 0; return; }
     let sal = +bq.dataset.sal || 0, ag = +bq.dataset.agita || 0;
+    const naAgua = bq.classList.contains('molhado');
     ag *= 0.972;
     if (ag < 0.004) ag = 0;
-    if (bq.classList.contains('molhado') && sal < 1)
+    if (naAgua && sal < 1)
       sal = Math.min(1, sal + 0.00062 + 0.0016 * ag);
     bq.dataset.sal = sal.toFixed(4);
     bq.dataset.agita = ag.toFixed(4);
@@ -6163,7 +6172,12 @@ function bqAnda(bq){
     G3.dissolve = sal;
     const d = bq.querySelector('.bq-dica');
     if (d) d.textContent = BQ_DICAS[sal >= 1 ? 2 : (sal > 0 ? 1 : 0)];
-    bq._t = (sal >= 1 && ag === 0) ? 0 : requestAnimationFrame(passo);
+    /* Para quando não há mais o que animar: a agitação acabou E ou o sal
+       já se dissolveu todo, ou nem chegou na água. Sem a segunda metade,
+       mexer o dedo antes de pôr o sal deixava este laço rodando a 60
+       quadros por segundo pelo resto da sessão, em todos os slides. */
+    const nadaAFazer = ag === 0 && (sal >= 1 || !naAgua);
+    bq._t = nadaAFazer ? 0 : requestAnimationFrame(passo);
   };
   passo();
 }
@@ -6261,7 +6275,7 @@ function descansaBequer(raiz){
 
 /* O cristal de cada propriedade. A face 4 volta ao NaCl: a pedra que
    entra no béquer é de sal, e seria estranho a lupa mostrar outro. */
-const REDE_DA_FACE = ['na2o', 'nacl', 'mgo', 'nacl'];
+const REDE_DA_FACE = ['na2o', 'nacl', 'mgo', 'nacl', 'nacl'];
 
 /* Troca o retículo sem o voo de aproximação: ele já nasce montado e
    enquadrado no vidro, porque quem está entrando em cena é a face nova,
