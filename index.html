@@ -469,8 +469,11 @@ body{
 .slide.quantum-on .qmol{pointer-events:auto;touch-action:none}
 .qat{
   position:absolute;border-radius:50%;
-  width:calc(var(--r) * 2);height:calc(var(--r) * 2);
-  margin:calc(var(--r) * -1) 0 0 calc(var(--r) * -1);
+  width:calc(var(--r) * 2 * var(--kb,1));height:calc(var(--r) * 2 * var(--kb,1));
+  margin:calc(var(--r) * -1 * var(--kb,1)) 0 0 calc(var(--r) * -1 * var(--kb,1));
+  transition:width .55s cubic-bezier(.2,1.35,.4,1),
+             height .55s cubic-bezier(.2,1.35,.4,1),
+             margin .55s cubic-bezier(.2,1.35,.4,1);
 }
 .slide.quantum-on .qat{pointer-events:auto;touch-action:none}
 .qat.core{cursor:move}                    /* pelo centro, arrasta a molécula toda */
@@ -488,6 +491,9 @@ body{
 /* passado o coice, o átomo solto entra no mesmo tremor das
    moléculas incompletas: sozinho, ele também é instável */
 .qat.end.torn.jitter{animation:molShake .26s linear infinite}
+/* o arremesso da ruptura: a ponta sai voando para longe do núcleo */
+.qat.arremessa{transition:left .5s cubic-bezier(.15,1.25,.4,1),
+                          top  .5s cubic-bezier(.15,1.25,.4,1)}
 /* a volta para o lugar, com um leve exagero no fim */
 .qat.flyback{transition:left .42s cubic-bezier(.28,1.5,.5,1),
                         top  .42s cubic-bezier(.28,1.5,.5,1)}
@@ -497,6 +503,58 @@ body{
        transform:scale(1.42);filter:brightness(2.4)}
   100%{box-shadow:0 0 0 52px rgba(130,255,228,0),0 0 0 rgba(130,255,228,0);
        transform:scale(1);filter:brightness(1)}
+}
+
+/* ---------- os elétrons de valência, quando o átomo fica sozinho ----------
+   Enquanto a ligação existe, o par é dos dois e não se mostra. Rompida a
+   ligação, cada átomo fica com os elétrons que são dele — sete, no caso
+   do cloro — e é isso que aparece em volta da bola. Eles crescem junto
+   com ela, porque as medidas saem todas de --r e --kb. */
+.qel{
+  position:absolute;left:50%;top:50%;
+  width:calc(var(--r) * .19 * var(--kb,1));
+  height:calc(var(--r) * .19 * var(--kb,1));
+  margin:calc(var(--r) * -.095 * var(--kb,1)) 0 0 calc(var(--r) * -.095 * var(--kb,1));
+  border-radius:50%;background:#DCF2FF;
+  box-shadow:0 0 calc(var(--r) * .22) rgba(160,225,255,.95);
+  transform:translate(calc(var(--ex) * var(--kb,1)), calc(var(--ey) * var(--kb,1)));
+  opacity:0;pointer-events:none;
+  transition:opacity .45s ease .3s,
+             transform .55s cubic-bezier(.2,1.35,.4,1),
+             width .55s ease, height .55s ease, margin .55s ease;
+}
+.qmol.partida .qel{opacity:.96}
+
+/* ---------- a molécula partida ----------
+   Os dois átomos dobram de tamanho, ficam soltos e ambos entram no mesmo
+   alerta: sozinho, nenhum dos dois está satisfeito. */
+.qmol.partida .qat{--kb:2}
+.qmol.partida .qat.core,
+.qmol.partida .qat.end.torn.jitter{
+  animation:molShake .26s linear infinite, coreAlert 1.1s ease-in-out infinite;
+}
+/* solto de vez: o núcleo também se arrasta sozinho */
+.qat.core.livre{cursor:grab;z-index:3}
+.slide.quantum-on .qat.core.livre{pointer-events:auto;touch-action:none}
+/* o estouro da ruptura */
+.qmol.partida .qbond{animation:none}
+.qmol.rompendo{animation:molBoom .55s cubic-bezier(.2,1.4,.35,1)}
+@keyframes molBoom{
+  0%  {filter:brightness(1)}
+  14% {filter:brightness(3.4) drop-shadow(0 0 40px #9BE8FF)}
+  46% {filter:brightness(1.5) drop-shadow(0 0 18px #9BE8FF)}
+  100%{filter:brightness(1)}
+}
+/* a onda que sai do ponto onde a ligação arrebentou */
+.qboom{
+  position:absolute;left:var(--x);top:var(--y);
+  width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;
+  border:3px solid rgba(190,235,255,.95);pointer-events:none;opacity:0;
+}
+.qmol.rompendo .qboom{animation:qboomOnda .7s cubic-bezier(.2,.7,.3,1)}
+@keyframes qboomOnda{
+  0%  {transform:scale(.2);opacity:1;border-width:4px}
+  100%{transform:scale(9); opacity:0;border-width:1px}
 }
 
 /* ===== a estrutura incompleta não fica parada: ela treme ===== */
@@ -2127,7 +2185,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v24.7';
+const VERSION = 'v25.2';
 
 const SLIDES = [
   {
@@ -2599,14 +2657,18 @@ const SLIDES = [
       { nowrap: true,
         text: 'É a ligação feita pelo compartilhamento de pares de elétrons',
         x: 640, y: 150, base: 23, tone: 'aqua' },
-      /* Segundo clique: o cilindro e o rótulo do exemplo, juntos. Dois
-         toques no cilindro mergulham nele, e as moléculas de Cl2 se
-         juntam na direção dele — que é o que o agrupamento já faz
-         sozinho, agora que o cilindro está à esquerda. */
-      { nowrap: true, text: 'Exemplo 01', x: 164, y: 477, base: 17.6, tone: '' },
+      /* Segundo clique: o nome do elemento, o cilindro e o rótulo do
+         exemplo, juntos e travados no lugar. Dois toques no cilindro
+         mergulham nele; lá dentro, segurar o dedo numa das bolas rompe
+         a ligação. */
+      { nowrap: true, text: 'Cloro &mdash; 7A', x: 208, y: 186, base: 22, tone: '',
+        travado: true },
+      { follow: 0, nowrap: true, text: 'Exemplo 01', x: 164, y: 477, base: 17.6,
+        tone: '', travado: true },
       { follow: 0, kind: 'vessel', shape: 'cylinder', mol: 'cl2', duplo: true,
+        field: 'split', elet: true, travado: true,
         tag: 'GÁS\nCLORO', color: '#8FE08F',
-        x: 163, y: 349, base: 150, tone: '' }
+        x: 208, y: 303, base: 150, tone: '' }
     ]
   }
 ];
@@ -3287,6 +3349,34 @@ const MOLGEO = {
   kr:[['Kr',50,50,34]], xe:[['Xe',50,50,34]], rn:[['Rn',50,50,34]]
 };
 
+/* Elétrons na camada de valência. Servem para desenhar o que sobra em
+   cada átomo quando a ligação se rompe. */
+const VALENCIA = { H: 1, C: 4, N: 5, O: 6, F: 7, Cl: 7, Br: 7, I: 7, S: 6, P: 5 };
+
+/* Os elétrons em volta da bola, distribuídos como manda a regra: um em
+   cada um dos quatro lados primeiro, e só depois os que sobram formam
+   pares. No cloro dá três pares e um elétron desemparelhado — que é
+   exatamente o que sobra quando o par compartilhado se desfaz. */
+function eletronsQat(rpx, n){
+  if (!n) return '';
+  const lados = [-90, 0, 90, 180];         /* cima, direita, baixo, esquerda */
+  const R = rpx * 1.32, meio = rpx * 0.30;
+  let html = '';
+  for (let k = 0; k < lados.length; k++){
+    const quantos = 1 + (k < n - lados.length ? 1 : 0);
+    if (n < lados.length && k >= n) break;
+    for (let j = 0; j < quantos; j++){
+      const a = lados[k] * Math.PI / 180;
+      /* o par se abre em torno do lado, perpendicular ao raio */
+      const d = quantos === 2 ? (j ? meio : -meio) : 0;
+      const ex = Math.cos(a) * R - Math.sin(a) * d;
+      const ey = Math.sin(a) * R + Math.cos(a) * d;
+      html += `<i class="qel" style="--ex:${ex.toFixed(1)}px;--ey:${ey.toFixed(1)}px"></i>`;
+    }
+  }
+  return html;
+}
+
 /* Desenha a molécula. O viewBox sai da própria tinta, então cada uma
    ocupa a caixa inteira sem sobra e sem corte. O gradiente é o mesmo das
    outras esferas do app: brilho a 34/26% e a borda escurecida. */
@@ -3515,7 +3605,7 @@ const SPLIT_K = 1.72;
 /* A molécula que se desmonta usa a MESMA geometria do desenho do slide
    15: ângulo de verdade e átomos encostados. A vareta da ligação fica
    escondida dentro das esferas e só aparece quando se puxa um átomo. */
-function splitMol(key, x, y){
+function splitMol(key, x, y, comEletrons){
   const g = MOLGEO[key] || MOLGEO.h2o;
   const c = g[g.length - 1];               /* o central é sempre o último */
   const cx = SPLIT_W / 2, cy = SPLIT_H / 2;
@@ -3536,12 +3626,21 @@ function splitMol(key, x, y){
     atoms += `<b class="qat end" data-i="${i}"`
            + ` data-hx="${(cx + ox).toFixed(1)}" data-hy="${(cy + oy).toFixed(1)}"`
            + ` style="left:${(cx + ox).toFixed(1)}px;top:${(cy + oy).toFixed(1)}px;`
-           + `--r:${(r * SPLIT_K).toFixed(1)}px;background:${sphereBg(EL_COLOR[el])}"></b>`;
+           + `--r:${(r * SPLIT_K).toFixed(1)}px;background:${sphereBg(EL_COLOR[el])}">`
+           + (comEletrons ? eletronsQat(r * SPLIT_K, VALENCIA[el] || 0) : '')
+           + `</b>`;
   });
   const nucleo = `<b class="qat core" style="left:${cx}px;top:${cy}px;`
-    + `--r:${(c[3] * SPLIT_K).toFixed(1)}px;background:${sphereBg(EL_COLOR[c[0]])}"></b>`;
+    + `--r:${(c[3] * SPLIT_K).toFixed(1)}px;background:${sphereBg(EL_COLOR[c[0]])}">`
+    + (comEletrons ? eletronsQat(c[3] * SPLIT_K, VALENCIA[c[0]] || 0) : '')
+    + `</b>`;
+  /* a onda do estouro nasce no meio da ligação que se rompeu */
+  const boom = g.length === 2
+    ? `<i class="qboom" style="--x:${(cx + (g[0][1] - c[1]) * SPLIT_K / 2).toFixed(1)}px;`
+      + `--y:${(cy + (g[0][2] - c[2]) * SPLIT_K / 2).toFixed(1)}px"></i>` : '';
 
-  return `<div class="qmol" style="left:${x}px;top:${y}px">${bonds}${nucleo}${atoms}</div>`;
+  return `<div class="qmol"${comEletrons ? ' data-elet="1"' : ''}`
+       + ` style="left:${x}px;top:${y}px">${bonds}${nucleo}${atoms}${boom}</div>`;
 }
 
 /* ------------------------------------------------------------
@@ -3573,7 +3672,7 @@ function QUANTUM(cfg, extra){
   } else if (cfg && cfg.field === 'split'){
     /* poucas, grandes e bem espaçadas */
     const xs = [300, 640, 980], ys = [250, 500];
-    ys.forEach(y => xs.forEach(x => { mols += splitMol(cfg.mol || 'h2o', x, y); }));
+    ys.forEach(y => xs.forEach(x => { mols += splitMol(cfg.mol || 'h2o', x, y, cfg.elet); }));
   } else
   for (let r = 0; r < 3; r++){
     for (let c = 0; c < 6; c++){
@@ -3899,7 +3998,8 @@ const REVEALS = (list, cfg) => {
       + (r.caption ? `<div class="cap">${r.caption}</div>` : '');
     const zoomable = (r.kind === 'glass' || r.kind === 'vessel') ? ' zoomable' : '';
     return `<div class="reveal-item ${r.kind || ''} ${r.tone || ''}${r.nowrap ? ' nowrap' : ''}${r.bullet ? ' bullet' : ''}${r.flip ? ' flip' : ''}${
-  r.aberto ? ' aberto' : ''}${r.fixo ? ' fixo' : ''}${r.nu ? ' nua' : ''}${zoomable}" hidden
+  r.aberto ? ' aberto' : ''}${r.fixo ? ' fixo' : ''}${r.nu ? ' nua' : ''}${
+  r.travado ? ' travado' : ''}${zoomable}" hidden
                  data-x="${r.x}" data-y="${r.y}"
                  ${r.id   ? `data-id="${r.id}"`     : ''}
                  ${r.from ? `data-from="${r.from}"` : ''}
@@ -5277,7 +5377,7 @@ const QM_BIG = 5;                          /* o toque na molécula leva a 500% *
    dentro do mundo quântico, as próprias moléculas */
 /* a ordem não importa: closest() devolve o mais próximo que casar.
    Num átomo de ponta casa o próprio átomo; no central, casa a molécula. */
-const PEGAVEL = '.reveal-item, .qm, .q-board.on, .qat.end, .qmol,'
+const PEGAVEL = '.reveal-item, .qm, .q-board.on, .qat.end, .qat.core.livre, .qmol,'
               + ' .cam.solta, .cam.valencia, .caco';
 
 /* Uma molécula fica instável por duas razões: falta um átomo dela,
@@ -5527,6 +5627,50 @@ function breakBond(at){
   marcaInstavel(mol);
 }
 
+/* SEGURAR O DEDO ROMPE A LIGAÇÃO
+   Enquanto o par de elétrons é dos dois, cada cloro conta oito e está
+   satisfeito. Rompida a ligação, cada um fica só com os seus sete: os
+   dois dobram de tamanho — porque o átomo isolado é maior que o átomo
+   ligado — mostram os elétrons que lhes restam e passam a tremer. */
+function parteMolecula(mol, at){
+  if (!mol || mol.classList.contains('partida')) return;
+  /* pode-se segurar em qualquer das duas bolas; quem se arranca é sempre
+     a ponta, que é a que tem ligação para romper */
+  const ponta = at.classList.contains('end') ? at : mol.querySelector('.qat.end');
+  if (ponta) breakBond(ponta);
+  mol.classList.add('partida');
+  const nucleo = mol.querySelector('.qat.core');
+  if (nucleo) nucleo.classList.add('livre');   /* agora ele também anda sozinho */
+  /* Dobrados de tamanho, os dois ficariam um dentro do outro: a ruptura
+     os arremessa para lados opostos. Cada um anda metade do caminho —
+     numa molécula de dois átomos iguais nenhum dos dois tem por que
+     ceder mais que o outro —, e isso também mantém o estrago dentro do
+     espaço da própria molécula, sem invadir a vizinha. */
+  if (ponta && nucleo){
+    const nx = parseFloat(nucleo.style.left), ny = parseFloat(nucleo.style.top);
+    const dx = +ponta.dataset.hx - nx, dy = +ponta.dataset.hy - ny;
+    const L = Math.hypot(dx, dy) || 1;
+    const ux = dx / L * 100, uy = dy / L * 100;
+    /* o afastamento é centrado na caixa da molécula, não no meio da
+       ligação: assim a molécula rompida não avança sobre a vizinha */
+    const meio = [ SPLIT_W / 2, SPLIT_H / 2 ];
+    ponta.classList.add('arremessa');
+    nucleo.classList.add('arremessa');
+    ponta.style.left  = (meio[0] + ux).toFixed(1) + 'px';
+    ponta.style.top   = (meio[1] + uy).toFixed(1) + 'px';
+    nucleo.style.left = (meio[0] - ux).toFixed(1) + 'px';
+    nucleo.style.top  = (meio[1] - uy).toFixed(1) + 'px';
+    setTimeout(() => {
+      ponta.classList.remove('arremessa');
+      nucleo.classList.remove('arremessa');
+    }, 620);
+  }
+  mol.classList.remove('rompendo');
+  void mol.offsetWidth;
+  mol.classList.add('rompendo');
+  setTimeout(() => mol.classList.remove('rompendo'), 780);
+}
+
 /* solto, o átomo volta voando e a ligação se refaz */
 function healBond(at){
   const mol   = at.closest('.qmol');
@@ -5542,6 +5686,20 @@ function healBond(at){
 
   setTimeout(() => {
     at.classList.remove('flyback', 'torn', 'jitter');
+    /* refeita a ligação, o par volta a ser dos dois: os elétrons somem,
+       as bolas voltam ao tamanho de sempre e o núcleo deixa de andar só */
+    if (mol){
+      mol.classList.remove('partida', 'rompendo');
+      const nucleo = mol.querySelector('.qat.core');
+      if (nucleo){
+        nucleo.classList.remove('livre');
+        /* o núcleo também tinha sido empurrado: volta ao meio da caixa */
+        nucleo.classList.add('arremessa');
+        nucleo.style.left = (SPLIT_W / 2) + 'px';
+        nucleo.style.top  = (SPLIT_H / 2) + 'px';
+        setTimeout(() => nucleo.classList.remove('arremessa'), 620);
+      }
+    }
     marcaInstavel(mol);                    /* completa de novo: para de tremer */
     repete(at, 'snapped');
     if (bond){
@@ -7098,8 +7256,20 @@ deck.addEventListener('pointerdown', (e) => {
   if (g.pts.size === 1){
     startDrag(it, g, e.clientX, e.clientY);
     g.moved = false;                       /* sem arrasto até prova em contrário */
+    /* travado: fica onde está. Continua recebendo o toque — é assim que
+       o cilindro abre o mundo quântico — mas não se arrasta nem se
+       redimensiona. */
+    if (it.classList.contains('travado')) g.mode = 'fixo';
     it.classList.add('dragging');
-    if (it.classList.contains('qat')) breakBond(it);
+    /* Molécula que mostra elétrons pede o dedo PARADO para romper: um
+       toque de passagem, ou um arrasto, não desfazem a ligação. Nas
+       outras, encostar na ponta já arranca, como sempre foi. */
+    const qat = e.target.closest && e.target.closest('.qat');
+    const mol = qat && qat.closest('.qmol');
+    if (qat && mol && mol.dataset.elet !== undefined){
+      clearTimeout(g.holdT);
+      g.holdT = setTimeout(() => { if (!g.moved) parteMolecula(mol, qat); }, 300);
+    } else if (it.classList.contains('qat')) breakBond(it);
     if (it.classList.contains('qm')){
       paraConflito();                        /* a mão retoma o controle */
       it.closest('.quantum, .pn-q').querySelectorAll('.qm')
@@ -7120,6 +7290,7 @@ deck.addEventListener('pointerdown', (e) => {
     g.moved = true;                        /* pinça nunca conta como toque */
     /* a molécula do campo só muda de tamanho no toque, nunca na pinça */
     if (it.classList.contains('qm')) return;
+    if (it.classList.contains('travado')) return;
     const [a, b] = [...g.pts.values()];
     g.mode = 'pinch';
     g.dist0 = Math.hypot(a.x - b.x, a.y - b.y) || 1;
@@ -7146,6 +7317,12 @@ deck.addEventListener('pointermove', (e) => {
     if (g.ox === undefined){ g.ox = e.clientX; g.oy = e.clientY; }
     orbitaG3(e.clientX - g.ox, e.clientY - g.oy);
     g.ox = e.clientX; g.oy = e.clientY;
+    return;
+  }
+
+  if (g.mode === 'fixo'){
+    /* não anda, mas um arrasto sobre ele não vale como toque */
+    if (Math.abs(e.clientX - g.x0) > 4 || Math.abs(e.clientY - g.y0) > 4) g.moved = true;
     return;
   }
 
