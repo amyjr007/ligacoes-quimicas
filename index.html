@@ -302,8 +302,12 @@ body{
 .reveal-item.aqua  .txt{color:var(--aqua)}
 .reveal-item.amber .txt{color:var(--amber)}
 /* legenda: acompanha o tamanho do objeto na pinça */
+/* Numa imagem recortada sobra uma faixa vazia embaixo — a sombra e o
+   vazio em volta do recorte — e a legenda nasce longe do desenho.
+   --capsobe, em fração da largura, puxa a legenda para junto dele. */
 .reveal-item .cap{
-  margin-top:11px;text-align:center;
+  margin-top:calc(11px - var(--base) * var(--capsobe,0) * 1px * var(--k));
+  text-align:center;
   font-family:var(--mono);
   font-size:clamp(14px,calc(var(--base) * 1px * var(--k) * .052),26px);
   letter-spacing:.1em;color:var(--paper-dim);
@@ -2058,7 +2062,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v22.7';
+const VERSION = 'v22.8';
 
 const SLIDES = [
   {
@@ -2504,14 +2508,15 @@ const SLIDES = [
         x: 949, y: 430, base: 400, tone: '' },
       { follow: 0, nowrap: true, text: 'visão submicroscópica',
         x: 916, y: 632, base: 19, tone: '' },
-      /* Terceiro clique: a foto do gesto real, ao lado da lupa — o que a
-         mão faz, logo ali do lado do que acontece entre os íons. Fica na
-         faixa livre à direita do vidro, a única larga o bastante (o vão
-         entre o cubo e a lupa tem só 122px). nu: a imagem já vem
-         recortada, com a própria borda e sombra. */
-      { kind: 'img', nu: true, img: 'imagens/clivagem.png',
+      /* A foto do gesto real. face 1 é a segunda do cubo, a dos
+         quebradiços: ela só sai quando o cubo está mostrando essa face e
+         se recolhe quando ele vira. nu: a imagem já vem recortada, com a
+         própria borda e sombra; capsobe traz a legenda para junto dela,
+         que senão nasceria 114px abaixo do círculo. */
+      { kind: 'img', face: 1, nu: true, capsobe: 0.315,
+        img: 'imagens/clivagem.png',
         caption: 'clivagem', alt: 'martelo e talhadeira clivando um cristal',
-        x: 1163, y: 372, base: 165, tone: '' }
+        x: 563, y: 481, base: 264.2, tone: '' }
     ]
   }
 ];
@@ -3728,6 +3733,7 @@ const REVEALS = (list, cfg) => {
                  ${r.exemplos ? `data-exemplos="1"` : ''}
                  style="left:${r.x}px;top:${r.y}px;--base:${r.base || 40};--k:1${
                    r.wch ? `;--wch:${r.wch}` : ''}${
+                   r.capsobe ? `;--capsobe:${r.capsobe}` : ''}${
                    r.kind === 'cube' ? `;--face:0` : ''}${
                    /* tface: tamanho que a letra deve TER NA TELA; a face
                       é escalada por base/360, então desconta-se isso */
