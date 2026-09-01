@@ -1364,31 +1364,75 @@ body{
 /* ---------- o pedaço de sal que se quebra ---------- */
 .pd{position:relative;flex:1;display:flex;align-items:center;justify-content:center;
     cursor:pointer;user-select:none;-webkit-user-select:none}
-.pd-svg{width:210px;height:auto;display:block;overflow:visible}
-/* Cada caco anda para fora e para baixo conforme --q, que é o quanto a
-   pedra já foi quebrada. Um só número move as doze peças. */
+.pd-svg{width:214px;height:auto;display:block;overflow:visible}
+/* O bloco não esfarela: ele parte ao longo de planos retos. Cada peça
+   sai inteira, de faces planas, e o estágio da quebra escolhe para onde
+   ela desliza. Três batidas, três estágios. */
 .pd .pc{
-  transform-box:fill-box;transform-origin:50% 50%;
-  transform:translate(calc(var(--dx) * var(--q,0)),calc(var(--dy) * var(--q,0)))
-            rotate(calc(var(--rr) * var(--q,0)));
-  transition:transform .8s cubic-bezier(.25,.85,.35,1);
-  stroke:#8FA0AC;stroke-width:.4;
+  transition:transform 1s cubic-bezier(.2,.85,.25,1);
+  stroke:#8FA0AC;stroke-width:.4;stroke-linejoin:round;
 }
-/* a batida do dedo sacode o conjunto */
+.pd[data-e="1"] .pc{transform:translate(var(--x1),var(--y1)) rotate(var(--r1))}
+.pd[data-e="2"] .pc{transform:translate(var(--x2),var(--y2)) rotate(var(--r2))}
+.pd[data-e="3"] .pc{transform:translate(var(--x3),var(--y3)) rotate(var(--r3))}
+
+/* a batida do dedo sacode o bloco todo */
 .pd-bloco{transform-box:fill-box;transform-origin:50% 100%}
-.pd.bate .pd-bloco{animation:pdBate .22s ease-out}
+.pd.bate .pd-bloco{animation:pdBate .3s cubic-bezier(.3,1.5,.5,1)}
 @keyframes pdBate{
-  0%  {transform:translate(0,0)}
-  30% {transform:translate(2px,3px) scaleY(.94)}
-  100%{transform:translate(0,0)}
+  0%  {transform:translate(0,0) scaleY(1)}
+  22% {transform:translate(1.5px,2.5px) scaleY(.955)}
+  55% {transform:translate(0,-1px) scaleY(1.015)}
+  100%{transform:translate(0,0) scaleY(1)}
+}
+/* o risco branco do instante em que o plano se rompe */
+.pd-rach{
+  fill:none;stroke:#FFFFFF;stroke-width:2.4;stroke-linecap:round;
+  stroke-linejoin:round;opacity:0;pointer-events:none;
+}
+.pd-rach.flash{animation:pdRach .6s ease-out}
+@keyframes pdRach{
+  0%  {opacity:0}
+  18% {opacity:1}
+  100%{opacity:0}
+}
+/* a onda do impacto e o pó que salta */
+.pd-onda{
+  fill:none;stroke:#BFE7FF;stroke-width:2;pointer-events:none;
+  animation:pdOnda .5s ease-out forwards;
+}
+@keyframes pdOnda{
+  0%  {transform:scale(.14);opacity:.95}
+  100%{transform:scale(1.5);opacity:0}
+}
+.pd-po{fill:#DCE7EE;pointer-events:none;animation:pdPo .85s ease-out forwards}
+@keyframes pdPo{
+  0%  {transform:translate(0,0) scale(1);opacity:.95}
+  100%{transform:translate(var(--px),var(--py)) scale(.2);opacity:0}
+}
+/* o rodapé: a legenda que ensina e o botão de refazer */
+.pd-pe{
+  position:absolute;left:0;right:0;bottom:-6px;
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  pointer-events:none;
 }
 .pd-dica{
-  position:absolute;left:0;right:0;bottom:-2px;text-align:center;
-  font-family:var(--mono);font-size:10px;letter-spacing:.12em;
-  text-transform:uppercase;color:var(--paper-dim);pointer-events:none;
-  transition:opacity .4s ease;
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--paper-dim);text-align:center;
 }
-.pd.quebrando .pd-dica{opacity:0}
+.pd-redo{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--paper-dim);
+  background:rgba(255,255,255,.06);border:1px solid rgba(232,241,245,.28);
+  border-radius:999px;padding:4px 11px;cursor:pointer;white-space:nowrap;
+  opacity:0;transform:translateY(4px);pointer-events:none;
+  transition:opacity .35s ease,transform .35s ease,
+             background .2s ease,color .2s ease;
+}
+/* só aparece depois da primeira rachadura: antes não há o que refazer */
+.pd:not([data-e="0"]) .pd-redo{opacity:1;transform:none;pointer-events:auto}
+.pd-redo:hover{background:rgba(255,255,255,.15);color:#E8F1F5}
+.pd-redo:active{transform:translateY(1px)}
 
 /* ---------- o elétron que se entrega ao átomo ---------- */
 .eletron{
@@ -2011,7 +2055,7 @@ body{
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v22.4';
+const VERSION = 'v22.5';
 
 const SLIDES = [
   {
@@ -2544,29 +2588,72 @@ function BICO(){
 /* Um pedaço grande de sal num prato. Ele é uma grade de doze cacos que
    juntos formam o bloco; a cada batida do dedo eles se afastam mais e a
    pedra se desfaz. Quatro batidas: três quebrando e a última refazendo. */
+/* O que o aluno vê aqui não é uma pedra esfarelando. É um cristal
+   clivando: sob a pancada, um plano de íons desliza sobre o vizinho,
+   cargas de mesmo sinal ficam frente a frente e o cristal se parte ao
+   longo de um plano reto. Por isso o bloco sai em pedaços de faces
+   planas, e não em migalhas — e é isso que significa "quebradiço".
+
+   O bloco é um cubo 2x2x2 desenhado em perspectiva isométrica. Cada
+   batida abre mais um plano de clivagem. */
 function PEDRA(){
-  const rnd = rng(9182);
-  const cols = 4, fil = 3;
-  const W = 138, H = 76, cx = 100, cy = 90;
-  let cacos = '';
-  for (let r = 0; r < fil; r++)
-    for (let c = 0; c < cols; c++){
-      const w = W / cols, h = H / fil;
-      const x0 = cx - W / 2 + c * w, y0 = cy - H / 2 + r * h;
-      const j = () => (rnd() - .5) * 5.5;
-      const pts = [[x0 + j(), y0 + j()], [x0 + w + j(), y0 + j()],
-                   [x0 + w + j(), y0 + h + j()], [x0 + j(), y0 + h + j()]]
-        .map(q => q[0].toFixed(1) + ',' + q[1].toFixed(1)).join(' ');
-      /* para onde este caco vai: para fora do centro e para baixo */
-      const dx = ((x0 + w / 2) - cx) * 0.6 + (rnd() - .5) * 16;
-      const dy = 14 + rnd() * 20 + (cy - (y0 + h / 2)) * 0.3;
-      const rr = (rnd() - .5) * 46;
-      const t  = 0.80 + rnd() * 0.20;       /* cada caco com o seu tom */
-      cacos += `<polygon class="pc" points="${pts}" style="`
-             + `--dx:${dx.toFixed(1)}px;--dy:${dy.toFixed(1)}px;--rr:${rr.toFixed(0)}deg;`
-             + `fill:rgb(${Math.round(238*t)},${Math.round(245*t)},${Math.round(250*t)})"/>`;
-    }
-  return `<div class="pd">
+  const a = 24, b = 12, h = 22;          /* largura, profundidade, altura */
+  const cx = 100, cy = 70;
+  /* x cresce para a direita-frente, z para a esquerda-frente, y para cima */
+  const P = (x, z, y) => [ cx + (x - z) * a,
+                           cy + (x + z - 2) * b - (y - 1) * h ];
+  const pts = arr => arr.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  const rgb = (r, g, bl, t) => `rgb(${Math.round(r*t)},${Math.round(g*t)},${Math.round(bl*t)})`;
+
+  /* as direções, já na tela, dos dois planos de clivagem verticais */
+  const n = Math.hypot(a, b);
+  const ux = [  a / n, b / n ];
+  const uz = [ -a / n, b / n ];
+
+  const pecas = [];
+  for (let i = 0; i < 2; i++)
+    for (let k = 0; k < 2; k++)
+      for (let j = 0; j < 2; j++){
+        const si = i ? 1 : -1, sk = k ? 1 : -1;
+        /* as três faces visíveis do bloquinho */
+        const topo = [P(i,k,j+1), P(i+1,k,j+1), P(i+1,k+1,j+1), P(i,k+1,j+1)];
+        const dir  = [P(i+1,k,j+1), P(i+1,k+1,j+1), P(i+1,k+1,j), P(i+1,k,j)];
+        const esq  = [P(i,k+1,j+1), P(i+1,k+1,j+1), P(i+1,k+1,j), P(i,k+1,j)];
+        const t = 1 - (i + k) * 0.02 - (1 - j) * 0.03;
+
+        /* estágio 1: abre só o plano perpendicular a x
+           estágio 2: abre também o plano perpendicular a z
+           estágio 3: tudo separado e a camada de cima desce para o prato */
+        const o1 = [ si * 8 * ux[0], si * 8 * ux[1] ];
+        const o2 = [ si * 13 * ux[0] + sk * 13 * uz[0],
+                     si * 13 * ux[1] + sk * 13 * uz[1] ];
+        /* no estágio 3 as peças ainda têm de caber no prato: 18 é o
+           quanto elas podem abrir sem passar da borda */
+        const o3 = [ si * 18 * ux[0] + sk * 18 * uz[0],
+                     si * 18 * ux[1] + sk * 18 * uz[1] + (j ? 13 : 2) ];
+        const c = P(i + 0.5, k + 0.5, j + 0.5);
+
+        pecas.push({ z: i + k + j * (2 * b / h), html:
+          `<g class="pc" style="transform-origin:${c[0].toFixed(1)}px ${c[1].toFixed(1)}px;`
+        + `--x1:${o1[0].toFixed(1)}px;--y1:${o1[1].toFixed(1)}px;--r1:0deg;`
+        + `--x2:${o2[0].toFixed(1)}px;--y2:${o2[1].toFixed(1)}px;--r2:${(si*1.5).toFixed(1)}deg;`
+        + `--x3:${o3[0].toFixed(1)}px;--y3:${o3[1].toFixed(1)}px;`
+        + `--r3:${((si + sk) * 3 + (j ? si * 5 : 0)).toFixed(1)}deg">`
+        + `<polygon points="${pts(esq)}" fill="${rgb(201,214,223,t)}"/>`
+        + `<polygon points="${pts(dir)}" fill="${rgb(169,184,195,t)}"/>`
+        + `<polygon points="${pts(topo)}" fill="${rgb(242,247,250,t)}"/>`
+        + `</g>` });
+      }
+  /* De trás para a frente. A direção do olhar nesta projeção é
+     (1, 2b/h, 1), então a profundidade de cada bloquinho é
+     i + k + j*(2b/h): pintar em ordem crescente põe o de trás primeiro. */
+  pecas.sort((p, q) => p.z - q.z);
+
+  /* os dois riscos que marcam onde o cristal partiu */
+  const rachaA = pts([P(1,0,2), P(1,2,2), P(1,2,0)]);
+  const rachaB = pts([P(0,1,2), P(2,1,2), P(2,1,0)]);
+
+  return `<div class="pd" data-e="0">
     <svg class="pd-svg" viewBox="0 0 200 152" aria-hidden="true">
       <defs>
         <linearGradient id="pdPrato" x1="0" y1="0" x2="0" y2="1">
@@ -2580,9 +2667,14 @@ function PEDRA(){
       <ellipse cx="100" cy="117" rx="88" ry="23" fill="url(#pdPrato)"
                stroke="#7C8A96" stroke-width="1.2"/>
       <ellipse cx="100" cy="118" rx="70" ry="17" fill="#C9D4DC" opacity=".55"/>
-      <g class="pd-bloco">${cacos}</g>
+      <g class="pd-bloco">${pecas.map(p => p.html).join('')}</g>
+      <polyline class="pd-rach a" points="${rachaA}"/>
+      <polyline class="pd-rach b" points="${rachaB}"/>
     </svg>
-    <span class="pd-dica">bata com o dedo na pedra</span>
+    <div class="pd-pe">
+      <span class="pd-dica">bata na pedra</span>
+      <button class="pd-redo" type="button">&#8635; refazer</button>
+    </div>
   </div>`;
 }
 
@@ -5382,10 +5474,7 @@ function resetReveals(slide){
   if (aj) aj.classList.remove('on');
   slide.classList.remove('acertou');       /* some o brilho de acerto */
   slide.querySelectorAll('.eletron, .rastro-e, .onda-e').forEach(x => x.remove());
-  slide.querySelectorAll('.pd').forEach(p => {
-    p.dataset.q = 0; p.style.setProperty('--q', 0);
-    p.classList.remove('quebrando', 'bate');
-  });
+  slide.querySelectorAll('.pd').forEach(refazPedra);
   const b = slide.querySelector('.reveal-btn');
   if (b) b.classList.remove('emit');
   syncReveals(slide);
@@ -5625,18 +5714,83 @@ deck.addEventListener('pointerup', (e) => {
   else if (cel) mostraLewis(cel);
 });
 
-/* Cada batida quebra mais um pouco. Na quarta a pedra se refaz, para a
-   demonstração poder ser repetida na aula. */
-function bateNaPedra(pd){
+/* O que a legenda diz a cada estágio: a batida é a pergunta, o texto é
+   a resposta química. */
+const PD_DICAS = [
+  'bata na pedra',
+  'os planos de íons deslizaram',
+  'cargas iguais frente a frente se repelem',
+  'o cristal clivou em faces planas'
+];
+
+/* a onda do impacto e o pó que salta do ponto onde o dedo bateu */
+function poDaBatida(svg, px, py){
+  if (!svg) return;
+  const NS = 'http://www.w3.org/2000/svg';
+  const org = px.toFixed(1) + 'px ' + py.toFixed(1) + 'px';
+  const onda = document.createElementNS(NS, 'circle');
+  onda.setAttribute('class', 'pd-onda');
+  onda.setAttribute('cx', px.toFixed(1));
+  onda.setAttribute('cy', py.toFixed(1));
+  onda.setAttribute('r', '14');
+  onda.style.transformOrigin = org;
+  svg.appendChild(onda);
+  setTimeout(() => onda.remove(), 540);
+  for (let i = 0; i < 11; i++){
+    /* para cima e para os lados; o +16 do fim é a gravidade puxando */
+    const ang = Math.PI * (1.08 + Math.random() * 0.84);
+    const d = 16 + Math.random() * 26;
+    const g = document.createElementNS(NS, 'circle');
+    g.setAttribute('class', 'pd-po');
+    g.setAttribute('cx', px.toFixed(1));
+    g.setAttribute('cy', py.toFixed(1));
+    g.setAttribute('r', (0.9 + Math.random() * 1.7).toFixed(2));
+    g.style.setProperty('--px', (Math.cos(ang) * d).toFixed(1) + 'px');
+    g.style.setProperty('--py', (Math.sin(ang) * d + 16).toFixed(1) + 'px');
+    g.style.transformOrigin = org;
+    g.style.animationDelay = (Math.random() * 0.06).toFixed(3) + 's';
+    svg.appendChild(g);
+    setTimeout(() => g.remove(), 960);
+  }
+}
+
+/* Cada batida abre mais um plano de clivagem. Depois da terceira o
+   cristal já está partido: quem volta ao começo é o botão refazer. */
+function bateNaPedra(pd, ev){
   if (!pd) return;
-  const q = Math.round((+pd.dataset.q || 0) * 3);
-  const novo = q >= 3 ? 0 : (q + 1) / 3;
-  pd.dataset.q = novo;
-  pd.style.setProperty('--q', novo.toFixed(3));
-  pd.classList.toggle('quebrando', novo > 0);
+  const e = +pd.dataset.e || 0;
+  const svg = pd.querySelector('.pd-svg');
+  let px = 100, py = 62;
+  if (ev && svg && ev.clientX != null){
+    const r = svg.getBoundingClientRect();
+    if (r.width){
+      px = (ev.clientX - r.left) / r.width * 200;
+      py = (ev.clientY - r.top) / r.height * 152;
+    }
+  }
+  poDaBatida(svg, px, py);
   pd.classList.remove('bate');
   void pd.offsetWidth;
   pd.classList.add('bate');
+  if (e >= 3) return;                     /* já partiu: só o refazer volta */
+  const novo = e + 1;
+  pd.dataset.e = novo;
+  if (novo <= 2){
+    const l = pd.querySelector(novo === 1 ? '.pd-rach.a' : '.pd-rach.b');
+    if (l){ l.classList.remove('flash'); void pd.offsetWidth; l.classList.add('flash'); }
+  }
+  const d = pd.querySelector('.pd-dica');
+  if (d) d.textContent = PD_DICAS[novo];
+}
+
+/* o cristal se recompõe, para a demonstração poder ser repetida */
+function refazPedra(pd){
+  if (!pd) return;
+  pd.dataset.e = 0;
+  pd.classList.remove('bate');
+  pd.querySelectorAll('.pd-rach').forEach(l => l.classList.remove('flash'));
+  const d = pd.querySelector('.pd-dica');
+  if (d) d.textContent = PD_DICAS[0];
 }
 
 /* ------------------------------------------------------------
@@ -6141,8 +6295,10 @@ function revealItem(slide, it){
 deck.addEventListener('click', (e) => {
   const redo = e.target.closest('.lego-redo');
   if (redo){ rebuildLego(redo.closest('.reveal-item')); return; }
+  const pdz = e.target.closest('.pd-redo');
+  if (pdz){ refazPedra(pdz.closest('.pd')); return; }
   const pdr = e.target.closest('.pd');
-  if (pdr){ bateNaPedra(pdr); return; }
+  if (pdr){ bateNaPedra(pdr, e); return; }
   const bkb = e.target.closest('.bk-liga');
   if (bkb){ bicoLiga(bkb.closest('.bk')); return; }
   const sair = e.target.closest('.pn-sair');
