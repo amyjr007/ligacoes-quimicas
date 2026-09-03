@@ -1,6 +1,6 @@
 /* Service worker da aula. Guarda tudo na instalação: a aula roda inteira
    sem rede, que é como ela costuma ser dada. */
-const CACHE = 'ligacoes-v25-2';
+const CACHE = 'ligacoes-v26';
 const ARQUIVOS = [
   './',
   './index.html',
@@ -15,6 +15,7 @@ const ARQUIVOS = [
   './imagens/Ramsey.png',
   './imagens/john_dalton.png',
   './imagens/lewis.jpg',
+  './imagens/g.n.lewis.avif',
   './imagens/clivagem.png'
 ];
 
