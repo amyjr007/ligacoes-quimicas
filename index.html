@@ -851,6 +851,30 @@ body{
   from{opacity:1}
   to  {opacity:0}
 }
+/* A CONTA ESCRITA.
+   O anel cerca; o rótulo diz quantos são. Sem ele o aluno conta os
+   pontos um a um — e conta errado, porque o par do meio é dos dois e é
+   fácil deixá-lo de fora. Com ele a circunferência passa a dizer a
+   frase inteira: oito elétrons, que é o que a Teoria do Octeto pede
+   que se veja. Fica logo acima do anel, fora do caminho dos elétrons,
+   e acompanha o raio dele — cresça o anel, o rótulo sobe junto. */
+.qsp-oito{
+  position:absolute;left:0;top:0;
+  transform:translate(-50%,calc(-50% - var(--oct) - 17px));
+  white-space:nowrap;pointer-events:none;text-decoration:none;
+  font-family:var(--mono);font-size:15px;letter-spacing:.1em;
+  color:rgba(130,255,228,.96);
+  text-shadow:0 2px 14px rgba(3,12,22,.92),0 0 22px rgba(130,255,228,.4);
+  opacity:0;
+}
+/* entra logo depois do anel, para a conta chegar quando já há o que
+   contar; sai no mesmo fade dele */
+.qsp-at.octeto  .qsp-oito{animation:oitoEntra .34s ease .12s both}
+.qsp-at.oct-sai .qsp-oito{animation:octetoSai .34s ease forwards}
+@keyframes oitoEntra{
+  from{opacity:0}
+  to  {opacity:1}
+}
 
 /* ---------- o encaixe ----------
    Os dois elétrons se acham e viram par. A ênfase é grande de propósito:
@@ -2408,6 +2432,26 @@ body{
   100%{opacity:1;transform:translate(var(--ax,-50%),-50%)}
 }
 
+/* CARROSSEL.
+   Um exemplo dá lugar ao outro sem a cena piscar: o que sai gira para a
+   frente, como se estivesse num prato giratório, e se vai pela direita —
+   no mesmo instante em que o próximo entra pela esquerda (.desliza). O
+   giro é o que diz que os dois são a mesma coisa vista em posições
+   diferentes, e não dois objetos soltos. */
+.reveal-item.carrossel{
+  animation:carrosselSai .68s cubic-bezier(.42,.02,.72,.44) both;
+  pointer-events:none;
+}
+@keyframes carrosselSai{
+  0%  {opacity:1;
+       transform:translate(var(--ax,-50%),-50%)
+                 perspective(1100px) rotateY(0deg) scale(1)}
+  26% {opacity:1}
+  100%{opacity:0;
+       transform:translate(calc(var(--ax,-50%) + 330px),-50%)
+                 perspective(1100px) rotateY(-82deg) scale(.62)}
+}
+
 .foot{
   position:absolute;left:88px;bottom:34px;font-family:var(--mono);
   font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(232,241,245,.32);
@@ -3277,8 +3321,9 @@ const SLIDES = [
          toques no cilindro mergulham nele. O cilindro e a legenda de
          baixo não saem do lugar: x/y são a casa deles no palco e valem
          igual dentro e fora do mergulho — quem se move é a câmera. */
-      { nowrap: true, text: 'Exemplo 01', x: 164, y: 477, base: 17.6, tone: '' },
-      { follow: 0, kind: 'vessel', shape: 'cylinder', mol: 'cl2', duplo: true,
+      { id: 'ex01', nowrap: true, text: 'Exemplo 01',
+        x: 164, y: 477, base: 17.6, tone: '' },
+      { follow: 0, id: 'clcil', kind: 'vessel', shape: 'cylinder', mol: 'cl2', duplo: true,
         tag: 'GÁS\nCLORO', color: '#8FE08F',
         /* qk: as moléculas saem 30% maiores que o padrão do mergulho.
            Aqui o assunto é a ligação entre os dois cloros, e ela tem de
@@ -3308,6 +3353,36 @@ const SLIDES = [
         qtit: [
           ['Cloro - 7A',              489, 63],
           ['moléculas de Gás cloro',  262, 64, 'legenda']
+        ],
+        x: 161, y: 363, base: 150, tone: '' },
+      /* O SEGUNDO EXEMPLO, EM CARROSSEL.
+         O clique seguinte troca a substância: o cloro gira para a frente
+         e se vai pela direita levando o rótulo dele, no mesmo instante em
+         que o oxigênio entra pela esquerda com o seu. Os dois ocupam
+         exatamente a mesma casa no palco — é a mesma cena, outra
+         substância, e é isso que a troca tem de dizer.
+
+         Lá dentro tudo se comporta como no cloro: as moléculas à deriva,
+         o duplo toque que amplia, o átomo que se arranca e se recoloca.
+         O que muda é a química — o oxigênio é da família 6A, então traz
+         SEIS elétrons de valência e dois desemparelhados, e a ligação que
+         eles fecham é DUPLA: dois pares no meio, dois bastões. */
+      { id: 'ex02', nowrap: true, text: 'Exemplo 02', entra: 'esq',
+        sai: 'ex01,clcil', x: 164, y: 477, base: 17.6, tone: '' },
+      { follow: 0, id: 'o2cil', entra: 'esq',
+        kind: 'vessel', shape: 'cylinder', mol: 'o2', duplo: true,
+        tag: 'GÁS\nOXIGÊNIO', color: '#8FC4E0',
+        qk: 1.3,
+        qmols: [
+          [ 91, 244], [270, 226], [428, 208], [485, 403],
+          [169, 392], [188, 279], [358, 298], [486, 302],
+          [168, 665], [174, 530], [ 96, 460], [274, 505],
+          [271, 382], [465, 569], [ 65, 352], [277, 658],
+          [358, 562], [379, 418]
+        ],
+        qtit: [
+          ['Oxigênio - 6A',               489, 63],
+          ['moléculas de Gás oxigênio',   262, 64, 'legenda']
         ],
         x: 161, y: 363, base: 150, tone: '' }
     ]
@@ -4101,6 +4176,7 @@ const RECIPES = {
           ['O',30,72,6],['O',70,72,6],['S',50,50,8.5]],
   etoh:  [['H',12,32,4],['H',88,30,4],['C',30,50,7],['C',52,62,7],['O',74,42,6.5]],
   cl2:   [['Cl',34,50,8],['Cl',66,50,8]],
+  o2:    [['O',34,50,8],['O',66,50,8]],
   /* gases nobres são monoatômicos: uma esfera só, sem ligação nenhuma */
   he: [['He',50,50,13]], ne: [['Ne',50,50,13]], ar: [['Ar',50,50,13]],
   kr: [['Kr',50,50,13]], xe: [['Xe',50,50,13]], rn: [['Rn',50,50,13]]
@@ -4143,6 +4219,10 @@ const MOLGEO = {
      folga entre as superfícies — e o bastão aparece no meio.
      O par de índices que se liga está em MOLBOND. */
   cl2:  [['Cl',20,50,24],['Cl',80,50,24]],
+  /* O2 é o mesmo desenho do Cl2 — duas esferas afastadas para o traço da
+     ligação aparecer entre elas. O que muda é a ligação: dois bastões
+     paralelos, porque o oxigênio compartilha DOIS pares. */
+  o2:   [['O',22,50,23],['O',78,50,23]],
   he:[['He',50,50,34]], ne:[['Ne',50,50,34]], ar:[['Ar',50,50,34]],
   kr:[['Kr',50,50,34]], xe:[['Xe',50,50,34]], rn:[['Rn',50,50,34]]
 };
@@ -4154,9 +4234,22 @@ const MOLGEO = {
    os índices apontando para MOLGEO. Molécula que não está aqui continua
    em calota colada, como sempre foi — só entra de bastão quem a aula
    pede que entre. */
+/* O quarto número afasta o traço do eixo, e é ele que desenha a ligação
+   dupla: dois bastões iguais, um de cada lado da linha dos núcleos. Um
+   traço por par compartilhado — é daqui que sai a ordem da ligação. */
 const MOLBOND = {
-  cl2: [[0, 1, 16]]
+  cl2: [[0, 1, 16]],
+  o2:  [[0, 1, 11, -9], [0, 1, 11, 9]]
 };
+
+/* Quantos pares a ligação tem: um bastão é simples, dois é dupla. Sai da
+   própria MOLBOND, que já traz um traço por par — sem segunda lista para
+   manter em dia. */
+function ordemLig(key){
+  const b = MOLBOND[key] || [];
+  if (!b.length) return 0;
+  return b.filter(l => l[0] === b[0][0] && l[1] === b[0][1]).length;
+}
 
 function MOL_SVG(key){
   const g = MOLGEO[key] || MOLGEO.h2o;
@@ -4182,12 +4275,18 @@ function MOL_SVG(key){
      cilindro em vez de uma fita chapada. Por isso o gradiente é montado
      na perpendicular da ligação, e serve para bastão em qualquer ângulo,
      não só para os horizontais. */
-  const lig = (MOLBOND[key] || []).map(([ia, ib, w], i) => {
-    const a = g[ia], b = g[ib];
-    if (!a || !b) return { def: '', haste: '' };
-    const [, ax, ay] = a, [, bx, by] = b;
-    const L = Math.hypot(bx - ax, by - ay) || 1;
-    const px = -(by - ay) / L, py = (bx - ax) / L;    /* perpendicular */
+  const lig = (MOLBOND[key] || []).map(([ia, ib, w, off], i) => {
+    const A = g[ia], B = g[ib];
+    if (!A || !B) return { def: '', haste: '' };
+    const [, ax0, ay0] = A, [, bx0, by0] = B;
+    const L = Math.hypot(bx0 - ax0, by0 - ay0) || 1;
+    const px = -(by0 - ay0) / L, py = (bx0 - ax0) / L;    /* perpendicular */
+    /* O desvio tira o bastão de cima do eixo. As pontas continuam
+       enterradas nas esferas — o desvio é bem menor que o raio delas —,
+       então o corte não aparece nem no traço deslocado. */
+    const d0 = off || 0;
+    const ax = ax0 + px * d0, ay = ay0 + py * d0;
+    const bx = bx0 + px * d0, by = by0 + py * d0;
     const mx = (ax + bx) / 2,  my = (ay + by) / 2;
     const id = `mb-${key}-${i}`;
     return {
@@ -4875,6 +4974,7 @@ const REVEALS = (list, cfg) => {
                  data-x="${r.x}" data-y="${r.y}"
                  ${r.entra ? `data-entra="${r.entra}"` : ''}
                  ${r.saiDe ? `data-saide='${r.saiDe}'` : ''}
+                 ${r.sai ? `data-sai="${r.sai}"` : ''}
                  ${r.reto ? `data-reto="1"` : ''}
                  ${r.id   ? `data-id="${r.id}"`     : ''}
                  ${r.from ? `data-from="${r.from}"` : ''}
@@ -6314,6 +6414,16 @@ const SEP_W = 52 * QM_BIG, SEP_H = 41 * QM_BIG;   /* a caixa, em px, a 500% */
 const SEP_BOLA = .8;
 const SEP_E_DIST = 17;      /* o elétron orbita a esta distância da esfera */
 const SEP_PAR    = 15;      /* meia abertura de um par, em graus */
+/* A LIGAÇÃO DUPLA.
+   O oxigênio tem dois elétrons desemparelhados, não um, e por isso ele
+   forma DOIS pares com o vizinho. Os dois solteiros saem mais abertos
+   que os de um par (SEP_DUPLA), para não se lerem como um par já feito;
+   já emparelhados, cada par fecha bem apertado (SEP_PAR2) e os dois se
+   afastam SEP_VAO2 do eixo, um para cada lado — que é o desenho de uma
+   ligação dupla: dois pares, e não um par gordo. */
+const SEP_DUPLA  = 30;      /* meia abertura entre os dois solteiros */
+const SEP_PAR2   = 9;       /* meia abertura DENTRO de cada par da dupla */
+const SEP_VAO2   = 26;      /* o quanto cada par se afasta do eixo, em px */
 const SEP_PUXAO  = 34;      /* puxão que rompe a ligação */
 /* Perto assim, os dois elétrons se emparelham. Com o desvio lateral de
    SEP_PAR eles nunca chegam a se tocar — passam a se cruzar lado a lado,
@@ -6352,17 +6462,31 @@ function sepGeo(key){
    Como base é sempre a direção do átomo vizinho, o elétron solteiro de
    um fica de frente para o do outro em qualquer posição em que os dois
    estejam — e é isso que faz o encaixe ser possível por qualquer lado. */
-function sepEletrons(n, base){
+function sepEletrons(n, base, ordem){
   /* O solteiro não fica em cima do eixo: sai SEP_PAR para o lado, o
      mesmo desvio com que um par isolado se abre. Como os dois átomos
      olham em direções opostas, o mesmo desvio para o mesmo lado põe um
      ACIMA da linha da ligação e o outro ABAIXO — e aí, aproximando-se,
      eles não se atropelam de frente: encaixam lado a lado, como um par
-     de verdade. */
-  const e = [{ a: base - SEP_PAR, so: true }];   /* o desemparelhado vem primeiro */
-  let resto = n - 1, i = 1;
-  while (resto > 0 && i < 4){
-    const lado = base + i * 90;
+     de verdade.
+
+     Na ligação dupla são DOIS solteiros, um acima e outro abaixo do
+     eixo. O mesmo espelho vale para eles: o de cima de um átomo procura
+     o de cima do outro, e o de baixo procura o de baixo. Saem dois
+     pares, que é o que uma dupla é. O campo lado diz de qual deles o
+     elétron é, e serve para orientaEletrons achar o meio certo. */
+  const nso = (ordem || 1) > 1 ? 2 : 1;
+  const e = nso === 1
+    ? [{ a: base - SEP_PAR, so: true, lado: 0 }]
+    : [{ a: base - SEP_DUPLA, so: true, lado: -1 },
+       { a: base + SEP_DUPLA, so: true, lado:  1 }];
+  /* Sobrando quatro elétrons e havendo dois solteiros de frente para o
+     vizinho, os pares isolados vão em cima e embaixo — não atrás. É como
+     a estrutura de Lewis do O2 é escrita no quadro. */
+  const lados = nso === 2 ? [90, 270, 180] : [90, 180, 270];
+  let resto = n - nso, i = 0;
+  while (resto > 0 && i < lados.length){
+    const lado = base + lados[i];
     if (resto >= 2){ e.push({ a: lado - SEP_PAR }, { a: lado + SEP_PAR }); resto -= 2; }
     else { e.push({ a: lado }); resto -= 1; }
     i++;
@@ -6389,18 +6513,31 @@ function orientaEletrons(sp){
      fechar — o solteiro vai ao meio; solta, ele volta à órbita */
   const montada = !sp.classList.contains('solto');
   const meio = Math.hypot(dx, dy) / 2;
-  [[a, ang], [b, ang + 180]].forEach(([at, base]) => {
+  const ordem = +sp.dataset.ordem || 1;
+  /* A conta do meio é feita no eixo da ligação: u corre de um núcleo
+     ao outro e v atravessa. Cada elétron compartilhado tem um ponto de
+     chegada (meio de u, tanto de v), e daí saem o ângulo e a distância
+     que o CSS pede. O sinal de v é o que espelha um átomo no outro: os
+     dois de um par chegam lado a lado, sem se atropelar. */
+  [[a, ang, -1, meio], [b, ang + 180, 1, -meio]].forEach(([at, base, sinal, uu]) => {
     const es = [...at.querySelectorAll('.qsp-e')];
     const orb = +at.dataset.de || 0;        /* a órbita normal deste átomo */
-    sepEletrons(es.length, base).forEach((novo, i) => {
+    sepEletrons(es.length, base, ordem).forEach((novo, i) => {
       const el = es[i];
       if (!el) return;
       if (novo.so && montada){
-        /* o mesmo afastamento lateral de um par, medido na órbita */
-        const lado = orb * Math.sin(SEP_PAR * Math.PI / 180);
-        el.style.setProperty('--d', Math.hypot(meio, lado).toFixed(1) + 'px');
+        /* meio vão de um par: apertado na dupla, para os dois pares dela
+           se lerem separados; o de sempre na ligação simples */
+        const vao = orb * Math.sin((ordem > 1 ? SEP_PAR2 : SEP_PAR) * Math.PI / 180);
+        /* Na dupla o par sobe ou desce SEP_VAO2 conforme o lado dele —
+           e o lado se espelha de um átomo para o outro, como o vão do
+           par: os dois se olham, e o que está em cima para um está
+           embaixo para o outro. É assim que cada solteiro vai encontrar
+           exatamente aquele que ele já vinha procurando. */
+        const v = sinal * (vao - (novo.lado || 0) * SEP_VAO2);
+        el.style.setProperty('--d', Math.hypot(uu, v).toFixed(1) + 'px');
         el.style.setProperty('--a',
-          (base - Math.atan2(lado, meio) * 180 / Math.PI).toFixed(1) + 'deg');
+          (ang + Math.atan2(v, uu) * 180 / Math.PI).toFixed(1) + 'deg');
       } else {
         if (novo.so && orb) el.style.setProperty('--d', orb.toFixed(1) + 'px');
         el.style.setProperty('--a', novo.a.toFixed(1) + 'deg');
@@ -6427,8 +6564,13 @@ function montaSeparavel(qm){
      centros têm de estar a (orb0 + orb1) * cos(SEP_PAR) um do outro.
      É essa distância que passa a ser a molécula — o par no meio é a
      ligação, e não há vareta nenhuma a desenhar. */
+  const ordem = ordemLig(key) || 1;
   const orb = [a, b].map(at => at.r + SEP_E_DIST);
-  const dist = (orb[0] + orb[1]) * Math.cos(SEP_PAR * Math.PI / 180);
+  /* A dupla é MAIS CURTA que a simples, e sai curta por si: os solteiros
+     dela saem mais abertos do eixo, então os dois núcleos têm de chegar
+     mais perto para que eles se cruzem no meio. */
+  const abre = ordem > 1 ? SEP_DUPLA : SEP_PAR;
+  const dist = (orb[0] + orb[1]) * Math.cos(abre * Math.PI / 180);
   const meioX = (a.x + b.x) / 2;
   const casa = [meioX - dist / 2, meioX + dist / 2];
 
@@ -6436,7 +6578,7 @@ function montaSeparavel(qm){
      vizinho. orientaEletrons refaz esta conta a cada movimento. */
   const atomos = [a, b].map((at, i) => {
     const n = VAL_SEP[at.el] || 0;
-    const es = sepEletrons(n, i ? 180 : 0).map(e =>
+    const es = sepEletrons(n, i ? 180 : 0, ordem).map(e =>
       `<s class="qsp-e${e.so ? ' so' : ''}"${e.so ? ` data-so="1"` : ''}`
       + ` style="--a:${e.a}deg;--d:${orb[i].toFixed(1)}px"></s>`).join('');
     /* O ANEL DO OCTETO.
@@ -6448,13 +6590,29 @@ function montaSeparavel(qm){
        no átomo do lado nem recolher elétron alheio. */
     const fora  = orb[i] + 6.5;                  /* borda do elétron */
     const perto = dist - (i ? a : b).r;          /* onde começa a esfera vizinha */
-    const anel  = (fora + perto) / 2 * 1.05;     /* 5% mais folgado que o meio */
+    let   anel  = (fora + perto) / 2 * 1.05;     /* 5% mais folgado que o meio */
+    /* Na dupla os pares compartilhados ficam longe do eixo, e por isso
+       mais longe do núcleo que na simples: o anel tem de alcançá-los,
+       ainda que para isso ele passe por cima da esfera vizinha — que é
+       como as circunferências do octeto se cruzam no quadro, mesmo. */
+    if (ordem > 1){
+      const vao = orb[i] * Math.sin(SEP_PAR2 * Math.PI / 180);
+      anel = Math.max(anel, Math.hypot(dist / 2, SEP_VAO2 + vao) + 9);
+    }
+    /* Quantos elétrons o anel cerca: os do próprio átomo mais os que o
+       vizinho põe no par — um por par compartilhado, dois na dupla. Dá
+       oito nos dois casos da aula, mas a conta é feita e não escrita à
+       mão: uma molécula que não fechasse o octeto diria a verdade. */
+    const dentro = n + ordem;
     return `<i class="qsp-at" data-i="${i}"`
          + ` data-de="${orb[i].toFixed(1)}"`
+         + ` data-oito="${dentro}"`
          + ` style="--x:${casa[i].toFixed(1)}px;--y:${at.y.toFixed(1)}px;`
          + `--oct:${anel.toFixed(1)}px;`
          + `--r:${at.r.toFixed(1)}px">`
-         + `<b class="qsp-bola" style="--bg:${sphereBg(EL_COLOR[at.el])}"></b>${es}</i>`;
+         + `<b class="qsp-bola" style="--bg:${sphereBg(EL_COLOR[at.el])}"></b>${es}`
+         + `<u class="qsp-oito">${dentro} elétron${dentro === 1 ? '' : 's'}</u>`
+         + `</i>`;
   }).join('');
 
   /* data-dist é a distância de repouso E o limite de aproximação: nenhum
@@ -6465,9 +6623,16 @@ function montaSeparavel(qm){
      fica a `lado` do eixo e o elétron tem 6.5px de raio, então a meia
      altura precisa passar dos dois — com folga, para o par não encostar
      na parede. Assim o par mora dentro da ligação, à vista. */
+  /* Um bastão por par: a dupla sai com dois, afastados do eixo para os
+     lados, cada um envelopando o seu par. */
+  const barras = ordem > 1
+    ? `<i class="qsp-lig" data-off="${-SEP_VAO2}"></i>`
+      + `<i class="qsp-lig" data-off="${SEP_VAO2}"></i>`
+    : `<i class="qsp-lig"></i>`;
   qm.innerHTML = `<div class="qsp ligado" data-dist="${dist.toFixed(1)}"`
+    + ` data-ordem="${ordem}"`
     + ` style="--lw:${(lig[2] * g.f * 1.5).toFixed(1)}px">`
-    + `<i class="qsp-lig"></i>${atomos}</div>`;
+    + `${barras}${atomos}</div>`;
   const sp = qm.querySelector('.qsp');
   orientaEletrons(sp);
   poeLigacao(sp);
@@ -6478,26 +6643,36 @@ function montaSeparavel(qm){
 function poeLigacao(sp){
   if (!sp) return;
   const [a, b] = [...sp.querySelectorAll('.qsp-at')];
-  const bar = sp.querySelector('.qsp-lig');
-  if (!a || !b || !bar) return;
+  const bars = [...sp.querySelectorAll('.qsp-lig')];
+  if (!a || !b || !bars.length) return;
   const le = (el, v) => parseFloat(el.style.getPropertyValue(v));
   const ax = le(a, '--x'), ay = le(a, '--y');
   const dx = le(b, '--x') - ax, dy = le(b, '--y') - ay;
-  bar.style.setProperty('--x', ax.toFixed(1) + 'px');
-  bar.style.setProperty('--y', ay.toFixed(1) + 'px');
-  bar.style.setProperty('--len', Math.hypot(dx, dy).toFixed(1) + 'px');
-  bar.style.setProperty('--w', sp.style.getPropertyValue('--lw') || '38px');
-  bar.style.setProperty('--rot', (Math.atan2(dy, dx) * 180 / Math.PI).toFixed(2) + 'deg');
+  const len = Math.hypot(dx, dy) || 1;
+  /* a perpendicular ao eixo: é por ela que os dois bastões da dupla se
+     afastam um do outro, em qualquer ângulo que a molécula esteja */
+  const px = -dy / len, py = dx / len;
+  const rot = (Math.atan2(dy, dx) * 180 / Math.PI).toFixed(2) + 'deg';
+  bars.forEach(bar => {
+    const off = +bar.dataset.off || 0;
+    bar.style.setProperty('--x', (ax + px * off).toFixed(1) + 'px');
+    bar.style.setProperty('--y', (ay + py * off).toFixed(1) + 'px');
+    bar.style.setProperty('--len', len.toFixed(1) + 'px');
+    bar.style.setProperty('--w', sp.style.getPropertyValue('--lw') || '38px');
+    bar.style.setProperty('--rot', rot);
+  });
 }
 
-/* onde está o elétron desemparelhado deste átomo, em px da caixa */
-function pontoSo(at){
-  const e = at.querySelector('.qsp-e[data-so]');
-  if (!e) return null;
-  const ang = parseFloat(e.style.getPropertyValue('--a')) * Math.PI / 180;
-  const d   = parseFloat(e.style.getPropertyValue('--d'));
-  return { x: parseFloat(at.style.getPropertyValue('--x')) + Math.cos(ang) * d,
-           y: parseFloat(at.style.getPropertyValue('--y')) + Math.sin(ang) * d };
+/* onde estão os elétrons desemparelhados deste átomo, em px da caixa.
+   São dois na ligação dupla, um na simples. */
+function pontosSo(at){
+  const x = parseFloat(at.style.getPropertyValue('--x'));
+  const y = parseFloat(at.style.getPropertyValue('--y'));
+  return [...at.querySelectorAll('.qsp-e[data-so]')].map(e => {
+    const ang = parseFloat(e.style.getPropertyValue('--a')) * Math.PI / 180;
+    const d   = parseFloat(e.style.getPropertyValue('--d'));
+    return { x: x + Math.cos(ang) * d, y: y + Math.sin(ang) * d };
+  });
 }
 
 /* A ruptura: o bastão se parte com estilhaços, os dois átomos ficam
@@ -6534,8 +6709,7 @@ function separaAtomos(sp, qm){
   void faisca.offsetWidth;
   faisca.classList.add('go');
 
-  const bar = sp.querySelector('.qsp-lig');
-  if (bar) repete(bar, 'parte');
+  sp.querySelectorAll('.qsp-lig').forEach(bar => repete(bar, 'parte'));
   setTimeout(() => { sp2.remove(); faisca.remove(); }, 900);
 
   /* O estado muda ANTES de recolocar os elétrons: orientaEletrons lê a
@@ -6607,8 +6781,7 @@ function juntaAtomos(sp, qm){
       e.classList.add('indo');
       e.classList.remove('mira');
     });
-    const so = at.querySelector('.qsp-e[data-so]');
-    if (so) so.classList.add('par');
+    at.querySelectorAll('.qsp-e[data-so]').forEach(so => so.classList.add('par'));
     repete(at, 'fechou');
   });
   /* Já nas posições finais, os solteiros se viram um para o outro e se
@@ -6635,8 +6808,7 @@ function juntaAtomos(sp, qm){
     /* o bastão volta: 'parte' preenche para a frente, então sem tirá-lo
        daqui ele ficaria invisível para sempre. Os elétrons FICAM — é com
        eles ao lado do bastão que se confere o octeto dos dois. */
-    const bar = sp.querySelector('.qsp-lig');
-    if (bar) bar.classList.remove('parte');
+    sp.querySelectorAll('.qsp-lig').forEach(bar => bar.classList.remove('parte'));
     poeLigacao(sp);
   }, 620);
 }
@@ -6652,16 +6824,19 @@ function juntaAtomos(sp, qm){
    que a aula quer dizer: para ligar de novo, primeiro é preciso separar. */
 function miraEncaixe(sp, qm){
   const ats = [...sp.querySelectorAll('.qsp-at')];
-  const p = ats.map(pontoSo);
-  if (!p[0] || !p[1]) return;
-  const d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+  const p = ats.map(pontosSo);
+  if (!p[0] || !p[1] || !p[0].length || !p[1].length) return;
+  /* Quem manda é o par mais perto de fechar. Na dupla são dois pares, e
+     os dois chegam juntos — o átomo é um só, e todos os elétrons dele
+     andam com ele —, então basta o primeiro para saber que é hora. */
+  let d = Infinity;
+  p[0].forEach(e0 => p[1].forEach(e1 =>
+    { d = Math.min(d, Math.hypot(e0.x - e1.x, e0.y - e1.y)); }));
   if (d > SEP_ENCAIXE * 2.4) sp.dataset.armado = '1';
   const armado = sp.dataset.armado === '1';
   const perto = armado && d < SEP_ENCAIXE * 1.7;
-  ats.forEach(at => {
-    const e = at.querySelector('.qsp-e[data-so]');
-    if (e) e.classList.toggle('mira', perto);
-  });
+  ats.forEach(at => at.querySelectorAll('.qsp-e[data-so]')
+    .forEach(e => e.classList.toggle('mira', perto)));
   if (armado && d < SEP_ENCAIXE) juntaAtomos(sp, qm);
 }
 
@@ -7270,7 +7445,10 @@ const eligible = (it, face) =>
 /* o que o próximo toque no "?" vai fazer */
 function nextAction(slide){
   const face = faceNow(slide);
+  /* quem saiu no carrossel está escondido, mas não é "por revelar": ele
+     já teve a sua vez e não pode voltar à fila do próximo clique */
   const it = itemsOf(slide).find(o => o.hidden && !o.classList.contains('retract')
+                                   && !o.classList.contains('saiu')
                                    && eligible(o, face));
   if (it) return { type: 'reveal', it };
   const c = cubeOf(slide);
@@ -7284,15 +7462,56 @@ function syncReveals(slide){
   const face = faceNow(slide);
   items.forEach(it => {
     const holds = !!it.dataset.id &&
-      items.some(o => o.hidden && o.dataset.from === it.dataset.id && eligible(o, face));
+      items.some(o => o.hidden && !o.classList.contains('saiu')
+                   && o.dataset.from === it.dataset.id && eligible(o, face));
     it.classList.toggle('has-more', holds && !it.hidden);
   });
   atualizaBarra();
 }
 
+/* ------------------------------------------------------------
+   O CARROSSEL
+   Manda embora, girando, os elementos cujos ids estão listados —
+   e guarda neles a marca 'saiu', que é o que impede o próximo
+   clique de os trazer de volta como se fossem novidade. Um passo
+   para trás desfaz a marca e os traz de volta inteiros.
+   ------------------------------------------------------------ */
+function giraFora(slide, ids){
+  ids.split(',').forEach(nome => {
+    const o = slide.querySelector(`.reveal-item[data-id="${nome.trim()}"]`);
+    if (!o || o.hidden) return;
+    closeQuantum(o);                       /* mergulhado, ele sobe antes de sair */
+    o.classList.remove('pop', 'has-more', 'retract');
+    void o.offsetWidth;
+    o.classList.add('carrossel');
+    setTimeout(() => {
+      if (!o.classList.contains('carrossel')) return;   /* voltou no meio do giro */
+      o.classList.remove('carrossel');
+      o.classList.add('saiu');
+      o.hidden = true;
+      o.style.left = o.dataset.x + 'px';
+      o.style.top  = o.dataset.y + 'px';
+      syncReveals(slide);
+    }, 700);
+  });
+}
+
+/* o passo para trás desfaz a troca: quem saiu para dar lugar volta */
+function voltaCarrossel(slide, ids){
+  ids.split(',').forEach(nome => {
+    const o = slide && slide.querySelector(`.reveal-item[data-id="${nome.trim()}"]`);
+    if (!o || !o.classList.contains('saiu')) return;
+    o.classList.remove('saiu', 'carrossel');
+    o.hidden = true;                       /* revealItem refaz a entrada dele */
+    revealItem(slide, o);
+  });
+}
+
 /* o elemento volta para dentro de onde saiu e some */
 function retractItem(it){
   const slide = it.closest('.slide');
+  /* carrossel desfeito: quem tinha saído para dar lugar a este volta */
+  if (it.dataset.sai && slide) voltaCarrossel(slide, it.dataset.sai);
   aplicaAcao(slide, it.dataset.acao, false);
   apagaDigitado(it);
   closeQuantum(it);                        /* se estava ampliado, volta antes de sumir */
@@ -8927,6 +9146,10 @@ function origemDeFora(x, y){
 
 /* solta um elemento: ele nasce de dentro do pai, ou vem de fora da tela */
 function revealItem(slide, it){
+  /* CARROSSEL: este item toma o lugar de outro. O que sai gira e se vai
+     no mesmo instante em que este chega, e não um depois do outro — é a
+     troca que se quer ver, não duas animações em fila. */
+  if (it.dataset.sai) giraFora(slide, it.dataset.sai);
   const pai = parentOf(slide, it);
   let ox, oy, arco = null;
 
@@ -10110,6 +10333,8 @@ function coordsFor(slide){
          + `${wch ? `, wch: ${wch.trim()}` : ''}`
          + `${it.dataset.of !== undefined ? `, face: ${it.dataset.of}` : ''}`
          + `, tone: '${tone}'`
+         + `${it.dataset.entra ? `, entra: '${it.dataset.entra}'` : ''}`
+         + `${it.dataset.sai ? `, sai: '${it.dataset.sai}'` : ''}`
          + `${it.dataset.from ? `, from: '${it.dataset.from}'` : ''} }`;
   });
 
