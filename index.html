@@ -612,6 +612,93 @@ body{
   100%{opacity:0;transform:scale(.25);border-color:rgba(130,255,228,.95);border-width:7px}
 }
 
+/* ---------- AJUDA PARA MONTAR MOLÉCULAS ----------
+   A esfera fica na quina de baixo à direita, fora do palco onde as
+   coisas se arrastam, e é a mesma pastilha luminosa que o app usa para
+   tudo que se toca: tinta funda, aro verde-água e o brilho por fora.
+
+   Ela NÃO é um passo da sequência de cliques. É consulta — abre quando a
+   turma trava na hora de montar, e fecha quando não precisa mais. Por
+   isso vive fora dos reveals, como o quadro. */
+/* A esfera mora na MESMA quina do Refazer do mundo quântico, e do mesmo
+   jeito: encostada em 18px do canto. Os dois nunca disputam o lugar —
+   dentro do mergulho esta some, porque ali não se monta molécula no
+   papel, monta-se com o dedo. */
+.poli-btn{
+  position:absolute;right:18px;bottom:18px;z-index:8;
+  width:80px;height:80px;padding:0;
+  border-radius:50%;border:1px solid rgba(69,199,176,.5);
+  background:radial-gradient(circle at 34% 30%,#1E5359 0%,#0B2C33 66%,#061A20 100%);
+  color:var(--paper);cursor:pointer;pointer-events:auto;
+  display:grid;place-items:center;
+  box-shadow:0 0 26px rgba(69,199,176,.22);
+  transition:border-color .2s,box-shadow .2s,transform .2s,color .2s,opacity .3s;
+}
+.poli-btn span{
+  font-family:var(--mono);font-size:8px;letter-spacing:.06em;line-height:1.5;
+  text-transform:uppercase;white-space:pre-line;text-align:center;
+}
+.poli-btn:hover{
+  border-color:var(--aqua);box-shadow:0 0 34px rgba(69,199,176,.45);
+  transform:scale(1.05);
+}
+/* aberta, a esfera acende em âmbar: ela é o que está no comando agora */
+.slide.poli-on .poli-btn{
+  border-color:var(--amber);color:var(--amber);
+  box-shadow:0 0 34px rgba(240,180,74,.4);
+}
+/* submerso, a ajuda de papel sai de cena — e a nota com ela */
+.slide.quantum-on .poli-btn,
+.slide.quantum-on .poli-nota{
+  opacity:0;visibility:hidden;pointer-events:none;
+}
+
+/* A NOTA. Estreita e alta — é uma lista de passos, e passo se lê em
+   coluna: linha curta, um de cada vez. Fica no PALCO, e não na janela,
+   então cresce e encolhe junto com o slide, como tudo que a aula
+   projeta; e se arrasta com o dedo, porque o lugar bom para ela depende
+   de onde está a molécula que a turma está tentando montar. */
+.poli-nota{
+  position:absolute;z-index:9;
+  transform:translate(-50%,-50%) scale(.93);
+  width:420px;padding:24px 26px 26px;
+  background:linear-gradient(180deg,rgba(18,49,75,.97),rgba(7,22,38,.985));
+  border:1px solid rgba(69,199,176,.34);border-radius:4px;
+  box-shadow:0 26px 70px rgba(3,12,22,.72),0 0 44px rgba(69,199,176,.1);
+  opacity:0;pointer-events:none;
+  cursor:move;touch-action:none;
+  user-select:none;-webkit-user-select:none;
+  transition:opacity .3s ease,transform .36s cubic-bezier(.2,.85,.3,1);
+}
+/* Aberta, ela veste o mesmo âmbar da esfera: as duas são a mesma coisa
+   acesa, e é o âmbar que diz isso. */
+.slide.poli-on .poli-nota{
+  opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1);
+  border-color:rgba(240,180,74,.55);
+  box-shadow:0 26px 70px rgba(3,12,22,.72),0 0 44px rgba(240,180,74,.18);
+}
+/* na mão ela acompanha o dedo, sem a mola da entrada */
+.poli-nota.pegando{
+  cursor:grabbing;transition:opacity .3s ease;
+  border-color:var(--amber);
+}
+.poli-nota h3{
+  margin:0 0 18px;font-family:var(--mono);font-size:12px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--amber);font-weight:400;
+}
+.poli-nota ol{margin:0;padding:0;list-style:none;display:grid;gap:13px}
+.poli-nota li{display:flex;align-items:flex-start;gap:13px}
+/* o número num anel âmbar, como os passos numerados do resto da aula */
+.poli-nota li b{
+  flex:none;width:25px;height:25px;margin-top:1px;border-radius:50%;
+  display:grid;place-items:center;
+  font-family:var(--mono);font-size:11.5px;font-weight:500;
+  color:var(--amber);border:1px solid rgba(240,180,74,.45);
+}
+.poli-nota li span{
+  font-size:16px;font-weight:300;line-height:1.42;color:var(--paper);
+}
+
 /* ---------- o quadro de escola ----------
    Antes cada slide que quisesse um quadro trazia a sua própria bola
    "Quadro" no canto da cena. Agora o pedido é um só e vale em toda a
@@ -718,6 +805,74 @@ body{
   0%,100%{filter:drop-shadow(0 0 16px rgba(255,80,50,.8)) brightness(1.1)}
   50%    {filter:drop-shadow(0 0 52px rgba(255,80,50,1))  brightness(1.65)}
 }
+/* ---------- MOLÉCULAS EM TRÊS DIMENSÕES ----------
+   A amônia é uma PIRÂMIDE, e pirâmide desenhada no plano vira triângulo:
+   some justamente o que a molécula tem de particular. Estas são montadas
+   em 3D de verdade, com os átomos em profundidade.
+
+   Por isso a interação delas é outra. Não se arranca elétron de uma
+   pirâmide que se está virando na mão — aqui o gesto é OLHAR, de todos
+   os lados. Arrastar leva a molécula inteira; o toque amplia; e,
+   ampliada, o dedo a gira.
+
+   Feito em CSS, e não na GPU: são quatro esferas e três hastes por
+   molécula, e o navegador ordena a profundidade sozinho quando o pai
+   guarda o espaço (preserve-3d). Uma esfera não precisa girar para o
+   olho — um círculo com brilho é esfera de qualquer ângulo —, então só
+   as hastes têm de ser orientadas de verdade. */
+.qm.tri{
+  width:calc(48px * var(--k,1));height:calc(48px * var(--k,1));
+  perspective:640px;
+}
+.m3{
+  position:absolute;left:50%;top:50%;width:0;height:0;
+  transform-style:preserve-3d;
+  transform:scale3d(var(--k,1),var(--k,1),var(--k,1))
+            rotateX(var(--rx,-16deg)) rotateY(var(--ry,22deg));
+}
+.qm.tri.girando .m3{transition:none}
+/* A ESFERA TEM DE ENCARAR A CÂMERA.
+   Sendo filha de um pai em preserve-3d, ela girava JUNTO com a molécula —
+   e um círculo girado é uma elipse. Eram discos virando, não esferas.
+   Aqui cada átomo desfaz a rotação do pai por dentro: a POSIÇÃO dele
+   continua girando (é o que faz a molécula ser tridimensional), mas o
+   desenho volta a encarar quem olha. É o que um visualizador molecular
+   faz com sprites — e é correto, não atalho: de qualquer ângulo uma
+   esfera é um círculo, e o brilho dela vem sempre da mesma luz. */
+.m3-at{
+  position:absolute;left:0;top:0;
+  width:calc(var(--r) * 2);height:calc(var(--r) * 2);
+  margin:calc(var(--r) * -1) 0 0 calc(var(--r) * -1);
+  border-radius:50%;background:var(--bg);
+  transform:translate3d(var(--x),var(--y),var(--z))
+            rotateY(calc(-1 * var(--ry,22deg)))
+            rotateX(calc(-1 * var(--rx,-16deg)));
+}
+/* A HASTE É UM CILINDRO, E CILINDRO NÃO SOME DE PERFIL.
+   Uma lâmina só virava um fio quando a molécula girava de lado. São três,
+   cruzadas de 60° em 60° em torno do eixo da ligação: de qualquer ângulo
+   pelo menos uma está quase de frente, e as outras duas fazem a sombra
+   das laterais. Juntas, elas se leem como um tubo.
+   Cada uma nasce no átomo A apontando para o +X do seu referencial; quem
+   a vira até o átomo B são o rotateZ e o rotateY, e o rotateX é a lâmina
+   girando em torno de si mesma. */
+.m3-lig{
+  position:absolute;left:0;top:0;
+  width:var(--len);height:var(--w);
+  margin-top:calc(var(--w) / -2);
+  border-radius:var(--w);
+  transform-origin:0 50%;
+  transform:translate3d(var(--x),var(--y),var(--z))
+            rotateZ(var(--rz)) rotateY(var(--ry2)) rotateX(var(--rx3,0deg));
+  background:linear-gradient(180deg,
+    rgba(150,185,210,.20) 0%,rgba(226,243,253,.58) 34%,
+    rgba(160,192,214,.34) 68%,rgba(110,145,175,.16) 100%);
+  opacity:var(--o3,1);
+}
+/* ampliada, ela pede o dedo para girar — e avisa isso no cursor */
+.slide.quantum-on .qm.tri.big{cursor:grab;touch-action:none}
+.slide.quantum-on .qm.tri.big.girando{cursor:grabbing}
+
 /* ---------- a molécula ampliada, que se deixa desmontar ----------
    Só a molécula que está em 500% aceita este gesto. É de propósito:
    ampliar é o pedido de "quero olhar isto de perto", e é só de perto
@@ -867,6 +1022,21 @@ body{
   text-shadow:0 2px 14px rgba(3,12,22,.92),0 0 22px rgba(130,255,228,.4);
   opacity:0;
 }
+/* NOS BRAÇOS A CONTA VAI PARA O LADO DE FORA.
+   O anel de um braço é largo — ele alcança o par que mora no meio da
+   ligação —, então o rótulo posto do lado do centro cairia justo em cima
+   do átomo central e das contas dele. Por isso ele sai pelo lado oposto:
+   abaixo do braço que está abaixo do centro, acima do que está acima.
+
+   Na água e no SCl2 os dois braços ficam embaixo e as duas contas descem.
+   No metano são quatro, dois em cima e dois embaixo, e cada par vai para
+   o seu lado — que é o que tira as quatro contas de cima do carbono. */
+.qsp-at.ramo .qsp-oito{
+  transform:translate(-50%,calc(-50% + var(--oct) + 17px));
+}
+.qsp-at.ramo.acima .qsp-oito{
+  transform:translate(-50%,calc(-50% - var(--oct) - 17px));
+}
 /* entra logo depois do anel, para a conta chegar quando já há o que
    contar; sai no mesmo fade dele */
 .qsp-at.octeto  .qsp-oito{animation:oitoEntra .34s ease .12s both}
@@ -875,6 +1045,24 @@ body{
   from{opacity:0}
   to  {opacity:1}
 }
+
+/* ---------- a molécula de braços ----------
+   Num par de iguais quem fica sozinho é a molécula: rompida a ligação,
+   não sobra molécula nenhuma, e o tremor é dos dois. Na água não — ela
+   continua sendo água com um hidrogênio a menos, incompleta mas inteira.
+   Então quem treme e acende em vermelho é o BRAÇO que se soltou; e o
+   centro treme junto, porque está tão incompleto quanto ele. */
+.qsp.ramos .qsp-at.solto,
+.qsp.ramos.incompleta .qsp-at.centro{
+  animation:molShake .26s linear infinite, qmAlert 1.1s ease-in-out infinite;
+}
+.qsp.ramos .qsp-at.solto.levando{animation:none}   /* na mão, ele para */
+/* o centro não sai do lugar: são os braços que se arrancam dele. O dedo
+   ainda o alcança, para acender o anel do octeto. */
+.qsp.ramos .qsp-at.centro{cursor:pointer}
+/* enquanto falta um braço, os elétrons acompanham a mão em vez de virem
+   pela mola de .42s, que ficaria sempre atrasada */
+.qsp.ramos.incompleta .qsp-e{transition:transform .13s linear,opacity .3s ease}
 
 /* ---------- o encaixe ----------
    Os dois elétrons se acham e viram par. A ênfase é grande de propósito:
@@ -1390,25 +1578,18 @@ body{
 .slide.rede-on .q-voltar{opacity:1;visibility:visible}
 .q-voltar:hover{border-color:var(--amber);box-shadow:0 0 30px rgba(240,180,60,.45);transform:scale(1.05)}
 
-/* botao que devolve tudo ao lugar dentro do reticulo */
-.q-reset{
-  position:absolute;right:38px;bottom:34px;
-  padding:11px 20px;border-radius:999px;
-  border:1px solid rgba(69,199,176,.5);
-  background:linear-gradient(180deg,#12414A 0%,#0A2830 100%);
-  color:var(--paper);font-family:var(--mono);font-size:13px;letter-spacing:.14em;
-  text-transform:uppercase;cursor:pointer;pointer-events:auto;
-  box-shadow:0 0 22px rgba(69,199,176,.2);
-  transition:border-color .2s,box-shadow .2s,transform .2s,opacity .3s;
-  opacity:0;visibility:hidden;
-}
-.slide.rede-on .q-reset{opacity:1;visibility:visible}
+/* REFAZER e RESETAR: a mesma pastilha.
+   Os dois dizem "volte ao começo" — um devolve o campo de moléculas, o
+   outro devolve o retículo — e moram na MESMA quina, porque nunca
+   aparecem juntos: onde há campo não há rede, e vice-versa. Não havia
+   por que falarem línguas diferentes, e o Resetar era a última pílula
+   escrita que sobrava aqui dentro.
 
-/* Refazer: devolve o campo de moléculas ao começo. Redondo e sem
-   palavra — o ícone da seta em volta já é lido como "recomeçar" em
+   Redondos e sem palavra: a seta em volta já é lida como "recomeçar" em
    qualquer aplicativo, e a pastilha ocupa menos canto do que a pílula
-   escrita ocupava. Encostado na quina, longe das moléculas. */
-.q-refazer{
+   escrita ocupava. Encostados na quina, longe do que se manuseia. */
+.q-refazer,
+.q-reset{
   position:absolute;right:18px;bottom:18px;
   width:52px;height:52px;padding:0;border-radius:50%;
   display:grid;place-items:center;
@@ -1419,9 +1600,12 @@ body{
   transition:border-color .2s,box-shadow .2s,transform .2s,opacity .3s;
   opacity:0;visibility:hidden;
 }
-.q-refazer svg{display:block}
+.q-refazer svg,
+.q-reset   svg{display:block}
+/* cada um acende no seu mundo: o campo de moléculas, a rede */
 .slide.quantum-on .q-refazer{opacity:1;visibility:visible}
-.q-refazer:hover{border-color:var(--aqua);box-shadow:0 0 30px rgba(69,199,176,.42);transform:scale(1.05)}
+.slide.rede-on    .q-reset  {opacity:1;visibility:visible}
+.q-refazer:hover,
 .q-reset:hover{border-color:var(--aqua);box-shadow:0 0 30px rgba(69,199,176,.42);transform:scale(1.05)}
 
 /* rótulo da célula unitária, no mundo quântico */
@@ -2061,7 +2245,38 @@ body{
   flex:1;display:flex;align-items:flex-start;justify-content:center;gap:78px;
   padding-top:34px;
 }
-.ex-el{display:flex;flex-direction:column;align-items:center;gap:4px}
+.ex-el{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px}
+/* A CARGA DO ÍON.
+   Sai da família e aparece acima do símbolo, uma por clique: primeiro a
+   do cátion, depois a do ânion. Arrasta-se com o dedo desde que apareça,
+   porque mover as duas é o gesto DESTA aula — é trocando-as de lado que
+   se chega à fórmula do composto.
+
+   Fica FORA do fluxo da coluna (position:absolute), e por isso não
+   empurra o símbolo nem a família para baixo: as posições já acertadas
+   das duas continuam valendo como estavam. */
+.ex-el .carga{
+  position:absolute;left:50%;bottom:100%;margin-bottom:8px;
+  font-family:var(--display);font-weight:600;font-size:34px;line-height:1;
+  color:var(--amber);text-shadow:0 4px 20px rgba(3,12,22,.85);
+  white-space:nowrap;
+  transform:translate(calc(-50% + var(--fx,0px)),var(--fy,0px)) scale(.55);
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:opacity .34s ease,transform .46s cubic-bezier(.2,1.5,.4,1);
+}
+.ex-el .carga.on{
+  opacity:1;visibility:visible;pointer-events:auto;
+  transform:translate(calc(-50% + var(--fx,0px)),var(--fy,0px)) scale(1);
+  cursor:grab;touch-action:none;
+  user-select:none;-webkit-user-select:none;
+}
+/* na mão ela acompanha o dedo sem mola: a curva de entrada ficaria
+   sempre um passo atrás do arrasto */
+.ex-el .carga.pegando{
+  cursor:grabbing;color:var(--aqua);
+  text-shadow:0 0 24px rgba(69,199,176,.6);
+  transition:none;
+}
 .ex-el .fam{
   font-family:var(--mono);font-size:15px;letter-spacing:.22em;color:var(--amber);
   transform:translate(var(--fx,0px),var(--fy,0px));
@@ -2069,14 +2284,39 @@ body{
   user-select:none;-webkit-user-select:none;
 }
 .ex-el .fam.pegando{cursor:grabbing;color:var(--aqua);text-shadow:0 0 18px rgba(69,199,176,.6)}
-/* Posição das famílias, medida na tela e igual em todos os exemplos.
-   Os valores não são simétricos porque a família é centrada sob o seu
-   próprio símbolo, e os símbolos têm larguras diferentes. */
-.ex-par .ex-el:first-child .fam{--fx:-63.6px;--fy:-1.3px}
-.ex-par .ex-el:last-child  .fam{--fx:54.8px;--fy:-1.9px}
+/* ONDE AS PEÇAS FICAM DENTRO DA FACE.
+   Medido na tela, arrumando o Exemplo 01 com o dedo — e vale para os
+   quatro: a regra é do LADO da face (first-child, last-child), não do
+   exemplo, então o que se acerta num se acerta em todos. Os valores não
+   são simétricos porque cada peça é centrada sob o seu próprio símbolo,
+   e os símbolos têm larguras diferentes.
+   Para reposicionar: ligue EX_SIM_MOVEL, arraste, aperte C e cole. */
+.ex-par .ex-el:first-child .carga{--fx:44.3px;--fy:40.4px}   /* 1+ */
+.ex-par .ex-el:first-child .sim  {--fx:8.8px;--fy:44.8px}    /* Na */
+.ex-par .ex-el:first-child .fam  {--fx:-77.5px;--fy:71.3px}  /* 1A */
+.ex-par .ex-el:last-child  .carga{--fx:29.7px;--fy:41px}     /* 2− */
+.ex-par .ex-el:last-child  .sim  {--fx:-18.4px;--fy:47.4px}  /* O  */
+.ex-par .ex-el:last-child  .fam  {--fx:68.6px;--fy:69.4px}   /* 6A */
 .ex-el .sim{
   font-family:var(--display);font-weight:600;font-size:64px;line-height:1;
   color:var(--paper);text-shadow:0 6px 26px rgba(3,12,22,.8);
+  /* o mesmo deslocamento da família, para o símbolo poder ser posto no
+     lugar dentro da face. Vale sempre; o que o interruptor liga e
+     desliga é o ARRASTO, não a posição já escolhida. */
+  transform:translate(var(--fx,0px),var(--fy,0px));
+}
+/* Modo de posicionamento dos símbolos — ver EX_SIM_MOVEL no script.
+   Só com ele ligado o símbolo pega o dedo: ele tem 64px e, pegável,
+   toma boa parte da face — e é tocando a face que se gira o cubo. */
+body.sim-movel .ex-el .sim{
+  cursor:grab;touch-action:none;
+  user-select:none;-webkit-user-select:none;
+  outline:1px dashed rgba(69,199,176,.4);outline-offset:6px;
+}
+body.sim-movel .ex-el .sim.pegando{
+  cursor:grabbing;color:var(--aqua);
+  text-shadow:0 0 22px rgba(69,199,176,.55);
+  outline-color:var(--aqua);
 }
 .face .n{
   font-family:var(--mono);font-size:11.5px;letter-spacing:.28em;text-transform:uppercase;
@@ -2452,6 +2692,43 @@ body{
                  perspective(1100px) rotateY(-82deg) scale(.62)}
 }
 
+/* O CARROSSEL AO CONTRÁRIO.
+   Um passo atrás não recolhe o exemplo para dentro de onde ele nasceu:
+   desfaz o giro. O prato roda para o outro lado — quem tinha entrado
+   pela esquerda sai por ela, e quem tinha saído pela direita volta por
+   onde foi. Assim a seta para trás desfaz o que a seta para frente fez,
+   e não outra coisa qualquer. */
+/* Quem entrou deslizando plano pela esquerda sai por ela do mesmo
+   jeito: sem giro. O giro é do outro — foi ele quem girou para dar o
+   lugar, e é ele quem gira de volta para retomá-lo. Por isso esta é a
+   revealDesliza tocada de trás para a frente, com o mesmo --dx que
+   trouxe o elemento e a curva dela invertida. */
+.reveal-item.carrossel-volta{
+  animation:carrosselVolta .68s cubic-bezier(.78,0,.78,.26) both;
+  pointer-events:none;
+}
+@keyframes carrosselVolta{
+  0%  {opacity:1;transform:translate(var(--ax,-50%),-50%)}
+  82% {opacity:1}
+  100%{opacity:0;
+       transform:translate(calc(var(--ax,-50%) + var(--dx,-330px)),
+                           calc(-50% + var(--dy,0px)))}
+}
+/* e o anterior refaz o giro ao contrário: volta da direita, de onde
+   tinha ido, desgirando até parar de frente na casa dele */
+.reveal-item.carrossel-entra{
+  animation:carrosselChega .68s cubic-bezier(.28,.56,.58,.98) both;
+}
+@keyframes carrosselChega{
+  0%  {opacity:0;
+       transform:translate(calc(var(--ax,-50%) + 330px),-50%)
+                 perspective(1100px) rotateY(-82deg) scale(.62)}
+  74% {opacity:1}
+  100%{opacity:1;
+       transform:translate(var(--ax,-50%),-50%)
+                 perspective(1100px) rotateY(0deg) scale(1)}
+}
+
 .foot{
   position:absolute;left:88px;bottom:34px;font-family:var(--mono);
   font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:rgba(232,241,245,.32);
@@ -2469,10 +2746,45 @@ body{
   letter-spacing:-.028em;max-width:11ch;
 }
 .cover h1 em{font-style:normal;color:var(--amber)}
+.cover .autor{display:flex;align-items:center;gap:22px;margin-top:6px}
 .cover .prof{
   font-size:23px;font-weight:400;color:var(--paper);letter-spacing:.01em;
+  margin:0;
 }
 .cover .prof span{color:var(--paper-dim);font-weight:300}
+/* O AUTOR, NA CAPA.
+   O retrato entra ao lado do nome, do tamanho de um crédito e não de um
+   cartaz: a capa é da aula, não de quem a dá. E entra puxado para o tema
+   — a foto de laboratório vem clara e saturada demais para este fundo.
+   São três coisas de uma vez:
+     o filtro tira o excesso de cor e de luz;
+     um véu verde-água desce do alto à esquerda, como se a luz da cena
+       viesse do mesmo lugar de onde vem a do resto do slide;
+     e o azul do fundo sobe por baixo, de modo que a foto não termina
+       num corte — ela se dissolve na página.
+   O anel é o mesmo que cerca a ficha do elemento no canto dos slides.
+   O recorte é redondo e mira o rosto (61% 21%), que num retrato em pé
+   fica no terço de cima. */
+.cover .autor-retrato{
+  position:relative;flex:none;
+  width:106px;height:106px;border-radius:50%;
+  border:1px solid rgba(69,199,176,.5);
+  box-shadow:0 0 0 6px rgba(69,199,176,.07),
+             0 16px 42px rgba(3,12,22,.62),
+             0 0 36px rgba(69,199,176,.16);
+}
+.cover .autor-retrato img{
+  display:block;width:100%;height:100%;border-radius:50%;
+  object-fit:cover;object-position:61% 21%;
+  filter:saturate(.6) contrast(1.06) brightness(.88);
+  -webkit-user-drag:none;user-select:none;
+}
+.cover .autor-retrato::after{
+  content:'';position:absolute;inset:0;border-radius:50%;pointer-events:none;
+  background:
+    linear-gradient(165deg, rgba(69,199,176,.26) 0%, rgba(69,199,176,0) 46%),
+    linear-gradient(0deg,   rgba(7,22,38,.60)  0%, rgba(7,22,38,0)      58%);
+}
 .cover .right{display:grid;place-items:center;height:100%}
 
 /* átomos da capa */
@@ -2512,9 +2824,35 @@ body{
   opacity:0;transition:opacity .26s ease;
 }
 #chiado.on{opacity:.97;transition:opacity .07s linear}
-/* Nada de mira no cursor: o mouse não escreve, e mudar o ponteiro dele
-   prometeria uma função que ele não tem. Quem avisa que a caneta está
-   armada é a moldura âmbar. */
+/* O PONTEIRO NO MODO CANETA.
+   Antes o cursor era o que estivesse por baixo — e como quase tudo no
+   palco se arrasta, o que aparecia era a mãozinha do "pegue e leve",
+   justo no momento em que o gesto é outro. Agora o palco inteiro mostra
+   uma bolinha da COR DA TINTA: ela avisa que a caneta está armada e de
+   que cor ela está, que é o que a moldura âmbar sozinha não dizia.
+   O desenho da bolinha é montado no script, porque a cor muda. */
+#stage.escrevendo,
+#stage.escrevendo *{cursor:var(--cur-tinta,crosshair) !important}
+
+/* ---------- O LASER ----------
+   O ponto vermelho que aponta, e nada mais: não risca, não pega, não
+   deixa rastro. Só a ponta da caneta o acende — quem aponta numa aula é
+   a mão do professor, e o mouse fazendo o ponto seria um laser que
+   ninguém está segurando. Parado, ele se apaga sozinho.
+   Fica acima de tudo, inclusive da folha da caneta e dos painéis: um
+   laser que passa por trás de alguma coisa não é um laser. */
+#laser{
+  position:fixed;z-index:95;pointer-events:none;
+  width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;
+  background:radial-gradient(circle at 50% 50%,
+    #FFF1EE 0%,#FF4A3A 38%,#D01A0C 68%,rgba(208,26,12,0) 100%);
+  box-shadow:0 0 16px rgba(255,74,58,.95),0 0 46px rgba(255,74,58,.5);
+  opacity:0;transition:opacity .2s ease;
+}
+#laser.on{opacity:1}
+/* o botão dele não acende em âmbar como os outros: acende na cor da luz */
+#laser-btn.on{color:#FF5A4A}
+
 /* a moldura acesa lembra que o palco está no modo caneta */
 #stage.escrevendo::after{
   content:'';position:absolute;inset:0;z-index:41;pointer-events:none;
@@ -2576,43 +2914,102 @@ body{
 
 /* ---------- visão geral ---------- */
 /* ---------- painel de coordenadas (ferramenta de montagem) ----------
-   O painel de anotações é a mesma folha: mesmo fundo, mesma caixa,
-   mesmo rodapé. Só muda o que se escreve dentro. */
-#coords,#notes{
+   Este toma a tela inteira, e pode: quem o abre parou de dar aula e
+   está montando o slide. */
+#coords{
   position:fixed;inset:0;z-index:90;background:rgba(7,22,38,.96);
   backdrop-filter:blur(8px);padding:48px;
   display:flex;flex-direction:column;gap:16px;
 }
 #coords[hidden],#notes[hidden]{display:none}
-#coords h2,#notes h2{
+#coords h2{
   font-family:var(--mono);font-size:13px;letter-spacing:.3em;text-transform:uppercase;
   color:var(--aqua);font-weight:400;
 }
-/* de que slide são estas anotações — o título vem em âmbar, ao lado */
-#notes h2 em{font-style:normal;color:var(--amber);letter-spacing:.14em}
-#coords textarea,#notes textarea{
+#coords textarea{
   flex:1;min-height:0;resize:none;
   background:var(--ink);color:var(--paper);
   border:1px solid rgba(69,199,176,.28);border-radius:2px;padding:18px 20px;
   font-family:var(--mono);font-size:13px;line-height:1.7;tab-size:2;
 }
-#coords textarea:focus,#notes textarea:focus{outline:none;border-color:var(--aqua)}
-/* a anotação é texto corrido de professor, não bloco de código:
-   pede a fonte de leitura e uma linha mais larga */
-#notes textarea{
-  font-family:var(--body);font-size:17px;font-weight:300;line-height:1.75;
-  max-width:1000px;width:100%;align-self:center;
-}
-#coords .row,#notes .row{display:flex;align-items:center;justify-content:space-between;gap:18px}
-#notes .row{max-width:1000px;width:100%;align-self:center}
-#coords .msg,#notes .msg{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--amber)}
-#coords .hint2,#notes .hint2{font-size:13px;font-weight:300;color:var(--paper-dim)}
-#coords .close,#notes .close{
+#coords textarea:focus{outline:none;border-color:var(--aqua)}
+#coords .row{display:flex;align-items:center;justify-content:space-between;gap:18px}
+#coords .msg{font-family:var(--mono);font-size:12px;letter-spacing:.1em;color:var(--amber)}
+#coords .hint2{font-size:13px;font-weight:300;color:var(--paper-dim)}
+#coords .close{
   border:1px solid rgba(69,199,176,.3);background:transparent;color:var(--paper);
   font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
   padding:10px 18px;border-radius:999px;cursor:pointer;transition:border-color .2s,color .2s;
 }
-#coords .close:hover,#notes .close:hover{border-color:var(--aqua);color:var(--aqua)}
+#coords .close:hover{border-color:var(--aqua);color:var(--aqua)}
+
+/* ---------- NOTAS DE AULA ----------
+   Não é uma página que substitui o slide: é uma folha que se põe SOBRE
+   ele. O slide continua ali atrás, à vista — quem lê a nota está
+   olhando para a cena de que ela fala, e é isso que faz a nota servir
+   durante a aula em vez de antes dela.
+
+   Daí o formato: um caderno EM PÉ, três por quatro. Uma folha deitada
+   tomaria a largura da tela e esconderia justamente o desenho.
+
+   E daí ela se arrastar pelo cabeçalho: em um slide o desenho está à
+   esquerda, no outro à direita, e a nota não pode tapar o que comenta.
+   O lugar escolhido fica valendo para as próximas aberturas.
+
+   O material é o mesmo do resto: fundo de tinta escura, fio verde-água,
+   monoespaçada em caixa alta no título e a fonte de leitura no corpo. */
+#notes{
+  position:fixed;z-index:90;
+  left:var(--nx,50%);top:var(--ny,50%);
+  transform:translate(-50%,-50%);
+  width:min(440px,44vw);height:min(586px,84vh);
+  display:flex;flex-direction:column;
+  background:linear-gradient(180deg,rgba(18,49,75,.97),rgba(7,22,38,.985));
+  border:1px solid rgba(69,199,176,.34);border-radius:4px;
+  box-shadow:0 30px 80px rgba(3,12,22,.72),0 0 46px rgba(69,199,176,.09);
+  backdrop-filter:blur(10px);
+  overflow:hidden;
+}
+/* o cabeçalho é a alça: é por ele que a folha anda */
+#notes .cab{
+  flex:none;display:flex;align-items:flex-start;justify-content:space-between;gap:14px;
+  padding:15px 14px 13px 19px;
+  border-bottom:1px solid rgba(69,199,176,.2);
+  background:rgba(69,199,176,.055);
+  cursor:move;touch-action:none;
+  user-select:none;-webkit-user-select:none;
+}
+#notes.levando .cab{cursor:grabbing;background:rgba(69,199,176,.1)}
+#notes h2{
+  margin:0;font-family:var(--mono);font-size:12px;letter-spacing:.26em;
+  text-transform:uppercase;color:var(--aqua);font-weight:400;
+}
+/* de que slide é esta nota, em letra pequena sob o título */
+#notes .de{
+  margin-top:5px;font-size:13px;font-weight:300;line-height:1.25;
+  color:var(--paper-dim);max-width:30ch;
+}
+#notes .x{
+  flex:none;width:30px;height:30px;padding:0;display:grid;place-items:center;
+  border:1px solid rgba(69,199,176,.28);border-radius:50%;
+  background:transparent;color:var(--paper-dim);cursor:pointer;
+  transition:border-color .2s,color .2s;
+}
+#notes .x:hover{border-color:var(--aqua);color:var(--aqua)}
+#notes textarea{
+  flex:1;min-height:0;resize:none;width:100%;
+  background:transparent;color:var(--paper);border:none;
+  padding:16px 19px;
+  font-family:var(--body);font-size:16px;font-weight:300;line-height:1.72;
+}
+#notes textarea:focus{outline:none}
+#notes textarea::placeholder{color:rgba(232,241,245,.34)}
+#notes .rod{
+  flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:10px 19px 12px;border-top:1px solid rgba(69,199,176,.16);
+}
+#notes .msg{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--amber)}
+#notes .hint2{font-size:11.5px;font-weight:300;color:var(--paper-dim)}
 /* o botão da barra acende quando o slide tem anotação guardada */
 #notes-btn.tem::after{
   content:'';position:absolute;top:9px;right:9px;
@@ -2693,6 +3090,10 @@ body{
 
 <div id="ver" aria-hidden="true"></div>
 
+<!-- a luz do laser: fora do palco, porque ela segue o ponteiro da tela,
+     e não uma posição da cena -->
+<i id="laser" aria-hidden="true"></i>
+
 <nav id="bar" aria-label="Controles da apresentação">
   <button class="btn" id="prev" title="Slide anterior (←)" aria-label="Slide anterior">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
@@ -2705,10 +3106,11 @@ body{
   <button class="btn" id="over" title="Ver todos os slides (O)" aria-label="Ver todos os slides">
     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
   </button>
-  <button class="btn" id="coords-btn" title="Copiar as posições dos elementos deste slide (C)" aria-label="Copiar as posições dos elementos deste slide">
-    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="1.5"/><path d="M5 15H4a1 1 0 01-1-1V4a1 1 0 011-1h10a1 1 0 011 1v1"/></svg>
-  </button>
-  <button class="btn" id="notes-btn" title="Anotações deste slide (A)" aria-label="Anotações deste slide">
+  <!-- O ícone de copiar as posições saiu da barra: ele é ferramenta de
+       montagem, não de aula, e a tecla C continua fazendo o serviço. No
+       lugar dele, a barra passa a começar as ferramentas do professor
+       pelas notas de aula. -->
+  <button class="btn" id="notes-btn" title="Notas de aula deste slide (A)" aria-label="Notas de aula deste slide">
     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 015.5 3H14l5 5v12.5a1.5 1.5 0 01-1.5 1.5h-12A1.5 1.5 0 014 20.5z"/><path d="M14 3v5h5"/><path d="M8.5 13h7M8.5 17h4.5"/></svg>
   </button>
   <div class="sep"></div>
@@ -2721,6 +3123,9 @@ body{
   </button>
   <button class="btn" id="pen-limpa" title="Apagar tudo deste slide" aria-label="Apagar o que foi escrito neste slide" hidden>
     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 20H21"/><path d="M15.5 4.5l4 4L10 18H6v-4z"/></svg>
+  </button>
+  <button class="btn" id="laser-btn" title="Apontar com o laser (L)" aria-label="Apontar com o laser">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/><path d="M12 2.5v3.2M12 18.3v3.2M2.5 12h3.2M18.3 12h3.2M5.4 5.4l2.3 2.3M16.3 16.3l2.3 2.3M18.6 5.4l-2.3 2.3M7.7 16.3l-2.3 2.3"/></svg>
   </button>
   <button class="btn" id="quadro-btn" title="Abrir o quadro (Q)" aria-label="Abrir o quadro">
     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12.5" rx="1.5"/><path d="M6.5 19.5h11"/><path d="M7 8.5h7M7 12h4.5"/></svg>
@@ -2755,15 +3160,22 @@ body{
      clique no fundo. Fica no navegador desta máquina; não vai para o
      arquivo da aula. -->
 <div id="notes" hidden>
-  <h2>Anotações · <em id="notes-slide"></em></h2>
+  <div class="cab" id="notes-cab">
+    <div>
+      <h2>Notas de aula</h2>
+      <div class="de" id="notes-slide"></div>
+    </div>
+    <button class="x" id="notes-close" type="button"
+            title="Salvar e fechar (Esc)" aria-label="Salvar e fechar">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
   <textarea id="notes-txt" spellcheck="true"
             placeholder="O que dizer neste slide, o que perguntar à turma, o que costuma dar errado…"></textarea>
-  <div class="row">
-    <div>
-      <div class="msg" id="notes-msg"></div>
-      <div class="hint2">Guardado neste navegador, por slide. Salva ao fechar.</div>
-    </div>
-    <button class="close" id="notes-close" type="button">Salvar e fechar · Esc</button>
+  <div class="rod">
+    <span class="hint2">Salva ao fechar · guardado neste navegador</span>
+    <span class="msg" id="notes-msg"></span>
   </div>
 </div>
 
@@ -2826,11 +3238,11 @@ const SLIDES = [
 
       /* o título fica fora do cubo, acima dele */
       { text: 'Postulados de Dalton', nowrap: true,
-        x: 620, y: 218, base: 36, tone: 'aqua' },
+        x: 567, y: 224, base: 31.4, tone: 'aqua' },
 
       /* o cubo: cada volta de 90° traz o postulado seguinte */
       /* o cubo sai de dentro do retrato: os postulados são dele */
-      { id: 'cubo', from: 'dalton', kind: 'cube', x: 620, y: 420, base: 360, tone: '',
+      { id: 'cubo', from: 'dalton', kind: 'cube', x: 567, y: 398, base: 314.3, tone: '',
         faces: [
           '1. Átomos são esféricos,\ncomo bolas de bilhar',
           '2. Há diferentes tipos\nde átomos',
@@ -2872,28 +3284,28 @@ const SLIDES = [
       /* elementos do postulado 3 — o nome é grande, a definição pequena,
          e ela fica ao lado do nome, não do desenho */
       { id: 'mol', from: 'cubo', face: 2, kind: 'molecule',
-        x: 951, y: 334, base: 190, tone: '' },
+        x: 852, y: 290, base: 212.4, tone: '' },
       { id: 'molnome', from: 'mol', face: 2, follow: 0, nowrap: true,
-        text: 'Molécula',          x: 930, y: 218, base: 28, tone: 'aqua' },
+        text: 'Molécula',          x: 845, y: 168, base: 37.6, tone: 'aqua' },
       { from: 'molnome', face: 2, nowrap: true,
         text: 'São estruturas formadas\npela combinação de átomos',
-        x: 1140, y: 218, base: 16, tone: 'amber' },
+        x: 1101, y: 229, base: 24.4, tone: 'amber' },
       /* a ponte para o próximo conceito: sai de dentro da própria molécula */
       { from: 'mol', face: 2, nowrap: true,
         text: 'Moléculas são a base de\numa substância química',
-        x: 1161, y: 363, base: 15, tone: '' },
+        x: 1094, y: 346, base: 26, tone: '' },
 
       { id: 'copo', from: 'cubo', face: 2, kind: 'glass', mol: 'h2o',
-        x: 918, y: 508, base: 115, tone: '' },
+        x: 889, y: 530, base: 139.2, tone: '' },
       { id: 'subnome', from: 'copo', face: 2, follow: 0, nowrap: true,
-        text: 'substância química', x: 920, y: 612, base: 22, tone: 'aqua' },
+        text: 'substância química', x: 1083, y: 495, base: 25.3, tone: 'aqua' },
       { from: 'subnome', face: 2, nowrap: true,
         text: 'São matérias formadas por\nmoléculas todas idênticas',
-        x: 1160, y: 612, base: 14, wch: 26, tone: 'amber' },
+        x: 1101, y: 561, base: 22.7, wch: 26, tone: 'amber' },
 
       /* a fórmula, à direita do copo */
       { from: 'copo', face: 2, nowrap: true,
-        text: 'H<sub>2</sub>O',   x: 1105, y: 505, base: 44, tone: 'aqua' },
+        text: 'H<sub>2</sub>O',   x: 967, y: 630, base: 44, tone: 'aqua' },
 
       /* face 4: exemplos de substâncias — cada uma abre a sua molécula no toque.
          A amônia sai no clique; as outras três vêm sozinhas atrás. */
@@ -2914,22 +3326,22 @@ const SLIDES = [
          e o que sai dela vai se empilhando por baixo do cubo */
       { from: 'cubo', face: 4, nowrap: true,
         text: 'Átomos se combinavam',
-        x: 577, y: 383, base: 23, tone: 'aqua' },
+        x: 570, y: 383, base: 29.8, tone: 'aqua' },
       { from: 'cubo', face: 4, nowrap: true,
         text: 'Não existe átomos isolados',
-        x: 596, y: 443, base: 23, tone: 'aqua' },
+        x: 572, y: 468, base: 26.4, tone: 'aqua' },
 
       /* este não gira no cubo: aparece à direita dele, no mesmo tamanho
          e na mesma cor do título que está na face, e o que sai dele desce */
       { id: 'naosabia', from: 'cubo', face: 4, nowrap: true,
         text: 'O que Dalton não sabia:',
-        x: 1046, y: 320, base: 29, tone: '' },
+        x: 1009, y: 301, base: 29, tone: '' },
       { from: 'naosabia', face: 4, nowrap: true,
         text: 'Como os átomos se ligam',
-        x: 1055, y: 389, base: 24, tone: 'amber' },
+        x: 1017, y: 382, base: 29, tone: 'amber' },
       { from: 'naosabia', face: 4, nowrap: true,
         text: 'Porque se ligam em\nproporções específicas',
-        x: 1037, y: 464, base: 22, tone: 'amber' }
+        x: 1024, y: 471, base: 25.1, tone: 'amber' }
     ]
   },
   {
@@ -2939,37 +3351,42 @@ const SLIDES = [
     reveals: [
       { id: 'def1', nowrap: true,
         text: '1. É o estudo das possibilidades\nde combinações entre átomos',
-        x: 693, y: 117, base: 27, tone: 'aqua' },
+        x: 556, y: 155, base: 32.6, tone: 'aqua' },
       { from: 'def1', nowrap: true,
         text: '2. E como essas combinações influenciam\nnas propriedades das substâncias',
-        x: 898, y: 182, base: 21.1, tone: '' },
+        x: 862, y: 251, base: 29.8, tone: '' },
 
       /* Terceiro clique: Lewis. 'entra: dir' faz o voo começar fora do
          palco, à direita, e ele atravessa até assentar aqui — sem escala
          nem borrão na entrada, que quem desliza chega inteiro (.desliza).
          Agora que a foto para no lado direito, o percurso é curto: ela
-         vem de 1700 e encosta em 1073. */
+         vem de 1700 e encosta em 1095. */
       { entra: 'dir', img: 'imagens/g.n.lewis.avif',
         caption: 'G.N. Lewis - 1916', alt: 'retrato de Gilbert N. Lewis',
-        x: 1073, y: 415, base: 284.7, tone: '' },
+        x: 1095, y: 493, base: 284.7, tone: '' },
 
       /* field: 'split' -> aqui as moléculas do mergulho são grandes,
          espaçadas e com as ligações rompíveis */
-      { id: 'copo4', kind: 'glass', mol: 'h2o', field: 'split',
-        x: 177, y: 387, base: 150, tone: '' },
+      /* mol 'agua': a de bola-e-bastão. Aqui as moléculas são grandes e
+         se desmontam pelo dedo, e o que se quer ver ANTES de desmontar é
+         justamente a ligação que vai ceder. Com os átomos colados, o
+         bastão só aparecia depois de alguém puxar um deles — mostrava a
+         ligação no instante em que ela deixava de existir. */
+      { id: 'copo4', kind: 'glass', mol: 'agua', field: 'split',
+        x: 106, y: 440, base: 188.1, tone: '' },
 
       /* A lista: um marcador por clique, cada um solta o seguinte. Os três
          se alinham pela esquerda (x é a borda, não o centro) e todos voam
          da caixa "?" para a direita. */
       { id: 'mk1', from: 'copo4', bullet: true, nowrap: true, esq: true,
         text: 'Átomos são encontrados combinados',
-        x: 285, y: 323, base: 24, tone: '' },
+        x: 191, y: 356, base: 32.2, tone: '' },
       { id: 'mk2', from: 'mk1', bullet: true, nowrap: true, esq: true,
         text: 'Isolados são instáveis',
-        x: 287, y: 390, base: 24, tone: '' },
+        x: 193, y: 435, base: 36.1, tone: '' },
       { from: 'mk2', bullet: true, nowrap: true, esq: true,
-        text: 'Eles se combinam pra atingirem a estabilidade',
-        x: 288, y: 461, base: 24, tone: '' }
+        text: 'Eles se combinam pra atingirem\na estabilidade',
+        x: 194, y: 519, base: 38.2, tone: '' }
     ]
   },
   {
@@ -3127,13 +3544,30 @@ const SLIDES = [
     ]
   },
   {
+    /* OS CINCO COMPOSTOS IÔNICOS, NUM SLIDE SÓ.
+       Eram cinco slides iguais em tudo menos a substância: mesma frase,
+       mesma casa no palco, mesma imagem de onde se arranca um grão para
+       mergulhar no retículo. Passar de um ao outro era trocar de slide,
+       e a turma perdia de vista que era o MESMO gesto sendo repetido
+       sobre outra matéria.
+
+       Agora é um carrossel, como o dos gases do slide da covalente: o
+       exemplo atual gira e sai pela direita enquanto o próximo entra
+       pela esquerda, e o passo atrás desfaz a troca pelo caminho
+       inverso. O que se vê é uma coisa só mudando de conteúdo — que é
+       exatamente o que a aula está dizendo.
+
+       Cada troca leva consigo o que aquele exemplo tinha aberto: o
+       mergulho no retículo dele e o grão arrancado da imagem dele (ver
+       limpaExemplo). Sem isso o segundo exemplo herdaria a rede do
+       primeiro, e o grão preso na tela impediria arrancar outro. */
     title: 'A ligação Iônica ou eletrovalente',
-    mini: 'Ligação Iônica: O NaCl',                 /* rótulo da miniatura */
+    mini: 'Ligação Iônica: os cinco compostos',    /* rótulo da miniatura */
     tsize: 40,
     content: '',
     reveals: [
-      /* sem "from": todos nascem na caixa "?", que fica na borda
-         esquerda — então todos entram da esquerda para a direita */
+      /* sem "from": todos nascem na borda esquerda, então todos entram
+         da esquerda para a direita */
       { id: 'd1', nowrap: true,
         text: 'É a ligação que ocorre entre íons, cátions (+) e ânions (-)',
         x: 560, y: 159, base: 28, tone: '' },
@@ -3141,81 +3575,56 @@ const SLIDES = [
         text: 'As substâncias formadas por ligações iônicas '
             + 'são chamadas de <em>Compostos Iônicos</em>',
         x: 787, y: 223, base: 23, tone: '' },
-      { id: 'ex', nowrap: true,
+
+      /* 1º — CLORETO DE SÓDIO. O rótulo e a imagem entram no mesmo
+         clique, e daqui em diante cada exemplo derruba o anterior. */
+      { id: 'ex1', nowrap: true,
         text: 'Exemplo de composto iônico:',
         x: 247, y: 294, base: 17.6, tone: 'aqua' },
-      { follow: 0, fixo: true, rede: 'nacl', img: 'imagens/NaCl.png',
+      { follow: 0, id: 'im1', fixo: true, rede: 'nacl', img: 'imagens/NaCl.png',
         caption: 'Cloreto de Sódio',
-        x: 245, y: 470, base: 280, tone: '' }
-    ]
-  },
-  {
-    /* mesma lógica do anterior: a imagem fixa da qual se arranca um grão
-       e o mergulho no retículo — que aqui é o do MgO */
-    title: 'A ligação Iônica ou eletrovalente',
-    mini: 'Ligação Iônica: O MgO',                 /* rótulo da miniatura */
-    tsize: 40,
-    content: '',
-    reveals: [
-      /* auto: os dois já estão na tela quando o slide abre. Não há o que
-         revelar aqui — o slide inteiro é a interação com o grão. */
-      { auto: true, fixo: true, rede: 'mgo', img: 'imagens/MgO.png',
+        x: 245, y: 470, base: 280, tone: '' },
+
+      /* 2º — ÓXIDO DE MAGNÉSIO */
+      { id: 'ex2', nowrap: true, entra: 'esq', sai: 'ex1,im1',
+        text: 'Próximo composto iônico:',
+        x: 247, y: 294, base: 17.6, tone: 'aqua' },
+      { follow: 0, id: 'im2', entra: 'esq',
+        fixo: true, rede: 'mgo', img: 'imagens/MgO.png',
         caption: 'Óxido de Magnésio',
         x: 245, y: 470, base: 280, tone: '' },
-      { auto: true, id: 'ex2', nowrap: true,
+
+      /* 3º — ÓXIDO DE SÓDIO, o retículo antifluorita: 2 sódios por
+         oxigênio. A Na2O é retrato — 187x272 vira 280x407 na tela,
+         quase o dobro da altura das outras —, então ela sobe para 440 e
+         o rótulo dela sobe junto, para 199: os mesmos 37px de folga que
+         o texto tem acima das outras imagens. É o único exemplo que não
+         ocupa a mesma casa dos demais, e é a imagem que manda. */
+      { id: 'ex3', nowrap: true, entra: 'esq', sai: 'ex2,im2',
         text: 'Próximo composto iônico:',
-        x: 247, y: 294, base: 17.6, tone: 'aqua' }
-    ]
-  },
-  {
-    /* mesma lógica, mas aqui o retículo é antifluorita: 2 sódios por oxigênio */
-    title: 'A ligação Iônica ou eletrovalente',
-    mini: 'Ligação Iônica: O Na<sub>2</sub>O',                 /* rótulo da miniatura */
-    tsize: 40,
-    content: '',
-    reveals: [
-      /* 1,5 linha acima dos outros dois exemplos (linha = 19,7px do
-         texto deste slide, base 17,6 x entrelinha 1,12) */
-      { auto: true, fixo: true, rede: 'na2o', img: 'imagens/Na2O.jpg',
+        x: 247, y: 199, base: 17.6, tone: 'aqua' },
+      { follow: 0, id: 'im3', entra: 'esq',
+        fixo: true, rede: 'na2o', img: 'imagens/Na2O.jpg',
         caption: 'Óxido de Sódio',
         x: 245, y: 440, base: 280, tone: '' },
-      /* A Na2O e retrato: 187x272 vira 280x407 na tela, quase o dobro da
-         altura das outras. Com a imagem em 440, o topo dela cai em 236,
-         entao o texto vai para 199 — os mesmos 37px de folga que ele tem
-         acima da imagem do slide 9. */
-      { auto: true, id: 'ex3', nowrap: true,
+
+      /* 4º — CLORETO DE MAGNÉSIO, o retículo em lamelas Cl–Mg–Cl */
+      { id: 'ex4', nowrap: true, entra: 'esq', sai: 'ex3,im3',
         text: 'Próximo composto iônico:',
-        x: 247, y: 199, base: 17.6, tone: 'aqua' }
-    ]
-  },
-  {
-    /* mesma lógica; aqui o retículo é em lamelas Cl–Mg–Cl */
-    title: 'A ligação Iônica ou eletrovalente',
-    mini: 'Ligação Iônica: O MgCl<sub>2</sub>',                 /* rótulo da miniatura */
-    tsize: 40,
-    content: '',
-    reveals: [
-      { auto: true, fixo: true, rede: 'mgcl2', img: 'imagens/MgCl2.jpg',
+        x: 247, y: 294, base: 17.6, tone: 'aqua' },
+      { follow: 0, id: 'im4', entra: 'esq',
+        fixo: true, rede: 'mgcl2', img: 'imagens/MgCl2.jpg',
         caption: 'Cloreto de Magnésio',
         x: 245, y: 470, base: 280, tone: '' },
-      { auto: true, id: 'ex4', nowrap: true,
+
+      /* 5º — ÓXIDO DE ALUMÍNIO, o retículo do corindo */
+      { id: 'ex5', nowrap: true, entra: 'esq', sai: 'ex4,im4',
         text: 'Próximo composto iônico:',
-        x: 247, y: 294, base: 17.6, tone: 'aqua' }
-    ]
-  },
-  {
-    /* mesma lógica; aqui o retículo é o do corindo */
-    title: 'A ligação Iônica ou eletrovalente',
-    mini: 'Ligação Iônica: O Al<sub>2</sub>O<sub>3</sub>',                 /* rótulo da miniatura */
-    tsize: 40,
-    content: '',
-    reveals: [
-      { auto: true, fixo: true, rede: 'al2o3', img: 'imagens/Al2O3.jpg',
+        x: 247, y: 294, base: 17.6, tone: 'aqua' },
+      { follow: 0, id: 'im5', entra: 'esq',
+        fixo: true, rede: 'al2o3', img: 'imagens/Al2O3.jpg',
         caption: 'Óxido de Alumínio',
-        x: 245, y: 470, base: 280, tone: '' },
-      { auto: true, id: 'ex5', nowrap: true,
-        text: 'Próximo composto iônico:',
-        x: 247, y: 294, base: 17.6, tone: 'aqua' }
+        x: 245, y: 470, base: 280, tone: '' }
     ]
   },
   {
@@ -3226,9 +3635,11 @@ const SLIDES = [
     title: 'A inversão do nox e a fórmula dos compostos iônicos',
     tsize: 33,
     content: '',
-    quadro: { x: 900, y: 420, k: 1 },
+    /* o quadro já de pé quando o slide abre: aqui ele não é um recurso a
+       chamar, é onde a fórmula de cada exemplo vai ser escrita */
+    quadro: { x: 900, y: 420, k: 1, aberto: true },
     reveals: [
-      { auto: true, id: 'cuboex', kind: 'cube', x: 370, y: 430, base: 380, tone: '',
+      { auto: true, id: 'cuboex', kind: 'cube', x: 350, y: 367, base: 380, tone: '',
         faces: [ PAR('Exemplo 01', 'Na', '1A', 'O',  '6A'),
                  PAR('Exemplo 02', 'Mg', '2A', 'Cl', '7A'),
                  PAR('Exemplo 03', 'Mg', '2A', 'O',  '6A'),
@@ -3313,10 +3724,31 @@ const SLIDES = [
     tsize: 40,
     virada: 'cube',
     content: '',
+    /* A receita de montar, à mão, para quando a turma travar. Fica numa
+       esfera na quina — fora do caminho — e não entra na sequência de
+       cliques: é consulta, não passo da aula. */
+    poli: {
+      rot: 'Moléculas\npoliatômicas',
+      tit: 'Ajuda pra montar moléculas',
+      x: 900, y: 360,
+      itens: [
+        'Some o total de elétrons de valência na molécula.',
+        'Defina o átomo central (tem mais valências).',
+        'Faça ligações simples do centro pros periféricos.',
+        'Distribua os elétrons restantes até todos completarem seus “octetos”.',
+        'Se precisar, faça ligações múltiplas.'
+      ]
+    },
     reveals: [
-      { nowrap: true,
+      { id: 'cov1', nowrap: true,
         text: 'É a ligação feita pelo compartilhamento de pares de elétrons',
-        x: 640, y: 150, base: 23, tone: 'aqua' },
+        x: 640, y: 140, base: 23, tone: 'aqua' },
+      /* O segundo clique dá nome ao que a ligação faz. Vem sozinho, e
+         só depois dele é que o primeiro exemplo entra em cena: a frase
+         é a definição, e os cilindros são a prova dela. */
+      { id: 'cov2', nowrap: true,
+        text: 'A estrutura formada por ligações covalentes chama molécula',
+        x: 844, y: 198, base: 23, tone: 'aqua' },
       /* Segundo clique: o cilindro e o rótulo do exemplo, juntos. Dois
          toques no cilindro mergulham nele. O cilindro e a legenda de
          baixo não saem do lugar: x/y são a casa deles no palco e valem
@@ -3345,14 +3777,16 @@ const SLIDES = [
         /* qtit: o nome do elemento NÃO fica no slide — ele pertence ao
            mergulho. Só faz sentido quando já se está vendo a matéria por
            dentro, e é lá que ele aparece, no alto à esquerda. */
-        /* Dois rótulos dentro do mergulho, [texto, x, y, estilo]. O nome
-           do elemento no alto à esquerda; e, do outro lado — sobre a
-           faixa que as moléculas deixam livre —, a legenda que diz o que
-           se está olhando. Ela é a voz da cena, não o nome da coisa,
-           então sai em verde-água e menor. */
+        /* Dois rótulos dentro do mergulho, [texto, x, y, estilo], um
+           debaixo do outro. Em cima, a legenda que diz o que se está
+           olhando — ela é a voz da cena, não o nome da coisa, e por isso
+           sai em verde-água, menor e em caixa alta. Embaixo, centrado
+           nela, o nome do elemento com a família dele. Antes os dois
+           dividiam a mesma linha, um em cada canto, e liam-se como duas
+           frases soltas em vez de um cabeçalho só. */
         qtit: [
-          ['Cloro - 7A',              489, 63],
-          ['moléculas de Gás cloro',  262, 64, 'legenda']
+          ['moléculas de Gás cloro',  262,  64, 'legenda'],
+          ['Cloro - 7A',              262,  98]
         ],
         x: 161, y: 363, base: 150, tone: '' },
       /* O SEGUNDO EXEMPLO, EM CARROSSEL.
@@ -3381,8 +3815,231 @@ const SLIDES = [
           [358, 562], [379, 418]
         ],
         qtit: [
-          ['Oxigênio - 6A',               489, 63],
-          ['moléculas de Gás oxigênio',   262, 64, 'legenda']
+          ['moléculas de Gás oxigênio',   262,  64, 'legenda'],
+          ['Oxigênio - 6A',               262,  98]
+        ],
+        x: 161, y: 363, base: 150, tone: '' },
+      /* O TERCEIRO EXEMPLO, NO MESMO CARROSSEL.
+         O oxigênio gira e sai, o nitrogênio entra pela esquerda. Lá
+         dentro, tudo como nos outros — só a química muda de novo: o
+         nitrogênio é da família 5A, traz CINCO elétrons de valência e
+         TRÊS desemparelhados, e o que eles fecham é uma ligação TRIPLA.
+         Três pares no meio, três bastões, e o único par isolado que
+         sobra fica atrás de cada átomo: :N≡N:, como se escreve.
+
+         É também a mais curta das três — e sai curta pela mesma conta
+         que dá as outras, sem número escrito à mão: quanto mais abertos
+         os solteiros saem do eixo, mais perto os núcleos têm de chegar
+         para que eles se cruzem no meio. */
+      { id: 'ex03', nowrap: true, text: 'Exemplo 03', entra: 'esq',
+        sai: 'ex02,o2cil', x: 164, y: 477, base: 17.6, tone: '' },
+      { follow: 0, id: 'n2cil', entra: 'esq',
+        kind: 'vessel', shape: 'cylinder', mol: 'n2', duplo: true,
+        tag: 'GÁS\nNITROGÊNIO', color: '#9FA8E8',
+        qk: 1.3,
+        qmols: [
+          [ 91, 244], [270, 226], [428, 208], [485, 403],
+          [169, 392], [188, 279], [358, 298], [486, 302],
+          [168, 665], [174, 530], [ 96, 460], [274, 505],
+          [271, 382], [465, 569], [ 65, 352], [277, 658],
+          [358, 562], [379, 418]
+        ],
+        qtit: [
+          ['moléculas de Gás nitrogênio',  262,  64, 'legenda'],
+          ['Nitrogênio - 5A',              262,  98]
+        ],
+        x: 161, y: 363, base: 150, tone: '' },
+      /* O QUARTO EXEMPLO: A ÁGUA.
+         O carrossel entrega o lugar a um copo, do tamanho dos cilindros
+         que vieram antes, com a fórmula escrita nele. Sai o gás, entra o
+         líquido — e sai também a molécula de dois átomos iguais: a água
+         é o primeiro exemplo com DOIS elementos diferentes, e por isso o
+         cabeçalho do mergulho traz as duas famílias, uma debaixo da
+         outra.
+
+         Por enquanto ela é só mais uma parada do carrossel, com as
+         mesmas interações das outras. O que a água tem de diferente
+         entra depois. */
+      { id: 'ex04', nowrap: true, text: 'Exemplo 04', entra: 'esq',
+        sai: 'ex03,n2cil', x: 164, y: 477, base: 17.6, tone: '' },
+      { follow: 0, id: 'copoh2o', entra: 'esq',
+        kind: 'glass', mol: 'agua', tag: 'Água', duplo: true,
+        qk: 1.3,
+        qmols: [
+          [ 91, 244], [270, 226], [428, 208], [485, 403],
+          [169, 392], [188, 279], [358, 298], [486, 302],
+          [168, 665], [174, 530], [ 96, 460], [274, 505],
+          [271, 382], [465, 569], [ 65, 352], [277, 658],
+          [358, 562], [379, 418]
+        ],
+        qtit: [
+          ['Água',     262,  64, 'legenda'],
+          ['O - 6A',   262,  98],
+          ['H - 1A',   262, 128]
+        ],
+        x: 161, y: 363, base: 150, tone: '' },
+      /* O QUINTO EXEMPLO: O DICLORETO DE ENXOFRE.
+         Fecha a série voltando ao começo dela por outro caminho. O
+         enxofre é da família 6A, como o oxigênio da água: dois pares
+         isolados, dois braços, e a mesma molécula entortada — aqui com
+         103° em vez de 104,5°. Nas pontas, porém, não há hidrogênio: há
+         cloro, o mesmo do primeiro exemplo da série, agora ligado a
+         outra coisa e com os seus três pares isolados à mostra.
+
+         Dentro, tudo se comporta como na água: o centro fica, e são os
+         cloros que se arrancam, um de cada vez, cada um pela sua
+         ligação. */
+      { id: 'ex05', nowrap: true, text: 'Exemplo 05', entra: 'esq',
+        sai: 'ex04,copoh2o', x: 164, y: 477, base: 17.6, tone: '' },
+      { follow: 0, id: 'coposcl2', entra: 'esq',
+        /* béquer, e não copo: é reagente de laboratório, não bebida. E
+           vermelho-alaranjado, que é a cor com que o SCl2 se apresenta. */
+        kind: 'vessel', shape: 'beaker', mol: 'scl2',
+        tag: 'Dicloreto\nde enxofre', color: '#C4441C', light: '#E87A45',
+        duplo: true,
+        qk: 1.3,
+        qmols: [
+          [ 91, 244], [270, 226], [428, 208], [485, 403],
+          [169, 392], [188, 279], [358, 298], [486, 302],
+          [168, 665], [174, 530], [ 96, 460], [274, 505],
+          [271, 382], [465, 569], [ 65, 352], [277, 658],
+          [358, 562], [379, 418]
+        ],
+        qtit: [
+          ['Dicloreto de enxofre',  262,  64, 'legenda'],
+          ['S - 6A',                262,  98],
+          ['Cl - 7A',               262, 128]
+        ],
+        x: 161, y: 363, base: 150, tone: '' },
+      /* O SEXTO EXEMPLO: O GÁS CARBÔNICO.
+         Volta ao cilindro, porque é gás — e fecha a série com a única
+         molécula RETA dela. O carbono gasta os quatro elétrons de
+         valência nas duas ligações duplas e não fica com par isolado
+         nenhum; sem pares nas costas empurrando, os dois oxigênios ficam
+         em linha. Vindo logo depois da água e do SCl2, que são
+         entortados justamente pelos pares que sobram, ela mostra de onde
+         vem a forma de uma molécula.
+
+         Lá dentro, a mesma coisa dos outros: o centro fica, e cada
+         oxigênio se arranca pela sua dupla. */
+      { id: 'ex06', nowrap: true, text: 'Exemplo 06', entra: 'esq',
+        sai: 'ex05,coposcl2', x: 164, y: 477, base: 17.6, tone: '' },
+      { follow: 0, id: 'co2cil', entra: 'esq',
+        kind: 'vessel', shape: 'cylinder', mol: 'carbonico', duplo: true,
+        tag: 'GÁS\nCARBÔNICO', color: '#A9B4BC',
+        qk: 1.3,
+        qmols: [
+          [ 91, 244], [270, 226], [428, 208], [485, 403],
+          [169, 392], [188, 279], [358, 298], [486, 302],
+          [168, 665], [174, 530], [ 96, 460], [274, 505],
+          [271, 382], [465, 569], [ 65, 352], [277, 658],
+          [358, 562], [379, 418]
+        ],
+        qtit: [
+          ['Gás carbônico',  262,  64, 'legenda'],
+          ['C - 4A',         262,  98],
+          ['O - 6A',         262, 128]
+        ],
+        x: 161, y: 363, base: 150, tone: '' },
+      /* O SÉTIMO EXEMPLO: O CIANETO DE HIDROGÊNIO.
+         Reúne numa molécula só o que a série foi mostrando separado: uma
+         ligação SIMPLES de um lado do carbono e uma TRIPLA do outro. É a
+         primeira em que os dois braços não são iguais entre si — e é aí
+         que a conta do octeto vira exercício de verdade, porque cada
+         átomo fecha os seus oito por um caminho diferente: o hidrogênio
+         com o dueto, o carbono com quatro pares compartilhados, o
+         nitrogênio com três pares mais o dele.
+
+         É também aqui que as DUAS frases da definição saem de cena: sete
+         exemplos depois, quem está vendo já não precisa da regra escrita
+         na tela. Elas giram junto com o exemplo anterior, no mesmo
+         movimento, e um passo atrás traz tudo de volta. */
+      { id: 'ex07', nowrap: true, text: 'Exemplo 07', entra: 'esq',
+        sai: 'ex06,co2cil,cov1,cov2', x: 164, y: 477, base: 17.6, tone: '' },
+      { follow: 0, id: 'hcncil', entra: 'esq',
+        kind: 'vessel', shape: 'cylinder', mol: 'hcn', duplo: true,
+        tag: 'Cianeto de\nhidrogênio', formula: 'HCN', color: '#B9A8C4',
+        qk: 1.3,
+        qmols: [
+          [ 91, 244], [270, 226], [428, 208], [485, 403],
+          [169, 392], [188, 279], [358, 298], [486, 302],
+          [168, 665], [174, 530], [ 96, 460], [274, 505],
+          [271, 382], [465, 569], [ 65, 352], [277, 658],
+          [358, 562], [379, 418]
+        ],
+        qtit: [
+          ['Cianeto de hidrogênio',  262,  64, 'legenda'],
+          ['H - 1A',                 262,  98],
+          ['C - 4A',                 262, 128],
+          ['N - 5A',                 262, 158]
+        ],
+        x: 161, y: 363, base: 150, tone: '' },
+
+      /* O OITAVO EXEMPLO: A AMÔNIA — e a primeira em TRÊS DIMENSÕES.
+         Todas as anteriores cabiam no plano: retas, ou entortadas num
+         ângulo que o papel guarda inteiro. A amônia não. Ela é uma
+         pirâmide, e pirâmide desenhada de frente vira triângulo — some
+         justamente o que ela tem de próprio, que é os três hidrogênios
+         estarem ABAIXO do nitrogênio, e não em volta dele. Quem os
+         empurra para baixo é o par isolado, que fica no eixo e não se
+         desenha: é o exemplo em que o par que NÃO aparece explica a
+         forma.
+
+         Por isso o mergulho dela funciona de outro jeito: as moléculas
+         são objetos montados em profundidade. Arrastar leva a molécula
+         inteira; o toque amplia; e ampliada ela GIRA na mão. Não há o
+         que arrancar aqui — o gesto é olhar de todos os lados. */
+      { id: 'ex08', nowrap: true, text: 'Exemplo 08', entra: 'esq',
+        sai: 'ex07,hcncil', x: 164, y: 477, base: 17.6, tone: '' },
+      { follow: 0, id: 'nh3frasco', entra: 'esq',
+        kind: 'vessel', shape: 'bottle', mol: 'amonia', duplo: true,
+        tag: 'Amônia', formula: 'NH3',
+        color: '#6FB6D8', light: '#BFE4F2',
+        qk: 1.3,
+        qmols: [
+          [ 91, 244], [270, 226], [428, 208], [485, 403],
+          [169, 392], [188, 279], [358, 298], [486, 302],
+          [168, 665], [174, 530], [ 96, 460], [274, 505],
+          [271, 382], [465, 569], [ 65, 352], [277, 658],
+          [358, 562], [379, 418]
+        ],
+        qtit: [
+          ['Amônia',   262,  64, 'legenda'],
+          ['N - 5A',   262,  98],
+          ['H - 1A',   262, 128]
+        ],
+        x: 161, y: 363, base: 150, tone: '' },
+
+      /* O NONO EXEMPLO: O METANO — em três dimensões, como a amônia.
+         Vem logo DEPOIS dela de propósito, e as duas juntas dizem a
+         mesma coisa por diferença. O carbono tem quatro elétrons de
+         valência e gasta os quatro: quatro hidrogênios em volta, nenhum
+         par isolado sobrando, e o resultado é um tetraedro PERFEITO, com
+         109,5° entre quaisquer duas ligações. O nitrogênio da amônia tem
+         cinco: gasta três e guarda um par — e é esse par guardado que
+         achata a pirâmide para 107°.
+
+         Vendo as duas girarem uma depois da outra, a turma vê que a
+         diferença entre um tetraedro e uma pirâmide é um par de elétrons
+         que ninguém desenha. No plano isso não se mostra: as duas
+         sairiam como triângulos. */
+      { id: 'ex09', nowrap: true, text: 'Exemplo 09', entra: 'esq',
+        sai: 'ex08,nh3frasco', x: 164, y: 477, base: 17.6, tone: '' },
+      { follow: 0, id: 'ch4cil', entra: 'esq',
+        kind: 'vessel', shape: 'cylinder', mol: 'metano', duplo: true,
+        tag: 'Metano', formula: 'CH4', color: '#D9C07A',
+        qk: 1.3,
+        qmols: [
+          [ 91, 244], [270, 226], [428, 208], [485, 403],
+          [169, 392], [188, 279], [358, 298], [486, 302],
+          [168, 665], [174, 530], [ 96, 460], [274, 505],
+          [271, 382], [465, 569], [ 65, 352], [277, 658],
+          [358, 562], [379, 418]
+        ],
+        qtit: [
+          ['Metano',   262,  64, 'legenda'],
+          ['C - 4A',   262,  98],
+          ['H - 1A',   262, 128]
         ],
         x: 161, y: 363, base: 150, tone: '' }
     ]
@@ -3774,11 +4431,33 @@ function BEQUER(){
 
 /* Uma face de exemplo: o título no alto e, no meio, os dois elementos
    um de frente para o outro, cada um com a sua família. */
+/* A CARGA DO ÍON, LIDA DA FAMÍLIA.
+   1A, 2A e 3A perdem elétrons e ficam com carga igual ao número da
+   família; 6A e 7A ganham o que falta para oito, e ficam negativas. É a
+   conta que a aula acabou de ensinar — feita aqui para não ter de ser
+   repetida à mão em cada exemplo do cubo, e para não haver risco de um
+   deles sair com o número trocado.
+
+   O número vem escrito por extenso (1+, 2−) mesmo quando é um só: este
+   slide é o da INVERSÃO do nox, e é o número que vai ser trocado de
+   lado. Um "+" solto não se inverte; um "1+" sim. */
+function cargaDaFamilia(fam){
+  const n = parseInt(fam, 10);
+  if (!n || n === 4) return '';
+  return n <= 3 ? n + '+' : (8 - n) + '\u2212';
+}
+
 function PAR(tit, a, fa, b, fb){
-  /* o símbolo em cima, a família logo abaixo dele */
-  const el = (sim, fam) =>
-    `<div class="ex-el"><span class="sim">${sim}</span>`
-  + `<span class="fam">${fam}</span></div>`;
+  /* a carga por cima do símbolo, a família logo abaixo dele. A carga
+     nasce escondida: ela é solta por clique, o cátion primeiro. */
+  const el = (sim, fam) => {
+    const q = cargaDaFamilia(fam);
+    const sinal = q.endsWith('+') ? ' mais' : ' menos';
+    return `<div class="ex-el">`
+      + (q ? `<span class="carga${sinal}">${q}</span>` : '')
+      + `<span class="sim">${sim}</span>`
+      + `<span class="fam">${fam}</span></div>`;
+  };
   return { cls: 'exemplo',
            html: `<div class="ex-tit">${tit}</div>`
                + `<div class="ex-par">${el(a, fa)}${el(b, fb)}</div>` };
@@ -4177,6 +4856,16 @@ const RECIPES = {
   etoh:  [['H',12,32,4],['H',88,30,4],['C',30,50,7],['C',52,62,7],['O',74,42,6.5]],
   cl2:   [['Cl',34,50,8],['Cl',66,50,8]],
   o2:    [['O',34,50,8],['O',66,50,8]],
+  n2:    [['N',34,50,8],['N',66,50,8]],
+  agua:  [['H',24.5,62,5.5],['H',75.5,62,5.5],['O',50,42,8]],
+  scl2:  [['Cl',22,60,7],['Cl',78,60,7],['S',50,42,9]],
+  carbonico: [['O',18,50,7],['O',82,50,7],['C',50,50,7.5]],
+  metano: [['H',26,34,5],['H',74,34,5],['H',26,66,5],['H',74,66,5],['C',50,50,8]],
+  hcn:    [['H',14,50,5],['N',84,50,8],['C',50,50,7.5]],
+  /* a amônia do slide da covalente é a de três dimensões (ver MOL3D);
+     esta receita só serve para o campo saber o tamanho dela e espaçar
+     as moléculas sem que se encostem */
+  amonia: [['H',26,62,5],['H',74,62,5],['H',50,76,5],['N',50,42,8]],
   /* gases nobres são monoatômicos: uma esfera só, sem ligação nenhuma */
   he: [['He',50,50,13]], ne: [['Ne',50,50,13]], ar: [['Ar',50,50,13]],
   kr: [['Kr',50,50,13]], xe: [['Xe',50,50,13]], rn: [['Rn',50,50,13]]
@@ -4223,9 +4912,132 @@ const MOLGEO = {
      ligação aparecer entre elas. O que muda é a ligação: dois bastões
      paralelos, porque o oxigênio compartilha DOIS pares. */
   o2:   [['O',22,50,23],['O',78,50,23]],
+  /* N2: o mesmo par de esferas, um pouco menores, e TRÊS bastões entre
+     elas. É a ligação mais forte da aula, e a mais curta. */
+  n2:   [['N',22,50,22],['N',78,50,22]],
+  /* A ÁGUA DO SLIDE DA COVALENTE.
+     A h2o de cima é a água como MATÉRIA: calotas coladas, os hidrogênios
+     enterrados no oxigênio, que é como ela de fato ocupa espaço. Esta
+     aqui é a água como LIGAÇÃO — o assunto do slide 17 —, e ligação se
+     vê no traço entre os núcleos. Por isso os hidrogênios se afastam o
+     bastante para os dois bastões caberem, guardando o ângulo de 104,5°
+     que a molécula tem de verdade: cada H sai a 52,25° da vertical.
+     São duas águas porque são duas aulas; a mesma distinção que o Cl2
+     já fazia em relação às outras moléculas daqui. */
+  agua: [['H',12,69.4,14],['H',88,69.4,14],['O',50,40,24]],
+  /* SCl2 — a mesma forma da água, e pela mesma razão: o enxofre é da
+     família 6A como o oxigênio, tem dois pares isolados e por isso a
+     molécula sai entortada, com 103° entre as duas ligações. O que muda
+     é o tamanho — cloro é átomo grande, e dois deles abrem a molécula
+     bem mais do que dois hidrogênios abriam. */
+  scl2: [['Cl',7.7,69.6,21],['Cl',92.3,69.6,21],['S',50,36,24]],
+  /* GÁS CARBÔNICO — a molécula RETA da série.
+     O carbono é da família 4A: tem quatro elétrons de valência e gasta
+     os quatro nas ligações, dois para cada oxigênio. Não lhe sobra par
+     isolado nenhum — e é justamente por não sobrar que ela não entorta,
+     ao contrário da água e do SCl2, que têm dois pares nas costas do
+     átomo central empurrando os braços para baixo. O CO2 é a prova, na
+     mesma aula, de que a forma da molécula vem dos pares que ficam, e
+     não só dos que se compartilham. */
+  carbonico: [['O',-2,50,23],['O',102,50,23],['C',50,50,20]],
+  /* CIANETO DE HIDROGÊNIO — H–C≡N, e as três ordens de ligação da série
+     numa molécula só: uma simples de um lado do carbono, uma tripla do
+     outro. O carbono gasta os quatro elétrons de valência nos dois
+     braços (um para o H, três para o N) e de novo não fica com par
+     isolado — daí ela ser reta, como o gás carbônico. Quem tem par
+     isolado aqui é o nitrogênio, um só, nas costas dele. */
+  hcn:  [['H',9,50,14],['N',103,50,22],['C',52,50,20]],
   he:[['He',50,50,34]], ne:[['Ne',50,50,34]], ar:[['Ar',50,50,34]],
   kr:[['Kr',50,50,34]], xe:[['Xe',50,50,34]], rn:[['Rn',50,50,34]]
 };
+
+/* ------------------------------------------------------------
+   AS MOLÉCULAS DE TRÊS DIMENSÕES
+   Posições em px do referencial da molécula, com z para dentro da
+   tela. O que entra aqui deixa de ser desenho e passa a ser objeto:
+   não se desmonta, se vira.
+   ------------------------------------------------------------ */
+const MOL3D = {
+  /* AMÔNIA — pirâmide trigonal. Os três hidrogênios abrem 107° um do
+     outro, o que os põe a 68° do eixo que sobe do nitrogênio. Quem os
+     empurra para baixo é o par isolado, que fica nesse eixo e não se
+     desenha: é o exemplo em que o par que NÃO aparece é o que explica
+     a forma. Chata, a molécula seria outra substância. */
+  /* As esferas são de BOLA-E-BASTÃO, e não de calota: menores que o
+     raio de verdade, para sobrar ligação à vista entre elas. Cortadas na
+     casca (ver MOL_3D), esferas do tamanho real se encostariam e não
+     restaria haste nenhuma para mostrar. */
+  amonia: {
+    at: [['N',    0, -5.9,    0, 9.5],
+         ['H',    0,  2.0, 20.6, 5.5],
+         ['H',-17.8,  2.0, -10.3, 5.5],
+         ['H', 17.8,  2.0, -10.3, 5.5]],
+    lig: [[0, 1, 4], [0, 2, 4], [0, 3, 4]]
+  },
+  /* METANO — tetraedro PERFEITO. Os quatro hidrogênios nos vértices
+     alternados de um cubo, que é o que dá os 109,5° entre quaisquer duas
+     ligações. Vem logo depois da amônia de propósito: o carbono gasta os
+     quatro elétrons de valência e não guarda par nenhum, e por isso a
+     figura fecha simétrica. O nitrogênio guarda um par, e é esse par que
+     achata a pirâmide dela para 107°. Girando as duas uma atrás da
+     outra, vê-se que a diferença entre um tetraedro e uma pirâmide é um
+     par de elétrons que ninguém desenha. */
+  metano: {
+    at: [['C',    0,     0,     0, 9],
+         ['H', 12.7,  12.7,  12.7, 5.5],
+         ['H', 12.7, -12.7, -12.7, 5.5],
+         ['H',-12.7,  12.7, -12.7, 5.5],
+         ['H',-12.7, -12.7,  12.7, 5.5]],
+    lig: [[0, 1, 4], [0, 2, 4], [0, 3, 4], [0, 4, 4]]
+  }
+};
+const eh3D = (key) => !!MOL3D[key];
+
+/* Monta a molécula em 3D. As esferas são círculos com brilho — de
+   qualquer ângulo uma esfera é um círculo, então elas não precisam ser
+   orientadas. As HASTES precisam: cada uma nasce no átomo de origem
+   apontando para o +X e é virada até encostar no átomo de destino.
+     rotateZ leva o +X ao ângulo do vetor no plano da tela;
+     rotateY o inclina para dentro ou para fora dela.
+   Nessa ordem o +X vai parar em (cosZ·cosY, senZ·cosY, -senY), que é
+   exatamente a direção da ligação normalizada. */
+function MOL_3D(key){
+  const M = MOL3D[key];
+  if (!M) return '';
+  const bolas = M.at.map(([el, x, y, z, r]) =>
+    `<i class="m3-at" style="--x:${x}px;--y:${y}px;--z:${z}px;--r:${r}px;`
+    + `--bg:${sphereBg(EL_COLOR[el] || '#B0B0B0')}"></i>`).join('');
+  const hastes = M.lig.map(([ia, ib, w]) => {
+    const a = M.at[ia], b = M.at[ib];
+    const dx = b[1] - a[1], dy = b[2] - a[2], dz = b[3] - a[3];
+    const D = Math.hypot(dx, dy, dz) || 1;
+    const ux = dx / D, uy = dy / D, uz = dz / D;
+    /* A HASTE VAI DE CASCA A CASCA, e não de centro a centro.
+       Numa cena 3D de verdade a esfera esconderia o pedaço de dentro
+       dela. Aqui quem ordena a profundidade é o navegador, e ele ordena
+       PLANOS inteiros: um bastão cuja lâmina caia à frente da esfera
+       aparece inteiro por cima, atravessando-a. Cortando a haste na
+       superfície das duas esferas não sobra pedaço nenhum para
+       atravessar — e a esfera volta a ser opaca de verdade.
+
+       O corte é o raio exato, e não sobra fresta: de frente ele cai
+       na borda do círculo; de viés, o encurtamento da perspectiva o
+       leva para DENTRO dele. */
+    const ax = a[1] + ux * a[4], ay = a[2] + uy * a[4], az = a[3] + uz * a[4];
+    const L = Math.max(1, D - a[4] - b[4]);
+    const rz = Math.atan2(dy, dx) * 180 / Math.PI;
+    const ry = -Math.asin(Math.max(-1, Math.min(1, dz / D))) * 180 / Math.PI;
+    /* três lâminas em torno do eixo, com brilhos diferentes: a de frente
+       clara, as de trás mais fechadas. É o que dá o arredondado do tubo */
+    return [[0, 1], [60, .72], [120, .72]].map(([g, o]) =>
+      `<i class="m3-lig" style="--x:${ax.toFixed(1)}px;--y:${ay.toFixed(1)}px;`
+      + `--z:${az.toFixed(1)}px;`
+      + `--len:${L.toFixed(1)}px;--w:${w}px;`
+      + `--rz:${rz.toFixed(1)}deg;--ry2:${ry.toFixed(1)}deg;`
+      + `--rx3:${g}deg;--o3:${o}"></i>`).join('');
+  }).join('');
+  return `<div class="m3">${hastes}${bolas}</div>`;
+}
 
 /* Desenha a molécula. O viewBox sai da própria tinta, então cada uma
    ocupa a caixa inteira sem sobra e sem corte. O gradiente é o mesmo das
@@ -4239,8 +5051,42 @@ const MOLGEO = {
    traço por par compartilhado — é daqui que sai a ordem da ligação. */
 const MOLBOND = {
   cl2: [[0, 1, 16]],
-  o2:  [[0, 1, 11, -9], [0, 1, 11, 9]]
+  o2:  [[0, 1, 11, -9], [0, 1, 11, 9]],
+  /* três traços mais finos, para os três caberem entre os dois núcleos
+     sem se encostarem */
+  n2:  [[0, 1, 7, -11.5], [0, 1, 7, 0], [0, 1, 7, 11.5]],
+  /* duas ligações que partem do mesmo átomo: o central é o índice 2, e é
+     isso que faz a água e o SCl2 serem lidos aqui como moléculas de
+     braços — centro parado, braços que se arrancam um a um */
+  agua: [[2, 0, 13], [2, 1, 13]],
+  scl2: [[2, 0, 12], [2, 1, 12]],
+  /* duas DUPLAS partindo do mesmo carbono: dois traços por ligação, e é
+     contando os traços de cada vizinho que a ordem sai */
+  carbonico: [[2, 0, 11, -9], [2, 0, 11, 9],
+              [2, 1, 11, -9], [2, 1, 11, 9]],
+  /* do carbono (índice 2) saem uma simples para o H e uma TRIPLA para o
+     N — três traços para o mesmo vizinho, e é contando-os que a ordem
+     de cada braço sai */
+  hcn: [[2, 0, 12],
+        [2, 1, 9, -9], [2, 1, 9, 0], [2, 1, 9, 9]]
 };
+
+/* O átomo que TODAS as ligações têm em comum — o centro de uma molécula
+   de braços. Devolve -1 quando não há um: num par de iguais como o Cl2
+   os dois seriam "o centro", e ali a ideia não se aplica. */
+function centroDe(key){
+  const b = MOLBOND[key] || [];
+  if (b.length < 2) return -1;
+  const atomos = new Set();
+  b.forEach(l => { atomos.add(l[0]); atomos.add(l[1]); });
+  if (atomos.size < 3) return -1;           /* dois átomos não têm centro */
+  const conta = {};
+  b.forEach(l => { conta[l[0]] = (conta[l[0]] || 0) + 1;
+                   conta[l[1]] = (conta[l[1]] || 0) + 1; });
+  const c = Object.keys(conta).find(k => conta[k] === b.length);
+  return c === undefined ? -1 : +c;
+}
+const ehRamos = (key) => centroDe(key) >= 0;
 
 /* Quantos pares a ligação tem: um bastão é simples, dois é dupla. Sai da
    própria MOLBOND, que já traz um traço por par — sem segunda lista para
@@ -4313,8 +5159,17 @@ function MOL_SVG(key){
        + `${lig.map(b => b.haste).join('')}${bolas}</svg>`;
 }
 const AGUA_SVG = MOL_SVG('h2o');
+/* A ÁGUA EM BOLA-E-BASTÃO.
+   A de cima é a água como MATÉRIA: calotas coladas, os hidrogênios
+   enterrados no oxigênio, que é como ela de fato ocupa espaço. Onde o
+   assunto é a LIGAÇÃO, é esta que serve — os átomos afastados e o traço
+   à vista entre eles.
+   Nos dois lugares em que ela entra o bastão JÁ EXISTIA no desenho: o
+   que faltava era a molécula abrir espaço para ele aparecer, porque com
+   os átomos colados ele ficava inteiro dentro das esferas. */
+const AGUA_BAST = MOL_SVG('agua');
 
-function GLASS(){
+function GLASS(tag){
   return `<div class="z-stage"><div class="z-body">
     <svg class="z-svg" viewBox="0 0 ${GLASS_W} ${GLASS_H}" aria-hidden="true">
       <defs>
@@ -4339,6 +5194,22 @@ function GLASS(){
                stroke="#D6E8F0" stroke-opacity=".55" stroke-width="2.5"/>
       <path d="M54 44 L66 228" stroke="#FFFFFF" stroke-opacity=".3" stroke-width="5"
             stroke-linecap="round" fill="none"/>
+      ${!tag ? '' : (() => {
+        /* NOME OU FÓRMULA?
+           A fórmula pede o índice embaixo — é o formulaSVG que o desce.
+           O nome pede que CAIBA, e aí quem serve é o rotulo comum, que
+           aperta o traço até entrar na plaqueta. Um nome de duas linhas
+           pede plaqueta mais alta, senão ele transborda. */
+        const linhas = String(tag).split('\n').length;
+        const alt  = linhas > 1 ? 60 : 44;
+        const topo = 174 - alt / 2;
+        const corpo = ehFormula(tag)
+          ? formulaSVG(tag, 100, 183, 25, '#16232E')
+          : rotulo(tag, 100, linhas > 1 ? 167 : 182, 80,
+                   linhas > 1 ? 17 : 21, '#16232E');
+        return `<rect x="54" y="${topo}" width="92" height="${alt}" rx="3"
+                      fill="#F2F6F8" opacity=".95"/>${corpo}`;
+      })()}
     </svg>
   </div></div>`;
 }
@@ -4348,13 +5219,37 @@ function GLASS(){
    frasco, bateria e extintor, no mesmo palco 200 x 260 do copo.
    O texto do rótulo é ajustado com textLength, então cabe sempre.
    ------------------------------------------------------------ */
+/* Fórmula química desenhada em SVG: os algarismos que vêm depois de uma
+   letra descem e diminuem — o 2 do H2O. Os rótulos de gás são palavras
+   ("GÁS CLORO") e saem pelo rotulo() comum; o do copo é uma FÓRMULA, e
+   fórmula sem índice embaixo não é fórmula. */
+function formulaSVG(txt, cx, y, size, fill){
+  let desceu = 0;
+  const partes = String(txt).split(/(\d+)/).filter(p => p !== '').map(p => {
+    if (!/^\d+$/.test(p)){
+      const volta = desceu ? ` dy="${-desceu}"` : '';
+      desceu = 0;
+      return `<tspan${volta}>${p}</tspan>`;
+    }
+    desceu = Math.round(size * 0.26);
+    return `<tspan font-size="${Math.round(size * 0.68)}" dy="${desceu}">${p}</tspan>`;
+  }).join('');
+  return `<text x="${cx}" y="${y}" text-anchor="middle" fill="${fill}"
+           font-size="${size}" font-weight="600">${partes}</text>`;
+}
+
+/* Fórmula ou nome? Um algarismo no texto decide: "CH4" é fórmula e pede
+   o índice embaixo; "GÁS CLORO" e "Água" são nomes e pedem que caibam.
+   A regra mora aqui para os recipientes não divergirem entre si. */
+const ehFormula = (tag) => /\d/.test(String(tag));
+
 const rotulo = (tag, cx, y, w, size, fill) =>
   String(tag).split('\n').map((l, i) =>
     `<text x="${cx}" y="${y + i * (size + 4)}" text-anchor="middle" fill="${fill}"
            font-size="${size}" textLength="${Math.min(w, l.length * size * .72)}"
            lengthAdjust="spacingAndGlyphs">${l}</text>`).join('');
 
-function BOTTLE(tag, c, cLight){
+function BOTTLE(tag, c, cLight, formula){
   return `
     <rect x="74" y="8"  width="52" height="26" rx="5" fill="#3A4A57"/>
     <rect x="74" y="28" width="52" height="9"  rx="3" fill="#26313B"/>
@@ -4365,7 +5260,12 @@ function BOTTLE(tag, c, cLight){
     <path d="M50 148 L50 230 Q50 246 66 246 L134 246 Q150 246 150 230 L150 148 Z"
           fill="${c}" opacity=".8"/>
     <rect x="56" y="152" width="88" height="62" rx="3" fill="#E8F1F5" opacity=".94"/>
-    ${rotulo(tag, 100, 176, 78, 13, '#16232E')}
+    ${formula
+        /* nome em cima, fórmula embaixo — como no cilindro */
+        ? rotulo(tag, 100, 174, 76, 14, '#16232E')
+          + formulaSVG(formula, 100, 204, 22, '#16232E')
+      : ehFormula(tag) ? formulaSVG(tag, 100, 190, 24, '#16232E')
+      : rotulo(tag, 100, 176, 78, 13, '#16232E')}
     <path d="M62 118 L62 226" stroke="#FFFFFF" stroke-opacity=".3"
           stroke-width="5" stroke-linecap="round"/>`;
 }
@@ -4402,7 +5302,7 @@ function EXTINGUISHER(tag){
 
 /* cilindro de gás comprimido: o volante da válvula, o corpo na cor do
    gás e o sombreado cilíndrico, que é o mesmo para qualquer cor */
-function CYLINDER(tag, c){
+function CYLINDER(tag, c, formula){
   const corpo = `M46 92 C46 56 154 56 154 92 L154 232 Q154 248 138 248
                  L62 248 Q46 248 46 232 Z`;
   return `
@@ -4422,18 +5322,97 @@ function CYLINDER(tag, c){
     <path d="${corpo}" fill="none" stroke="#5F6B76" stroke-width="2"/>
     <rect x="46" y="106" width="108" height="6" fill="#5F6B76" opacity=".45"/>
     <rect x="52" y="128" width="96" height="72" rx="3" fill="#F2F6F8" opacity=".95"/>
-    ${rotulo(tag, 100, 154, 88, 17, '#16232E')}
+    ${formula
+        /* NOME EM CIMA, FÓRMULA EMBAIXO — é assim que se lê o rótulo de
+           um cilindro de verdade, e das duas coisas é a fórmula que a
+           aula vai usar, então ela sai maior. Nome de duas linhas sobe e
+           aperta a fórmula: os dois têm de caber na mesma plaqueta. */
+        ? (() => {
+            const n2 = String(tag).split('\n').length > 1;
+            return rotulo(tag, 100, n2 ? 145 : 152, 84, 16, '#16232E')
+                 + formulaSVG(formula, 100, n2 ? 192 : 189, n2 ? 24 : 27, '#16232E');
+          })()
+      : ehFormula(tag)
+        /* só fórmula: uma linha, centrada na plaqueta e grande, que ela
+           é curta e tem de ser lida do fundo da sala */
+        ? formulaSVG(tag, 100, 175, 30, '#16232E')
+        : rotulo(tag, 100, 154, 88, 17, '#16232E')}
     <rect x="42" y="242" width="116" height="14" rx="5" fill="#5F6B76"/>`;
+}
+
+/* BÉQUER — o copo de laboratório: paredes retas, bico de vazar e as
+   marcas de graduação. O copo liso é a água que se bebe, e é dela que
+   os slides do começo falam; aqui o assunto é uma substância que se
+   manipula, e um líquido corrosivo não está num copo de água.
+
+   A cor vem de fora, porque é ela que diz de que líquido se trata. Como
+   no cilindro, os degradês de identificador fixo são só de luz e sombra
+   — nada que dependa da cor —, senão dois béqueres de cores diferentes
+   na mesma tela disputariam o mesmo id e sairiam iguais. */
+function BEAKER(tag, c, cLight){
+  /* o miolo: paredes retas e o fundo levemente arredondado */
+  const corpo = 'M50 56 L50 228 Q50 246 72 246 L128 246 Q150 246 150 228 L150 56 Z';
+  const marcas = [96, 120, 144].map(y =>
+    `<path d="M60 ${y} H84" stroke="#E8F1F5" stroke-opacity=".38" stroke-width="2"/>`).join('');
+  return `
+    <defs>
+      <linearGradient id="bkrSh" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0"   stop-color="#000000" stop-opacity=".30"/>
+        <stop offset=".18" stop-color="#FFFFFF" stop-opacity=".40"/>
+        <stop offset=".55" stop-color="#FFFFFF" stop-opacity="0"/>
+        <stop offset="1"   stop-color="#000000" stop-opacity=".42"/>
+      </linearGradient>
+      <clipPath id="bkrIn"><path d="${corpo}"/></clipPath>
+    </defs>
+    <!-- o bico de vazar, na quina direita da boca -->
+    <path d="M148 50 L170 40 L172 50 L152 62 Z" fill="#C9DAE4" opacity=".55"/>
+    <!-- o líquido, do nível para baixo -->
+    <g clip-path="url(#bkrIn)">
+      <rect x="40" y="104" width="120" height="150" fill="${c}"/>
+      <rect x="40" y="104" width="120" height="150" fill="url(#bkrSh)" opacity=".45"/>
+      <!-- a superfície: a borda de trás mais viva, porque ali a luz
+           atravessa o líquido e volta -->
+      <ellipse cx="100" cy="104" rx="50" ry="7.5" fill="${cLight}" opacity=".8"/>
+      <path d="M50 104 A50 7.5 0 0 1 150 104" fill="none"
+            stroke="#FFFFFF" stroke-opacity=".4" stroke-width="1.6"/>
+    </g>
+    <!-- o vidro por cima: é esta camada que faz o copo conter o líquido
+         em vez de ficar atrás dele -->
+    <path d="${corpo}" fill="url(#bkrSh)" opacity=".5"/>
+    <path d="${corpo}" fill="none" stroke="#B9CBD6" stroke-opacity=".72" stroke-width="2.4"/>
+    <ellipse cx="100" cy="56" rx="50" ry="8" fill="none"
+             stroke="#D6E8F0" stroke-opacity=".72" stroke-width="2.4"/>
+    ${marcas}
+    <rect x="54" y="158" width="92" height="58" rx="3" fill="#F2F6F8" opacity=".95"/>
+    ${rotulo(tag, 100, 180, 80, 17, '#16232E')}`;
 }
 
 function VESSEL(r){
   const art = r.shape === 'battery'      ? BATTERY(r.tag)
             : r.shape === 'extinguisher' ? EXTINGUISHER(r.tag)
-            : r.shape === 'cylinder'     ? CYLINDER(r.tag, r.color || '#9CCBDB')
-            : BOTTLE(r.tag, r.color || '#7FC8E8', r.light || '#CDE9F4');
+            : r.shape === 'cylinder'     ? CYLINDER(r.tag, r.color || '#9CCBDB',
+                                                     r.formula)
+            : r.shape === 'beaker'       ? BEAKER(r.tag, r.color || '#8FC4E0',
+                                                  r.light || '#CDE9F4')
+            : BOTTLE(r.tag, r.color || '#7FC8E8', r.light || '#CDE9F4', r.formula);
   return `<div class="z-stage"><div class="z-body">
     <svg class="z-svg" viewBox="0 0 ${GLASS_W} ${GLASS_H}" aria-hidden="true">${art}</svg>
   </div></div>`;
+}
+
+/* A esfera de ajuda e a nota que ela abre. A nota mora no palco, na
+   posição que o slide pedir; a esfera mora na quina, sempre a mesma. */
+function POLI(cfg){
+  const itens = (cfg.itens || [])
+    .map((t, i) => `<li><b>${i + 1}</b><span>${t}</span></li>`).join('');
+  const rot = cfg.rot || 'Ajuda';
+  return `<button class="poli-btn" type="button" tabindex="-1"
+            title="${rot.replace(/\n/g, ' ')}"
+            aria-label="${rot.replace(/\n/g, ' ')}"><span>${rot}</span></button>
+    <div class="poli-nota" style="left:${cfg.x || 900}px;top:${cfg.y || 360}px">
+      <h3>${cfg.tit || ''}</h3>
+      <ol>${itens}</ol>
+    </div>`;
 }
 
 /* ------------------------------------------------------------
@@ -4441,7 +5420,9 @@ function VESSEL(r){
    moldura de madeira, lousa verde e o suporte com os gizes.
    ------------------------------------------------------------ */
 function BOARD(x, y, k, cls){
-  return `<div class="q-board${cls ? ' ' + cls : ''}" style="left:${x || 640}px;top:${y || 330}px;--k:${k || 1}">
+  /* nasce aberto? o Refazer precisa saber ao que devolver o slide */
+  const nasce = /(^|\s)on(\s|$)/.test(cls || '') ? '1' : '';
+  return `<div class="q-board${cls ? ' ' + cls : ''}" data-aberto="${nasce}" style="left:${x || 640}px;top:${y || 330}px;--k:${k || 1}">
     <svg viewBox="0 0 520 340" aria-hidden="true">
       <defs>
         <linearGradient id="qbB" x1="0" y1="0" x2="1" y2="1">
@@ -4513,15 +5494,28 @@ const SPLIT_K = 1.72;
 /* A molécula que se desmonta usa a MESMA geometria do desenho do slide
    15: ângulo de verdade e átomos encostados. A vareta da ligação fica
    escondida dentro das esferas e só aparece quando se puxa um átomo. */
-function splitMol(key, x, y){
+/* CADA MOLÉCULA DEITA DE UM JEITO.
+   O giro entra na GEOMETRIA, e não numa rotação do contêiner. Aqui os
+   átomos se arrancam com o dedo, e a conta que leva a posição deles para
+   o palco (ver arrastaAtomo) supõe a molécula sem rotação: girar a caixa
+   faria o átomo aparecer num lugar e ser agarrado noutro. Girando as
+   posições na hora de montar, tudo o que vem depois — o bastão, o
+   estilhaço, a casa para onde o átomo volta — já nasce certo.
+
+   O ângulo vem do sorteio com semente do campo: muda de molécula para
+   molécula, mas é sempre o mesmo em toda abertura do slide. */
+function splitMol(key, x, y, giro){
   const g = MOLGEO[key] || MOLGEO.h2o;
   const c = g[g.length - 1];               /* o central é sempre o último */
   const cx = SPLIT_W / 2, cy = SPLIT_H / 2;
+  const cs = Math.cos(giro || 0), sn = Math.sin(giro || 0);
 
   let bonds = '', atoms = '';
   g.slice(0, -1).forEach(([el, px, py, r], i) => {
-    const ox = (px - c[1]) * SPLIT_K;
-    const oy = (py - c[2]) * SPLIT_K;
+    const dx = (px - c[1]) * SPLIT_K;
+    const dy = (py - c[2]) * SPLIT_K;
+    const ox = dx * cs - dy * sn;
+    const oy = dx * sn + dy * cs;
     const len = Math.hypot(ox, oy), rot = Math.atan2(oy, ox) * 180 / Math.PI;
     bonds += `<i class="qbond" data-for="${i}" style="`
            + `--x:${cx.toFixed(1)}px;--y:${cy.toFixed(1)}px;`
@@ -4558,7 +5552,7 @@ function MOLS_PN(w, h, n){
       + `--fx:${(rnd() * 26 - 13).toFixed(0)}px;--fy:${(rnd() * 22 - 11).toFixed(0)}px;`
       + `--r0:${(a - 11).toFixed(0)}deg;--r1:${(a + 11).toFixed(0)}deg;`
       + `--fd:${(6 + rnd() * 4).toFixed(1)}s;--o:${(.55 + rnd() * .4).toFixed(2)}">`
-      + AGUA_SVG + `</i>`;
+      + AGUA_BAST + `</i>`;
   }
   return out;
 }
@@ -4571,7 +5565,11 @@ function QUANTUM(cfg, extra){
   } else if (cfg && cfg.field === 'split'){
     /* poucas, grandes e bem espaçadas */
     const xs = [300, 640, 980], ys = [250, 500];
-    ys.forEach(y => xs.forEach(x => { mols += splitMol(cfg.mol || 'h2o', x, y); }));
+    /* cada uma deitada num ângulo seu: seis moléculas idênticas e
+       alinhadas leem-se como um padrão desenhado, e não como matéria */
+    ys.forEach(y => xs.forEach(x => {
+      mols += splitMol(cfg.mol || 'h2o', x, y, rnd() * Math.PI * 2);
+    }));
   } else
   for (let r = 0; r < 3; r++){
     for (let c = 0; c < 6; c++){
@@ -4914,7 +5912,7 @@ const REVEALS = (list, cfg) => {
       : r.kind === 'lego'     ? LEGO()
       : r.kind === 'cube'     ? CUBE(r.faces || [], r.id)
       : r.kind === 'molecule' ? MOLECULE()
-      : r.kind === 'glass'    ? GLASS()
+      : r.kind === 'glass'    ? GLASS(r.tag)
       : r.kind === 'vessel'   ? VESSEL(r)
       : r.kind === 'gas'      ? GAS(r.sim, r)
       : r.kind === 'caixa'    ? `<div class="cx"><div class="cx-tit">${r.tit || ''}</div>`
@@ -5034,17 +6032,28 @@ const REVEALS = (list, cfg) => {
           + `<button class="q-voltar" type="button" tabindex="-1"
                      title="Sair do mundo quântico">&#8592; Voltar</button>`
           + `<button class="q-reset" type="button" tabindex="-1"
-                     title="Voltar tudo ao lugar">Resetar</button>` : '')
+                     aria-label="Voltar tudo ao lugar"
+                     title="Voltar tudo ao lugar"
+             ><svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.1"
+                   stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+               ><polyline points="23 4 23 10 17 10"/><path
+                  d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>` : '')
       + (tem3d ? `<div class="cel-rot">célula unitária</div>`
                + `<div class="rede-rot">Retículo Cristalino</div>` : '')
     : '';
   /* Quadro solto no slide (fora do mundo quântico), na posição que aquele
      slide pediu. Quem o abre é o ícone da barra, como em todo slide — a
-     config só diz onde ele nasce, já que o padrão é o meio do palco. */
+     config só diz onde ele nasce, já que o padrão é o meio do palco.
+     Com "aberto", ele já está de pé quando o slide abre: há aula em que o
+     quadro não é um recurso a chamar, é parte da cena desde o começo. */
   const quadro = cfg && cfg.quadro
-    ? BOARD(cfg.quadro.x, cfg.quadro.y, cfg.quadro.k, 'solto')
+    ? BOARD(cfg.quadro.x, cfg.quadro.y, cfg.quadro.k,
+            cfg.quadro.aberto ? 'solto on' : 'solto')
     : '';
-  return `${quantum}${quadro}${items}`;
+  /* a esfera de ajuda, quando o slide pedir uma */
+  const ajuda = cfg && cfg.poli ? POLI(cfg.poli) : '';
+  return `${quantum}${quadro}${ajuda}${items}`;
 };
 
 function render(){
@@ -5065,7 +6074,13 @@ function render(){
           <div class="kicker">Química · Apresentação</div>
           <h1>Ligações <em>Químicas</em></h1>
           <div class="bond"><span class="line a"></span><span class="line b"></span><span class="e l"></span><span class="e r"></span></div>
-          <p class="prof"><span>Professor:</span> Amauri Junior</p>
+          <div class="autor">
+            <span class="autor-retrato">
+              <img src="imagens/amauri_jr.jpg" draggable="false"
+                   alt="Professor Amauri Junior no laboratório">
+            </span>
+            <p class="prof"><span>Professor:</span> Amauri Junior</p>
+          </div>
         </div>
         <div class="right">${HERO}</div>`;
     } else {
@@ -5116,12 +6131,32 @@ const FX_CLASSES = [
 let fxTimer;
 
 function clearFx(){
+  /* a nota de ajuda não atravessa a troca de slide: ela é consulta do
+     momento, e voltar ao slide com ela aberta seria herdar uma dúvida */
+  slides.forEach(el => el.classList.remove('poli-on'));
   slides.forEach(el => el.classList.remove(...FX_CLASSES));
   fxLayer.classList.remove('run');
   /* a pedra não fica desmontada se o slide mudar com o dedo apoiado */
   deck.querySelectorAll('.reveal-item.broken, .reveal-item.pressing, .reveal-item.zoomed')
       .forEach(r => { r.classList.remove('pressing'); restoreRock(r); closeQuantum(r); });
 }
+
+/* ------------------------------------------------------------
+   PASSAGENS QUE PEDEM OUTRO TEMPO
+   O deslize padrão é o --t-desl, 0,62s. Algumas passagens pedem mais
+   fôlego: ou porque muda muita coisa de um slide para o outro, ou
+   porque a fala do professor precisa acompanhar a cena chegando.
+
+   A chave é o PAR de índices, sempre do menor para o maior, e por isso
+   o tempo vale nos dois sentidos — voltar demora o mesmo que ir.
+   Índices contam do zero: '1-2' é a passagem do slide 2 para o 3.
+   ------------------------------------------------------------ */
+const DESLIZE = {
+  '1-2': 0.81,    /* slide 2 -> 3: 30% mais lento que o padrão */
+  '2-3': 1.03     /* slide 3 -> 4: a 60% da velocidade das outras */
+};
+const deslizeDe = (a, b) =>
+  DESLIZE[Math.min(a, b) + '-' + Math.max(a, b)] || 0;
 
 function go(n, instant){
   const to = Math.max(0, Math.min(SLIDES.length - 1, n));
@@ -5148,14 +6183,16 @@ function go(n, instant){
     const emCaixa = i => i === 0 || (SLIDES[i] && SLIDES[i].virada === 'cube');
     const cube = emCaixa(from) || emCaixa(to);
     const kind = cube ? 'cube' : 'desl';       /* os dois seguem o sentido */
-    /* A passagem entre o slide 3 e o 4 corre a 60% da velocidade das
-       outras — 0,62s viram 1,03s. Vale nos dois sentidos. */
-    const lenta = (from === 2 && to === 3) || (from === 3 && to === 2);
-    stage.style.setProperty('--t-desl', lenta ? '1.03s' : '');
+    /* Passagens que pedem outro tempo — ver DESLIZE. Vale nos dois
+       sentidos, e o relógio que limpa a animação segue o mesmo número:
+       um deslize mais longo do que o temporizador terminaria cortado. */
+    const t = deslizeDe(from, to);
+    stage.style.setProperty('--t-desl', t ? t + 's' : '');
     void stage.offsetWidth;                    /* reinicia animação interrompida */
     slides[from].classList.add('is-leaving', `fx-${kind}-out-${dir}`);
     slides[to].classList.add(`fx-${kind}-in-${dir}`);
-    fxTimer = setTimeout(clearFx, cube ? 950 : (lenta ? 1250 : 750));
+    fxTimer = setTimeout(clearFx,
+      cube ? 950 : (t ? Math.round(t * 1000) + 220 : 750));
   }
 
   /* retículo que mora no slide: o laço 3D retoma ao entrar nele */
@@ -6143,7 +7180,14 @@ function abreRede(it, modo, px, py, largura, altura){
      quadro branco, para quem for escrever ali, e ao ALTO DO MUNDO
      QUÂNTICO, onde fica à vista o tempo todo. Submerso no retículo, é
      essa palavra que diz de que substância é o cristal em volta. */
-  const cap = slide.querySelector('.reveal-item.fixo .cap');
+  /* A legenda é a DAQUELE composto: quem manda é o retículo que está
+     sendo aberto, e não a primeira imagem que o slide tiver. Sem isto,
+     no slide dos cinco todos os mergulhos se anunciavam como Cloreto
+     de Sódio, no alto do mundo quântico e no quadro branco. */
+  const dono = [...slide.querySelectorAll('.reveal-item.fixo')]
+                 .find(f => f.dataset.rede === modo)
+             || slide.querySelector('.reveal-item.fixo');
+  const cap = dono && dono.querySelector('.cap');
   const nome = (REDES[modo] && cap) ? cap.textContent.trim() : '';
   const tit = slide.querySelector('.qb-tit');
   if (tit) tit.textContent = nome;
@@ -6424,6 +7468,36 @@ const SEP_PAR    = 15;      /* meia abertura de um par, em graus */
 const SEP_DUPLA  = 30;      /* meia abertura entre os dois solteiros */
 const SEP_PAR2   = 9;       /* meia abertura DENTRO de cada par da dupla */
 const SEP_VAO2   = 26;      /* o quanto cada par se afasta do eixo, em px */
+/* A LIGAÇÃO TRIPLA.
+   O nitrogênio tem TRÊS desemparelhados e um par isolado só — cinco de
+   valência, família 5A. Os três solteiros abrem bem (SEP_TRIPLA), e ao
+   fechar viram três pares: um em cima, um no eixo e um embaixo. Como
+   agora são três a caber no mesmo vão, cada par fecha ainda mais
+   apertado que os da dupla e o afastamento entre eles cresce. */
+const SEP_TRIPLA = 38;      /* meia abertura entre os solteiros de fora */
+const SEP_PAR3   = 5;       /* meia abertura DENTRO de cada par da tripla */
+const SEP_VAO3   = 36;      /* o afastamento dos pares de fora, em px */
+
+/* Simples, dupla e tripla passam pela mesma máquina: muda só o quanto os
+   solteiros se abrem, o quanto cada par fecha, e o quanto os pares se
+   afastam do eixo. Uma ligação de ordem maior é sempre MAIS CURTA, e sai
+   curta por si: os solteiros dela saem mais abertos, então os núcleos
+   têm de chegar mais perto para que eles se cruzem no meio. */
+function medidasLig(ordem){
+  if (ordem >= 3)  return { abre: SEP_TRIPLA, par: SEP_PAR3, vao: SEP_VAO3 };
+  if (ordem === 2) return { abre: SEP_DUPLA,  par: SEP_PAR2, vao: SEP_VAO2 };
+  return { abre: SEP_PAR, par: SEP_PAR, vao: 0 };
+}
+
+/* Onde cada par compartilhado mora, medido do eixo para fora: um só no
+   eixo na simples, dois lados na dupla, e na tripla os dois lados mais o
+   eixo. É desta lista que saem os bastões — um por par. */
+function vaosLig(ordem){
+  const m = medidasLig(ordem);
+  if (ordem >= 3)  return [-m.vao, 0, m.vao];
+  if (ordem === 2) return [-m.vao, m.vao];
+  return [0];
+}
 const SEP_PUXAO  = 34;      /* puxão que rompe a ligação */
 /* Perto assim, os dois elétrons se emparelham. Com o desvio lateral de
    SEP_PAR eles nunca chegam a se tocar — passam a se cruzar lado a lado,
@@ -6462,6 +7536,26 @@ function sepGeo(key){
    Como base é sempre a direção do átomo vizinho, o elétron solteiro de
    um fica de frente para o do outro em qualquer posição em que os dois
    estejam — e é isso que faz o encaixe ser possível por qualquer lado. */
+/* ONDE OS SOLTEIROS DE UMA LIGAÇÃO FICAM, pela ordem dela.
+   Simples: um só, desviado SEP_PAR do eixo — o desvio que faz os dois se
+   cruzarem lado a lado em vez de se atropelarem de frente.
+   Dupla: dois, mais abertos, um acima e outro abaixo.
+   Tripla: três; os de fora bem abertos e o do meio com o desvio mínimo,
+   porque em cima do eixo ele bateria de frente com o do vizinho.
+   O campo "lado" diz de qual par o elétron é, e é por ele que a conta do
+   meio acha o lugar de cada um.
+
+   Vale para os pares de iguais e para os braços de um centro: a regra é
+   da LIGAÇÃO, não do formato da molécula, e por isso mora num lugar só. */
+function solteirosDe(base, ordem){
+  if ((ordem || 1) >= 3) return [{ a: base - SEP_TRIPLA, lado: -1 },
+                                 { a: base - SEP_PAR3,   lado:  0 },
+                                 { a: base + SEP_TRIPLA, lado:  1 }];
+  if (ordem === 2)       return [{ a: base - SEP_DUPLA, lado: -1 },
+                                 { a: base + SEP_DUPLA, lado:  1 }];
+  return [{ a: base - SEP_PAR, lado: 0 }];
+}
+
 function sepEletrons(n, base, ordem){
   /* O solteiro não fica em cima do eixo: sai SEP_PAR para o lado, o
      mesmo desvio com que um par isolado se abre. Como os dois átomos
@@ -6475,15 +7569,15 @@ function sepEletrons(n, base, ordem){
      o de cima do outro, e o de baixo procura o de baixo. Saem dois
      pares, que é o que uma dupla é. O campo lado diz de qual deles o
      elétron é, e serve para orientaEletrons achar o meio certo. */
-  const nso = (ordem || 1) > 1 ? 2 : 1;
-  const e = nso === 1
-    ? [{ a: base - SEP_PAR, so: true, lado: 0 }]
-    : [{ a: base - SEP_DUPLA, so: true, lado: -1 },
-       { a: base + SEP_DUPLA, so: true, lado:  1 }];
-  /* Sobrando quatro elétrons e havendo dois solteiros de frente para o
-     vizinho, os pares isolados vão em cima e embaixo — não atrás. É como
-     a estrutura de Lewis do O2 é escrita no quadro. */
-  const lados = nso === 2 ? [90, 270, 180] : [90, 180, 270];
+  const e = solteirosDe(base, ordem).map(x => ({ a: x.a, so: true, lado: x.lado }));
+  const nso = e.length;
+  /* Onde ficam os pares isolados. Com dois solteiros de frente para o
+     vizinho eles vão em cima e embaixo — a estrutura de Lewis do O2. Com
+     três, o único par que sobra vai ATRÁS, que é como se escreve o N2:
+     :N≡N:. Com um só solteiro, a volta inteira, como no cloro. */
+  const lados = nso === 3 ? [180, 90, 270]
+              : nso === 2 ? [90, 270, 180]
+              : [90, 180, 270];
   let resto = n - nso, i = 0;
   while (resto > 0 && i < lados.length){
     const lado = base + lados[i];
@@ -6504,6 +7598,7 @@ function sepEletrons(n, base, ordem){
    com o mesmo vão de um par isolado: é o par compartilhado desenhado
    como par — e é ele, e não uma vareta, que segura a molécula. */
 function orientaEletrons(sp){
+  if (sp.classList.contains('ramos')) return orientaRamos(sp);
   const [a, b] = [...sp.querySelectorAll('.qsp-at')];
   if (!a || !b) return;
   const le = (el, v) => parseFloat(el.style.getPropertyValue(v));
@@ -6526,15 +7621,16 @@ function orientaEletrons(sp){
       const el = es[i];
       if (!el) return;
       if (novo.so && montada){
-        /* meio vão de um par: apertado na dupla, para os dois pares dela
-           se lerem separados; o de sempre na ligação simples */
-        const vao = orb * Math.sin((ordem > 1 ? SEP_PAR2 : SEP_PAR) * Math.PI / 180);
+        /* meio vão de um par: quanto mais pares houver para caber no
+           mesmo lugar, mais apertado cada um fecha */
+        const M = medidasLig(ordem);
+        const vao = orb * Math.sin(M.par * Math.PI / 180);
         /* Na dupla o par sobe ou desce SEP_VAO2 conforme o lado dele —
            e o lado se espelha de um átomo para o outro, como o vão do
            par: os dois se olham, e o que está em cima para um está
            embaixo para o outro. É assim que cada solteiro vai encontrar
            exatamente aquele que ele já vinha procurando. */
-        const v = sinal * (vao - (novo.lado || 0) * SEP_VAO2);
+        const v = sinal * (vao - (novo.lado || 0) * M.vao);
         el.style.setProperty('--d', Math.hypot(uu, v).toFixed(1) + 'px');
         el.style.setProperty('--a',
           (ang + Math.atan2(v, uu) * 180 / Math.PI).toFixed(1) + 'deg');
@@ -6546,10 +7642,408 @@ function orientaEletrons(sp){
   });
 }
 
+/* ============================================================
+   MOLÉCULA DE BRAÇOS
+   Cl2, O2 e N2 são pares de iguais: dois átomos, uma ligação, e
+   afastar um do outro dá no mesmo que afastar o outro do um. A água
+   não é assim. É um oxigênio no meio com dois hidrogênios pendurados,
+   cada um preso por uma ligação SUA — arrancar um não desfaz o outro,
+   e é justamente essa a diferença que ela vem mostrar.
+
+   Por isso ela tem o seu próprio caminho aqui: o centro fica onde
+   está e são os braços que se soltam, um a um. Todo o resto — os
+   elétrons, os bastões de vidro, o anel do octeto, o estilhaço da
+   ruptura — é o mesmo dos outros e sai das mesmas funções.
+   ============================================================ */
+
+/* Onde cada braço mora quando está ligado. Não é a distância do
+   desenho: é aquela em que o solteiro do centro e o do braço caem lado
+   a lado formando o par — a mesma conta dos pares de iguais. A DIREÇÃO
+   vem do desenho, e é ela que guarda o ângulo de 104,5° da água. */
+function ramosDe(key){
+  const ic = centroDe(key);
+  const g = sepGeo(key);
+  const c = g.ats[ic];
+  if (!c) return null;
+  const orbC = c.r + SEP_E_DIST;
+  /* Um braço por VIZINHO, e não por traço: a ligação dupla declara dois
+     traços para o mesmo par de átomos, e eles são a mesma ligação — o que
+     se conta neles é a ORDEM dela. */
+  const porVizinho = new Map();
+  (MOLBOND[key] || []).forEach(([i, j, w]) => {
+    const ip = i === ic ? j : i;
+    if (!g.ats[ip]) return;
+    const r = porVizinho.get(ip);
+    if (r){ r.ordem++; return; }
+    porVizinho.set(ip, { i: ip, at: g.ats[ip], w, ordem: 1 });
+  });
+  const ramos = [...porVizinho.values()];
+  if (!ramos.length) return null;
+  ramos.forEach(r => {
+    r.orb = r.at.r + SEP_E_DIST;
+    const M = medidasLig(r.ordem);
+    r.d   = (orbC + r.orb) * Math.cos(M.abre * Math.PI / 180);
+    /* Na dupla e na tripla os pares se afastam do eixo. O afastamento é
+       uma fração do COMPRIMENTO da ligação, e não um número fixo em px:
+       assim a mesma conta serve à molécula pequena e à grande — e num
+       centro com braços os tamanhos variam bem mais do que num par de
+       iguais, onde o número fixo bastava. */
+    r.vao = r.ordem > 1 ? r.d * 0.24 : 0;
+    r.ang = Math.atan2(r.at.y - c.y, r.at.x - c.x);
+    r.hx  = c.x + Math.cos(r.ang) * r.d;
+    r.hy  = c.y + Math.sin(r.ang) * r.d;
+  });
+  return { ic, c, orbC, ramos, f: g.f };
+}
+
+/* Os elétrons do centro: um solteiro apontando para cada braço, e o que
+   sobra em pares isolados do lado de lá. Na água dá os dois solteiros
+   para baixo, um por hidrogênio, e dois pares isolados em cima — que é
+   o desenho de Lewis dela, e a razão de ela ser entortada. */
+function eletronsCentro(el, ramos){
+  const n = VAL_SEP[el] || 0;
+  /* um solteiro por PAR compartilhado: o carbono do gás carbônico entra
+     com quatro, dois para cada oxigênio, e não lhe sobra par isolado
+     nenhum — que é por isso que a molécula dele sai reta */
+  const es = [];
+  ramos.forEach((r, k) => solteirosDe(r.ang * 180 / Math.PI, r.ordem)
+    .forEach(e => es.push({ a: e.a, so: true, ramo: k, lado: e.lado })));
+  /* a direção média dos braços; as costas do átomo são o lado oposto */
+  const mx = ramos.reduce((t, r) => t + Math.cos(r.ang), 0);
+  const my = ramos.reduce((t, r) => t + Math.sin(r.ang), 0);
+  const costas = Math.atan2(my, mx) * 180 / Math.PI + 180;
+  const lados = [costas - 34, costas + 34, costas + 90, costas - 90];
+  let resto = n - es.length, i = 0;
+  while (resto > 0 && i < lados.length){
+    if (resto >= 2){ es.push({ a: lados[i] - SEP_PAR }, { a: lados[i] + SEP_PAR }); resto -= 2; }
+    else { es.push({ a: lados[i] }); resto -= 1; }
+    i++;
+  }
+  return es;
+}
+
+/* Os elétrons de um braço: o solteiro de frente para o centro e, se
+   sobrar algum, pares isolados nos outros lados. O hidrogênio tem um
+   só — e o octeto dele são dois, que é a regra do dueto. */
+function eletronsRamo(el, ang, ordem){
+  const n = VAL_SEP[el] || 0;
+  const base = ang * 180 / Math.PI + 180;
+  const es = solteirosDe(base, ordem)
+    .map(e => ({ a: e.a, so: true, ramo: 0, lado: e.lado }));
+  /* Onde ficam os pares isolados do braço, pela ordem da ligação. Com
+     TRÊS solteiros de frente para o centro, o único par que sobra vai
+     ATRÁS — é como se escreve o nitrogênio do HCN: H–C≡N com o par nas
+     costas dele. Com dois, eles vão em cima e embaixo, como no oxigênio
+     do gás carbônico. Com um, a volta inteira, como no cloro.
+     A mesma escolha que sepEletrons faz nos pares de iguais. */
+  const lados = (ordem || 1) >= 3 ? [180, 90, 270]
+              : (ordem || 1) === 2 ? [90, 270, 180]
+              : [90, 180, 270];
+  let resto = n - es.length, i = 0;
+  while (resto > 0 && i < lados.length){
+    const lado = base + lados[i];
+    if (resto >= 2){ es.push({ a: lado - SEP_PAR }, { a: lado + SEP_PAR }); resto -= 2; }
+    else { es.push({ a: lado }); resto -= 1; }
+    i++;
+  }
+  return es;
+}
+
+const eHTML = (e, d) =>
+  `<s class="qsp-e${e.so ? ' so' : ''}"${e.so ? ` data-so="1" data-ramo="${e.ramo}"` : ''}`
+  + ` style="--a:${e.a.toFixed(1)}deg;--d:${d.toFixed(1)}px"></s>`;
+
+function montaRamos(qm, key){
+  const R = ramosDe(key);
+  if (!R) return false;
+  const g = sepGeo(key);
+  const elC = R.c.el;
+
+  /* O ANEL DO OCTETO, aqui.
+     Alcança o elétron mais longe que aquele átomo conta como seu: os
+     pares isolados, na órbita; e os compartilhados, que moram no meio de
+     cada ligação — e na dupla ainda afastados do eixo. */
+  const anelC = Math.max(R.orbC, ...R.ramos.map(r =>
+    Math.hypot(r.d / 2, r.vao + Math.min(R.orbC, r.orb)
+      * Math.sin(medidasLig(r.ordem).par * Math.PI / 180)))) + 6.5 + 7;
+  /* Quantos elétrons o anel do centro cerca: os dele mais um por par
+     compartilhado de cada braço. No carbono do CO2 dá 4 + 2 + 2 = 8. */
+  const dentroC = (VAL_SEP[elC] || 0) + R.ramos.reduce((t, r) => t + r.ordem, 0);
+
+  const centro = `<i class="qsp-at centro" data-i="${R.ic}"`
+    + ` data-de="${R.orbC.toFixed(1)}" data-oito="${dentroC}"`
+    + ` style="--x:${R.c.x.toFixed(1)}px;--y:${R.c.y.toFixed(1)}px;`
+    + `--oct:${anelC.toFixed(1)}px;--r:${R.c.r.toFixed(1)}px">`
+    + `<b class="qsp-bola" style="--bg:${sphereBg(EL_COLOR[elC])}"></b>`
+    + eletronsCentro(elC, R.ramos).map(e => eHTML(e, R.orbC)).join('')
+    + `<u class="qsp-oito">${dentroC} elétron${dentroC === 1 ? '' : 's'}</u>`
+    + `</i>`;
+
+  const bracos = R.ramos.map((r, k) => {
+    const el = r.at.el;
+    const gap = Math.min(R.orbC, r.orb)
+      * Math.sin(medidasLig(r.ordem).par * Math.PI / 180);
+    const anel = Math.max(r.orb, Math.hypot(r.d / 2, r.vao + gap)) + 6.5 + 7;
+    /* os do átomo mais um por par que ele divide com o centro */
+    const tot = (VAL_SEP[el] || 0) + r.ordem;
+    /* de que lado do centro este braço está: é para o lado de fora que
+       a conta dele vai */
+    const acima = r.hy < R.c.y - 1 ? ' acima' : '';
+    return `<i class="qsp-at ramo${acima}" data-i="${r.i}" data-ramo="${k}"`
+      + ` data-de="${r.orb.toFixed(1)}" data-d="${r.d.toFixed(1)}"`
+      + ` data-ordem="${r.ordem}" data-vao="${r.vao.toFixed(1)}"`
+      + ` data-hx="${r.hx.toFixed(1)}" data-hy="${r.hy.toFixed(1)}"`
+      + ` data-oito="${tot}"`
+      + ` style="--x:${r.hx.toFixed(1)}px;--y:${r.hy.toFixed(1)}px;`
+      + `--oct:${anel.toFixed(1)}px;--r:${r.at.r.toFixed(1)}px">`
+      + `<b class="qsp-bola" style="--bg:${sphereBg(EL_COLOR[el])}"></b>`
+      + eletronsRamo(el, r.ang, r.ordem).map(e => eHTML(e, r.orb)).join('')
+      + `<u class="qsp-oito">${tot} elétron${tot === 1 ? '' : 's'}</u>`
+      + `</i>`;
+  }).join('');
+
+  /* um bastão por par compartilhado, afastado do eixo conforme a ordem:
+     um traço na simples, dois na dupla, três na tripla */
+  const barras = R.ramos.map((r, k) => {
+    const offs = r.ordem >= 3 ? [-r.vao, 0, r.vao]
+               : r.ordem === 2 ? [-r.vao, r.vao] : [0];
+    return offs.map(o => `<i class="qsp-lig" data-ramo="${k}"`
+      + ` data-off="${o.toFixed(1)}"></i>`).join('');
+  }).join('');
+
+  qm.innerHTML = `<div class="qsp ramos ligado" data-key="${key}"`
+    + ` style="--lw:${(R.ramos[0].w * g.f * 1.5).toFixed(1)}px">`
+    + `${barras}${centro}${bracos}</div>`;
+  const sp = qm.querySelector('.qsp');
+  orientaRamos(sp);
+  poeRamos(sp);
+  return true;
+}
+
+/* o centro e os braços, como o DOM os tem agora */
+function pecasRamos(sp){
+  return { centro: sp.querySelector('.qsp-at.centro'),
+           ramos: [...sp.querySelectorAll('.qsp-at.ramo')] };
+}
+
+/* Vira os elétrons de todos. Cada braço olha para o centro e o centro
+   olha para cada braço; o par de uma ligação ligada mora no meio dela,
+   e o de uma rompida volta para a órbita de cada um. */
+function orientaRamos(sp){
+  const { centro, ramos } = pecasRamos(sp);
+  if (!centro || !ramos.length) return;
+  const le = (el, v) => parseFloat(el.style.getPropertyValue(v));
+  const cx = le(centro, '--x'), cy = le(centro, '--y');
+  const orbC = +centro.dataset.de || 0;
+
+  ramos.forEach((br, k) => {
+    const bx = le(br, '--x'), by = le(br, '--y');
+    const ang = Math.atan2(by - cy, bx - cx) * 180 / Math.PI;
+    const meio = Math.hypot(bx - cx, by - cy) / 2;
+    const orb = +br.dataset.de || 0;
+    const ordem = +br.dataset.ordem || 1;
+    const VAO = +br.dataset.vao || 0;
+    /* O VÃO DE UM PAR É O MESMO DOS DOIS.
+       Num par de iguais as duas órbitas medem igual e o par sai simétrico
+       sozinho. Aqui não: a órbita do oxigênio é bem maior que a do
+       hidrogênio, e cada um desviando o SEU tanto o par nascia torto,
+       fora do meio da ligação. O desvio passa a ser o da órbita mais
+       curta — apertado o bastante para caber nos dois anéis, e centrado
+       no meio do bastão, que é onde o par mora. */
+    const gap = Math.min(orbC, orb)
+      * Math.sin(medidasLig(ordem).par * Math.PI / 180);
+    const ligada = !br.classList.contains('solto');
+
+    /* Cada solteiro tem o seu lugar no meio da ligação: o "lado" dele diz
+       de qual par ele é, e o sinal espelha um átomo no outro — os dois
+       átomos se olham, então o que está em cima para um está embaixo para
+       o outro, e é assim que cada um encontra o seu. */
+    const poe = (el, lado, sinal, uu, solto, orbita) => {
+      if (!el) return;
+      if (ligada){
+        const v = sinal * (gap - lado * VAO);
+        el.style.setProperty('--d', Math.hypot(uu, v).toFixed(1) + 'px');
+        el.style.setProperty('--a',
+          (ang + Math.atan2(v, uu) * 180 / Math.PI).toFixed(1) + 'deg');
+      } else {
+        el.style.setProperty('--d', orbita.toFixed(1) + 'px');
+        el.style.setProperty('--a', solto.toFixed(1) + 'deg');
+      }
+    };
+    /* os solteiros do centro que são deste braço */
+    const eCs = [...centro.querySelectorAll(`.qsp-e[data-ramo="${k}"]`)];
+    solteirosDe(ang, ordem).forEach((novo, i) =>
+      poe(eCs[i], novo.lado, -1, meio, novo.a, orbC));
+    /* e os do braço, que procuram aqueles */
+    const eBs = [...br.querySelectorAll('.qsp-e[data-so]')];
+    solteirosDe(ang + 180, ordem).forEach((novo, i) =>
+      poe(eBs[i], novo.lado, 1, -meio, novo.a, orb));
+  });
+}
+
+/* um bastão por braço, do centro até onde o braço estiver */
+function poeRamos(sp){
+  const { centro, ramos } = pecasRamos(sp);
+  if (!centro) return;
+  const le = (el, v) => parseFloat(el.style.getPropertyValue(v));
+  const cx = le(centro, '--x'), cy = le(centro, '--y');
+  ramos.forEach((br, k) => {
+    const dx = le(br, '--x') - cx, dy = le(br, '--y') - cy;
+    const len = Math.hypot(dx, dy) || 1;
+    /* a perpendicular ao eixo: é por ela que os bastões de uma dupla ou
+       tripla se afastam um do outro, em qualquer ângulo do braço */
+    const px = -dy / len, py = dx / len;
+    const rot = (Math.atan2(dy, dx) * 180 / Math.PI).toFixed(2) + 'deg';
+    const solto = br.classList.contains('solto');
+    sp.querySelectorAll(`.qsp-lig[data-ramo="${k}"]`).forEach(bar => {
+      const off = +bar.dataset.off || 0;
+      bar.style.setProperty('--x', (cx + px * off).toFixed(1) + 'px');
+      bar.style.setProperty('--y', (cy + py * off).toFixed(1) + 'px');
+      bar.style.setProperty('--len', len.toFixed(1) + 'px');
+      bar.style.setProperty('--w', sp.style.getPropertyValue('--lw') || '38px');
+      bar.style.setProperty('--rot', rot);
+      /* rompido, os bastões daquele braço ficam fora de cena */
+      bar.style.opacity = solto ? '0' : '';
+    });
+  });
+}
+
+/* marca a molécula como incompleta enquanto lhe faltar um braço */
+function conferaRamos(sp){
+  const falta = !!sp.querySelector('.qsp-at.ramo.solto');
+  sp.classList.toggle('incompleta', falta);
+  /* sem todos os braços não há octeto para cercar: os anéis se apagam */
+  if (falta) sp.querySelectorAll('.qsp-at.octeto').forEach(apagaOcteto);
+}
+
+/* ARRANCAR UM BRAÇO. Só aquela ligação se parte; a outra continua. */
+function quebraRamo(sp, br, qm){
+  if (br.classList.contains('solto')) return;
+  const { centro } = pecasRamos(sp);
+  const le = (el, v) => parseFloat(el.style.getPropertyValue(v));
+  const cx = le(centro, '--x'), cy = le(centro, '--y');
+  const bx = le(br, '--x'),     by = le(br, '--y');
+  const mx = (cx + bx) / 2,     my = (cy + by) / 2;
+  const rot = Math.atan2(by - cy, bx - cx) * 180 / Math.PI;
+
+  const jato = document.createElement('i');
+  jato.className = 'qsplash';
+  jato.style.setProperty('--x', mx + 'px');
+  jato.style.setProperty('--y', my + 'px');
+  jato.style.setProperty('--rot', rot + 'deg');
+  jato.innerHTML = splashHTML(0);
+  sp.appendChild(jato);
+  void jato.offsetWidth;
+  jato.classList.add('go');
+
+  const faisca = document.createElement('i');
+  faisca.className = 'qspark';
+  faisca.style.left = mx + 'px';
+  faisca.style.top  = my + 'px';
+  sp.appendChild(faisca);
+  void faisca.offsetWidth;
+  faisca.classList.add('go');
+  setTimeout(() => { jato.remove(); faisca.remove(); }, 900);
+
+  sp.querySelectorAll(`.qsp-lig[data-ramo="${br.dataset.ramo}"]`)
+    .forEach(bar => repete(bar, 'parte'));
+
+  /* o estado muda ANTES de recolocar os elétrons: orientaRamos lê a
+     classe para saber se o par fica no meio ou volta para a órbita */
+  br.classList.add('solto');
+  /* 'feito' põe os elétrons à vista e libera o anel do octeto: daqui em
+     diante esta molécula é uma que já passou pelas mãos da turma */
+  sp.classList.remove('ligado');
+  sp.classList.add('feito');
+  sp.dataset['armado' + br.dataset.ramo] = '';
+  conferaRamos(sp);
+  br.querySelectorAll('.qsp-e').forEach(e => e.classList.remove('par', 'mira', 'indo'));
+  orientaRamos(sp);
+  poeRamos(sp);
+  if (qm) qm.classList.remove('assentou');
+}
+
+/* O BRAÇO VOLTA. Ele mesmo se recoloca na casa dele, o bastão reaparece
+   e o par se fecha de novo — sem mexer no outro braço, que nunca saiu. */
+function juntaRamo(sp, br, qm){
+  if (!br.classList.contains('solto')) return;
+  br.classList.remove('solto');
+  if (levaAtomo && levaAtomo.at === br){
+    br.classList.remove('levando');
+    levaAtomo = null;
+  }
+  br.classList.add('indo');
+  br.style.setProperty('--x', br.dataset.hx + 'px');
+  br.style.setProperty('--y', br.dataset.hy + 'px');
+  br.querySelectorAll('.qsp-e').forEach(e => {
+    e.classList.add('indo'); e.classList.remove('mira');
+  });
+  br.querySelectorAll('.qsp-e[data-so]').forEach(e => e.classList.add('par'));
+  const { centro } = pecasRamos(sp);
+  const eC = centro && centro.querySelector(`.qsp-e[data-ramo="${br.dataset.ramo}"]`);
+  if (eC) eC.classList.add('par');
+  repete(br, 'fechou');
+  conferaRamos(sp);
+  orientaRamos(sp);
+  poeRamos(sp);
+
+  const slide = qm && qm.closest('.slide');
+  if (slide && !sp.querySelector('.qsp-at.ramo.solto')){
+    const r = qm.getBoundingClientRect(), st = stage.getBoundingClientRect();
+    const k = fitScale || 1;
+    confete(slide, (r.left + r.width / 2 - st.left) / k,
+                   (r.top  + r.height / 2 - st.top)  / k);
+    repete(qm, 'assentou');
+  }
+  setTimeout(() => {
+    br.classList.remove('indo');
+    br.querySelectorAll('.qsp-e').forEach(e => e.classList.remove('indo'));
+    sp.querySelectorAll(`.qsp-lig[data-ramo="${br.dataset.ramo}"]`)
+      .forEach(bar => bar.classList.remove('parte'));
+    poeRamos(sp);
+  }, 620);
+}
+
+/* O braço solto avisa quando está a ponto de voltar, e chegando lá ele
+   volta sozinho. O 'armado' é por braço: cada ligação tem a sua conta. */
+function miraRamos(sp, qm){
+  const { centro, ramos } = pecasRamos(sp);
+  if (!centro) return;
+  ramos.forEach(br => {
+    if (!br.classList.contains('solto')) return;
+    const k = br.dataset.ramo;
+    const eCs = [...centro.querySelectorAll(`.qsp-e[data-ramo="${k}"]`)];
+    const eBs = [...br.querySelectorAll('.qsp-e[data-so]')];
+    if (!eCs.length || !eBs.length) return;
+    const onde = (at, e) => {
+      const a = parseFloat(e.style.getPropertyValue('--a')) * Math.PI / 180;
+      const d = parseFloat(e.style.getPropertyValue('--d'));
+      return { x: parseFloat(at.style.getPropertyValue('--x')) + Math.cos(a) * d,
+               y: parseFloat(at.style.getPropertyValue('--y')) + Math.sin(a) * d };
+    };
+    /* Na dupla e na tripla são vários pares por braço, e todos chegam
+       juntos — o átomo é um só. Basta o mais perto de fechar. */
+    let dd = Infinity;
+    eCs.forEach(a => eBs.forEach(b => {
+      const p = onde(centro, a), q = onde(br, b);
+      dd = Math.min(dd, Math.hypot(p.x - q.x, p.y - q.y));
+    }));
+    if (dd > SEP_ENCAIXE * 2.4) sp.dataset['armado' + k] = '1';
+    const armado = sp.dataset['armado' + k] === '1';
+    const perto = armado && dd < SEP_ENCAIXE * 1.7;
+    eCs.forEach(e => e.classList.toggle('mira', perto));
+    eBs.forEach(e => e.classList.toggle('mira', perto));
+    if (armado && dd < SEP_ENCAIXE) juntaRamo(sp, br, qm);
+  });
+}
+
 /* Monta a camada que se deixa desmontar por cima da molécula ampliada.
    Só molécula com bastão declarado em MOLBOND entra aqui. */
 function montaSeparavel(qm){
   const key = qm.dataset.mol;
+  /* molécula de braços tem o seu próprio caminho: centro parado, braços
+     que se arrancam um a um */
+  if (ehRamos(key)) return montaRamos(qm, key);
   const lig = (MOLBOND[key] || [])[0];
   if (!lig) return false;
   const g = sepGeo(key);
@@ -6569,8 +8063,8 @@ function montaSeparavel(qm){
   /* A dupla é MAIS CURTA que a simples, e sai curta por si: os solteiros
      dela saem mais abertos do eixo, então os dois núcleos têm de chegar
      mais perto para que eles se cruzem no meio. */
-  const abre = ordem > 1 ? SEP_DUPLA : SEP_PAR;
-  const dist = (orb[0] + orb[1]) * Math.cos(abre * Math.PI / 180);
+  const M = medidasLig(ordem);
+  const dist = (orb[0] + orb[1]) * Math.cos(M.abre * Math.PI / 180);
   const meioX = (a.x + b.x) / 2;
   const casa = [meioX - dist / 2, meioX + dist / 2];
 
@@ -6596,8 +8090,8 @@ function montaSeparavel(qm){
        ainda que para isso ele passe por cima da esfera vizinha — que é
        como as circunferências do octeto se cruzam no quadro, mesmo. */
     if (ordem > 1){
-      const vao = orb[i] * Math.sin(SEP_PAR2 * Math.PI / 180);
-      anel = Math.max(anel, Math.hypot(dist / 2, SEP_VAO2 + vao) + 9);
+      const vao = orb[i] * Math.sin(M.par * Math.PI / 180);
+      anel = Math.max(anel, Math.hypot(dist / 2, M.vao + vao) + 9);
     }
     /* Quantos elétrons o anel cerca: os do próprio átomo mais os que o
        vizinho põe no par — um por par compartilhado, dois na dupla. Dá
@@ -6625,10 +8119,8 @@ function montaSeparavel(qm){
      na parede. Assim o par mora dentro da ligação, à vista. */
   /* Um bastão por par: a dupla sai com dois, afastados do eixo para os
      lados, cada um envelopando o seu par. */
-  const barras = ordem > 1
-    ? `<i class="qsp-lig" data-off="${-SEP_VAO2}"></i>`
-      + `<i class="qsp-lig" data-off="${SEP_VAO2}"></i>`
-    : `<i class="qsp-lig"></i>`;
+  const barras = vaosLig(ordem)
+    .map(o => `<i class="qsp-lig" data-off="${o}"></i>`).join('');
   qm.innerHTML = `<div class="qsp ligado" data-dist="${dist.toFixed(1)}"`
     + ` data-ordem="${ordem}"`
     + ` style="--lw:${(lig[2] * g.f * 1.5).toFixed(1)}px">`
@@ -6642,6 +8134,7 @@ function montaSeparavel(qm){
 /* põe o bastão entre os dois átomos, onde quer que eles estejam */
 function poeLigacao(sp){
   if (!sp) return;
+  if (sp.classList.contains('ramos')) return poeRamos(sp);
   const [a, b] = [...sp.querySelectorAll('.qsp-at')];
   const bars = [...sp.querySelectorAll('.qsp-lig')];
   if (!a || !b || !bars.length) return;
@@ -6823,6 +8316,7 @@ function juntaAtomos(sp, qm){
    valer depois que os dois se afastaram de verdade uma vez. É também o
    que a aula quer dizer: para ligar de novo, primeiro é preciso separar. */
 function miraEncaixe(sp, qm){
+  if (sp.classList.contains('ramos')) return miraRamos(sp, qm);
   const ats = [...sp.querySelectorAll('.qsp-at')];
   const p = ats.map(pontosSo);
   if (!p[0] || !p[1] || !p[0].length || !p[1].length) return;
@@ -6865,6 +8359,47 @@ document.addEventListener('pointermove', (e) => {
      passaria por toque quando o dedo saísse */
   if (Math.hypot(e.clientX - g.x, e.clientY - g.y) > 5) g.mexeu = true;
   let dx = (e.clientX - g.x) / g.k, dy = (e.clientY - g.y) / g.k;
+
+  /* MOLÉCULA DE BRAÇOS: o centro não sai do lugar — o dedo nele só serve
+     para acender o anel —, e o braço se arranca da sua própria ligação,
+     sem tocar na do vizinho. */
+  if (g.sp.classList.contains('ramos')){
+    if (!g.at.classList.contains('ramo')) return;
+    if (!g.at.classList.contains('solto')){
+      if (Math.hypot(dx, dy) < SEP_PUXAO) return;
+      quebraRamo(g.sp, g.at, g.qm);
+      g.x = e.clientX; g.y = e.clientY;
+      g.ax = parseFloat(g.at.style.getPropertyValue('--x'));
+      g.ay = parseFloat(g.at.style.getPropertyValue('--y'));
+      dx = dy = 0;
+    }
+    let rx = Math.min(SEP_W + SEP_SOLTA, Math.max(-SEP_SOLTA, g.ax + dx));
+    let ry = Math.min(SEP_H + SEP_SOLTA, Math.max(-SEP_SOLTA, g.ay + dy));
+    /* matéria não atravessa matéria: o braço esbarra no centro e para,
+       e o fundo do curso é justo a casa dele — daí voltar sozinho a
+       quem o empurrar contra o oxigênio até não dar mais */
+    const centro = g.sp.querySelector('.qsp-at.centro');
+    if (centro){
+      const ox = parseFloat(centro.style.getPropertyValue('--x'));
+      const oy = parseFloat(centro.style.getPropertyValue('--y'));
+      const min = +g.at.dataset.d || 0;
+      let vx = rx - ox, vy = ry - oy;
+      const L = Math.hypot(vx, vy);
+      if (L < min){
+        if (L < .01){ vx = 1; vy = 0; }
+        const n = Math.hypot(vx, vy);
+        rx = ox + vx / n * min;
+        ry = oy + vy / n * min;
+      }
+    }
+    g.at.style.setProperty('--x', rx.toFixed(1) + 'px');
+    g.at.style.setProperty('--y', ry.toFixed(1) + 'px');
+    orientaRamos(g.sp);
+    poeRamos(g.sp);
+    miraRamos(g.sp, g.qm);
+    return;
+  }
+
   /* Montada, ela só se abre depois de um puxão de verdade: um roçar no
      átomo não pode desmanchar a molécula sem querer. Vale para a que
      nasceu ligada e para a que o aluno acabou de fechar. */
@@ -6911,6 +8446,104 @@ document.addEventListener('pointermove', (e) => {
   miraEncaixe(g.sp, g.qm);
 });
 
+/* Devolve a molécula ao tamanho dela. Vale para as duas espécies: a
+   chapada volta a ser o desenho de sempre, e a de três dimensões só
+   encolhe — ela não foi montada para ser ampliada, ela já era objeto. */
+function encolheMol(m){
+  if (!m || !m.classList.contains('big')) return;
+  m.classList.remove('big', 'assentou', 'girando');
+  m.style.setProperty('--k', +m.dataset.k0 || 1);
+  if (!eh3D(m.dataset.mol)) m.innerHTML = MOL_SVG(m.dataset.mol || 'h2o');
+}
+
+/* ------------------------------------------------------------
+   VIRAR A MOLÉCULA NA MÃO
+   Ampliada, a molécula tridimensional deixa de andar e passa a
+   girar: é o gesto de examinar um objeto, e é o único que faz
+   sentido com uma pirâmide — de frente ela é um triângulo, e é
+   virando que se vê que os três hidrogênios estão ABAIXO do
+   nitrogênio, e não em volta dele.
+
+   O ponto de controle é a MÉDIA dos dedos que estiverem nela.
+   Assim o mesmo código serve aos dois casos: um dedo (ou o mouse
+   do computador) gira, e dois dedos numa tela de toque giram
+   igual, sem que a segunda mão mude o comportamento nem deixe o
+   navegador levar o gesto para o seu próprio zoom.
+
+   O giro vertical para nos 85°: passar do polo viraria a molécula
+   de cabeça para baixo e o eixo horizontal se inverteria na mão,
+   que é a hora em que quem gira perde a noção de onde está.
+   ------------------------------------------------------------ */
+let giraMol = null;
+const mediaDedos = (pts) => {
+  let x = 0, y = 0;
+  pts.forEach(p => { x += p.x; y += p.y; });
+  return { x: x / pts.size, y: y / pts.size };
+};
+function poeGiro(el){
+  const m3 = el.querySelector('.m3');
+  if (!m3) return;
+  m3.style.setProperty('--rx', (+el.dataset.rx || 0).toFixed(1) + 'deg');
+  m3.style.setProperty('--ry', (+el.dataset.ry || 0).toFixed(1) + 'deg');
+}
+
+deck.addEventListener('pointerdown', (e) => {
+  const mol = e.target.closest('.qm.tri.big');
+  if (!mol) return;
+  e.preventDefault();
+  if (!giraMol || giraMol.el !== mol)
+    giraMol = { el: mol, pts: new Map() };
+  giraMol.pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  /* a cada dedo que entra ou sai, o gesto recomeça do estado atual:
+     senão a molécula daria um salto ao mudar o ponto de controle */
+  const c = mediaDedos(giraMol.pts);
+  giraMol.x = c.x; giraMol.y = c.y;
+  /* de onde o gesto partiu, para saber no fim se foi giro ou TOQUE: o
+     arrasto gira a molécula, o toque a devolve ao tamanho dela */
+  if (giraMol.x0 === undefined){ giraMol.x0 = c.x; giraMol.y0 = c.y; }
+  giraMol.rx = +mol.dataset.rx || 0;
+  giraMol.ry = +mol.dataset.ry || 0;
+  try { mol.setPointerCapture(e.pointerId); } catch (_){}
+  mol.classList.add('girando');
+});
+
+document.addEventListener('pointermove', (e) => {
+  const g = giraMol;
+  if (!g || !g.pts.has(e.pointerId)) return;
+  g.pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  const c = mediaDedos(g.pts);
+  if (Math.hypot(c.x - g.x0, c.y - g.y0) > 5) g.mexeu = true;
+  const k = fitScale || 1;
+  const rx = g.rx - (c.y - g.y) / k * 0.42;
+  const ry = g.ry + (c.x - g.x) / k * 0.42;
+  g.el.dataset.rx = Math.max(-85, Math.min(85, rx)).toFixed(1);
+  g.el.dataset.ry = ry.toFixed(1);
+  poeGiro(g.el);
+});
+
+function soltaGiro(e){
+  const g = giraMol;
+  if (!g || !e || !g.pts.has(e.pointerId)) return;
+  g.pts.delete(e.pointerId);
+  if (!g.pts.size){
+    g.el.classList.remove('girando');
+    /* dedo parado: foi toque, e o toque devolve a molécula ao tamanho
+       dela — o mesmo que o toque faz em qualquer outra ampliada. Sem
+       isto ela ficaria grande para sempre, porque o guarda do arrasto
+       impede que o toque chegue ao caminho comum. */
+    if (!g.mexeu) encolheMol(g.el);
+    giraMol = null;
+    return;
+  }
+  /* sobrou dedo na tela: o gesto continua, rebaseado no que ficou */
+  const c = mediaDedos(g.pts);
+  g.x = c.x; g.y = c.y;
+  g.rx = +g.el.dataset.rx || 0;
+  g.ry = +g.el.dataset.ry || 0;
+}
+document.addEventListener('pointerup', soltaGiro);
+document.addEventListener('pointercancel', soltaGiro);
+
 /* O anel sai em fade, e para isso precisa sobreviver ao fim da classe
    que o acendeu: 'oct-sai' o segura em cena o tempo do apagamento. O
    temporizador fica guardado no próprio elemento, para que acender de
@@ -6937,6 +8570,8 @@ function acendeOcteto(at){
    Fora do estado montado não há oito para cercar, e nada acontece. */
 function tocaAtomo(at, sp){
   if (!sp.classList.contains('feito')) return;
+  /* na molécula de braços, faltando um braço não há oito para cercar */
+  if (sp.classList.contains('ramos') && sp.classList.contains('incompleta')) return;
   const jaEra = at.classList.contains('octeto');
   sp.querySelectorAll('.qsp-at.octeto').forEach(apagaOcteto);
   if (!jaEra) acendeOcteto(at);
@@ -7310,7 +8945,10 @@ function povoaCampo(q, it){
     /* cada substância mostra a sua própria molécula */
     const key = it.dataset.mol || 'h2o';
     const rec = RECIPES[key] || RECIPES.h2o;
-    const desenho = MOL_SVG(key);
+    /* substância de molécula tridimensional: o que se põe no campo é o
+       objeto montado, e não o desenho chapado */
+    const tri = eh3D(key);
+    const desenho = tri ? MOL_3D(key) : MOL_SVG(key);
     const raio = raioBase(rec);
     /* gás nobre é uma esfera só: sai maior, para ocupar o mesmo peso visual */
     const mono = rec.length === 1;
@@ -7330,7 +8968,20 @@ function povoaCampo(q, it){
       m.dataset.k0  = escala;
       m.dataset.mol = key;                   /* quem é ela, para o modo separável */
       m.style.setProperty('--k', escala);
-      m.classList.remove('unstable', 'big', 'assentou');
+      m.classList.toggle('tri', tri);
+      m.classList.remove('unstable', 'big', 'assentou', 'girando');
+      /* cada uma nasce virada de um jeito: um campo de pirâmides todas
+         no mesmo ângulo pareceria um padrão estampado, e não matéria */
+      if (tri){
+        const j = bolas.indexOf(m);
+        m.dataset.rx = (-24 + (j * 37) % 40).toFixed(0);
+        m.dataset.ry = ((j * 63) % 360).toFixed(0);
+        const m3 = m.querySelector('.m3');
+        if (m3){
+          m3.style.setProperty('--rx', m.dataset.rx + 'deg');
+          m3.style.setProperty('--ry', m.dataset.ry + 'deg');
+        }
+      }
     });
     /* Os rótulos moram aqui dentro, e não no slide: eles falam do que se
        está vendo por dentro. Cada um traz o seu ponto e, se quiser, uma
@@ -7476,11 +9127,34 @@ function syncReveals(slide){
    clique de os trazer de volta como se fossem novidade. Um passo
    para trás desfaz a marca e os traz de volta inteiros.
    ------------------------------------------------------------ */
+/* O QUE O EXEMPLO LEVA CONSIGO.
+   Uma imagem de onde se arranca grão deixa três coisas abertas: o
+   mergulho no retículo, a cópia do grão que voa por cima do palco, e o
+   próprio grão fora do lugar com o buraco que ele deixou. Nada disso é
+   do slide — é DAQUELE exemplo —, e trocando de exemplo tem de sair
+   junto. Sem isto o retículo do composto anterior ficaria de pé por
+   baixo do seguinte, e o grão preso na tela impediria arrancar outro:
+   arrancaCaco só solta um por slide, e antes cada exemplo era um slide.
+
+   A saída é seca, sem encenar a volta do grão ao buraco: quem está
+   saindo é a imagem inteira, girando — devolver o grão a ela no meio
+   do giro seria animar duas coisas contrárias ao mesmo tempo. */
+function limpaExemplo(slide, o){
+  clearTimeout(slide._camT);
+  limpaCamera(slide);
+  stage.querySelectorAll('.grao-cobre').forEach(c => c.remove());
+  paraChiado();
+  if (slide.classList.contains('quantum-on')) fechaRede(slide);
+  slide.querySelectorAll('.caco').forEach(c => c.remove());
+  o.querySelectorAll('.buraco').forEach(b => b.remove());
+}
+
 function giraFora(slide, ids){
   ids.split(',').forEach(nome => {
     const o = slide.querySelector(`.reveal-item[data-id="${nome.trim()}"]`);
     if (!o || o.hidden) return;
     closeQuantum(o);                       /* mergulhado, ele sobe antes de sair */
+    if (o.classList.contains('fixo')) limpaExemplo(slide, o);
     o.classList.remove('pop', 'has-more', 'retract');
     void o.offsetWidth;
     o.classList.add('carrossel');
@@ -7496,35 +9170,53 @@ function giraFora(slide, ids){
   });
 }
 
-/* o passo para trás desfaz a troca: quem saiu para dar lugar volta */
+/* O passo para trás desfaz a troca. Quem tinha saído girando pela
+   direita volta por onde foi — e não pelo caminho por onde entrou na
+   primeira vez, que era outro. É o mesmo movimento, ao contrário. */
 function voltaCarrossel(slide, ids){
   ids.split(',').forEach(nome => {
     const o = slide && slide.querySelector(`.reveal-item[data-id="${nome.trim()}"]`);
     if (!o || !o.classList.contains('saiu')) return;
-    o.classList.remove('saiu', 'carrossel');
-    o.hidden = true;                       /* revealItem refaz a entrada dele */
-    revealItem(slide, o);
+    /* o que volta, volta inteiro: sem grão fora do lugar nem buraco */
+    if (o.classList.contains('fixo')) limpaExemplo(slide, o);
+    o.classList.remove('saiu', 'carrossel', 'carrossel-volta', 'pop', 'retract');
+    o.hidden = false;
+    o.style.left = o.dataset.x + 'px';
+    o.style.top  = o.dataset.y + 'px';
+    void o.offsetWidth;                    /* reinicia a animação */
+    o.classList.add('carrossel-entra');
+    /* a classe sai quando o giro acaba: o estado final dela é a mesma
+       posição de repouso do elemento, então não há salto nenhum */
+    clearTimeout(o._giroT);
+    o._giroT = setTimeout(() => o.classList.remove('carrossel-entra'), 700);
+    if (slide) syncReveals(slide);
   });
 }
 
-/* o elemento volta para dentro de onde saiu e some */
-function retractItem(it){
+/* O elemento volta para dentro de onde saiu e some — a não ser que ele
+   tenha chegado por uma troca de carrossel: aí ele não se recolhe, ele
+   desfaz o giro e sai pela esquerda, no mesmo instante em que o exemplo
+   anterior volta pela direita. `comGiro` é o grupo inteiro dizendo que a
+   volta é essa: o rótulo sai junto com o recipiente, como entrou. */
+function retractItem(it, comGiro){
   const slide = it.closest('.slide');
+  const carrossel = comGiro || !!it.dataset.sai;
   /* carrossel desfeito: quem tinha saído para dar lugar a este volta */
   if (it.dataset.sai && slide) voltaCarrossel(slide, it.dataset.sai);
   aplicaAcao(slide, it.dataset.acao, false);
   apagaDigitado(it);
   closeQuantum(it);                        /* se estava ampliado, volta antes de sumir */
-  it.classList.remove('pop', 'has-more');
-  it.classList.add('retract');
+  it.classList.remove('pop', 'has-more', 'carrossel-entra');
+  const saida = carrossel ? 'carrossel-volta' : 'retract';
+  it.classList.add(saida);
   setTimeout(() => {
-    if (!it.classList.contains('retract')) return;   /* foi revelado de novo no meio */
-    it.classList.remove('retract', 'gira');
+    if (!it.classList.contains(saida)) return;   /* foi revelado de novo no meio */
+    it.classList.remove('retract', 'carrossel-volta', 'gira');
     it.hidden = true;
     it.style.left = it.dataset.x + 'px';
     it.style.top  = it.dataset.y + 'px';
     if (slide) syncReveals(slide);
-  }, 520);
+  }, carrossel ? 700 : 520);
 }
 
 /* ------------------------------------------------------------
@@ -7545,7 +9237,12 @@ function retractGroup(items, i){
   while (a > 0 && items[a].dataset.follow && items[a - 1].dataset.of === face) a--;
   while (b + 1 < items.length && items[b + 1].dataset.follow
          && items[b + 1].dataset.of === face) b++;
-  for (let k = a; k <= b; k++) if (!busy(items[k])) retractItem(items[k]);
+  /* Basta um do grupo trazer a troca para o grupo inteiro voltar
+     girando: o rótulo do exemplo não carrega o `sai` — quem carrega é o
+     recipiente —, e os dois entraram juntos. */
+  let giro = false;
+  for (let k = a; k <= b; k++) if (items[k].dataset.sai) giro = true;
+  for (let k = a; k <= b; k++) if (!busy(items[k])) retractItem(items[k], giro);
 }
 
 function stepBack(slide){
@@ -7559,6 +9256,10 @@ function stepBack(slide){
     retractGroup(items, i);
     return true;
   }
+
+  /* As cargas são o último passo da face, então são as primeiras a
+     desfazer — antes de o cubo voltar ao exemplo anterior. */
+  if (cube && !cube.hidden && recolheCarga(cube)) return true;
 
   if (cube && !cube.hidden && +cube.dataset.face > 0){
     const back = +cube.dataset.face - 1;
@@ -7600,7 +9301,11 @@ const temReveals = (slide) => !!(slide && slide.querySelector('.reveal-item'));
 function atualizaBarra(){
   const slide = slides[current];
   const temPassos = temReveals(slide);
-  const faltaAqui = temPassos && nextAction(slide).type !== 'reset';
+  /* Ainda falta algo AQUI? Além dos passos da sequência, contam as
+     cargas por soltar: na última face do cubo a nextAction já responde
+     'reset', e sem isto a seta apagaria com elas ainda por mostrar. */
+  const faltaAqui = temPassos && (nextAction(slide).type !== 'reset'
+                                  || !!cargaPendente(cubeOf(slide)));
   const p = document.getElementById('prev'), n = document.getElementById('next');
   if (p) p.disabled = current === 0 && !temPassos;
   if (n) n.disabled = current === SLIDES.length - 1 && !faltaAqui;
@@ -7638,6 +9343,10 @@ function stepForward(){
   if (temReveals(slide)){
     const act = nextAction(slide);
     if (act.type === 'reveal'){ revealItem(slide, act.it); return; }
+    /* As cargas do exemplo vêm antes de o cubo girar — e também na
+       última face, onde não há giro nenhum adiante: lá elas seriam o
+       passo perdido entre o fim dos exemplos e o slide seguinte. */
+    if (soltaCarga(cubeOf(slide))) return;
     if (act.type === 'turn'){ turnCube(slide, cubeOf(slide)); return; }
   }
   go(current + 1);
@@ -7657,6 +9366,50 @@ function acompanhaFace(it, cube){
   const larg = cube.getBoundingClientRect().width / (fitScale || 1);
   it.style.setProperty('--gx', (-(larg * 0.55 + 280)).toFixed(0) + 'px');
   it.classList.add('gira');
+}
+
+/* A face que está de frente. Com mais de quatro faces os painéis são
+   reescritos a cada giro, então quem está na frente é o painel de índice
+   (face mod 4) — e não o painel 0. */
+function faceDaFrente(cube){
+  if (!cube) return null;
+  const panes = cube.querySelectorAll('.face');
+  const F = +cube.dataset.face || 0;
+  return panes[((F % 4) + 4) % 4] || null;
+}
+
+/* AS CARGAS VÊM ANTES DO GIRO.
+   Cada face solta as suas duas, um clique cada: primeiro a do cátion,
+   depois a do ânion. Só depois das duas é que o cubo gira para o exemplo
+   seguinte. Elas não são reveal-items — moram DENTRO da face, e é por
+   isso que giram junto com ela e não precisam ser recolhidas à parte.
+   Devolve true quando havia uma para mostrar, e nesse caso quem chamou
+   não gira. */
+function cargaPendente(cube){
+  const frente = faceDaFrente(cube);
+  if (!frente) return null;
+  /* o cátion primeiro, sempre — pela carga, e não pela ordem em que o
+     par foi escrito */
+  return frente.querySelector('.carga.mais:not(.on)')
+      || frente.querySelector('.carga:not(.on)');
+}
+
+function soltaCarga(cube){
+  const c = cargaPendente(cube);
+  if (!c) return false;
+  c.classList.add('on');
+  return true;
+}
+
+/* e o passo para trás recolhe a última que apareceu */
+function recolheCarga(cube){
+  const frente = faceDaFrente(cube);
+  if (!frente) return false;
+  const vistas = [...frente.querySelectorAll('.carga.on')];
+  const c = vistas[vistas.length - 1];
+  if (!c) return false;
+  c.classList.remove('on');
+  return true;
 }
 
 function turnCube(slide, cube){
@@ -7706,11 +9459,18 @@ function resetReveals(slide){
   if (slide.classList.contains('quantum-on')) fechaRede(slide);
   /* o grão arrancado refaz o caminho até o buraco, e a imagem se fecha */
   slide.querySelectorAll('.caco').forEach(devolveCaco);
+  /* O quadro volta ao estado em que o slide o entrega: de pé onde ele
+     nasce de pé, recolhido nos demais. */
+  const qb = slide.querySelector(':scope > .q-board');
+  if (qb) qb.classList.toggle('on', qb.dataset.aberto === '1');
+  sincronizaQuadro();
   /* as famílias voltam ao ponto de partida */
-  slide.querySelectorAll('.ex-el .fam').forEach(x => {
+  slide.querySelectorAll('.ex-el .fam, .ex-el .sim, .ex-el .carga').forEach(x => {
     x.style.removeProperty('--fx');
     x.style.removeProperty('--fy');
   });
+  /* as cargas voltam a estar por revelar: o exemplo recomeça do zero */
+  slide.querySelectorAll('.ex-el .carga.on').forEach(c => c.classList.remove('on'));
   const c = cubeOf(slide);
   /* No cubo de exemplos o Refazer não volta ao primeiro: ele refaz o
      átomo da face que está à vista, que é o que se está resolvendo. */
@@ -7843,7 +9603,15 @@ function duploNoGrao(caco){
      onde ele foi arrancado. Mede-se o <img>, não o item inteiro: o item
      carrega a legenda embaixo, que aumentaria a medida. */
   const slide = caco.closest('.slide');
-  const fixo  = slide && slide.querySelector('.reveal-item.fixo');
+  /* DE QUAL IMAGEM ESTE GRÃO SAIU.
+     O buraco que ele deixou mora dentro dela, e é por ele que se chega à
+     imagem certa. Perguntar ao slide pela primeira imagem só valia
+     quando cada exemplo era um slide: no slide dos cinco compostos
+     iônicos a primeira do DOM é o NaCl, e todos os mergulhos abriam o
+     retículo dele — o do MgO, o do Na2O e os outros nunca apareciam. */
+  const fixo  = (caco._buraco && caco._buraco.closest('.reveal-item.fixo'))
+             || (slide && [...slide.querySelectorAll('.reveal-item.fixo')]
+                   .find(f => !f.hidden && !f.classList.contains('saiu')));
   const foto  = fixo && fixo.querySelector('img');
   const p     = noPalco(caco);                 /* posição: a do grão */
   const k     = fitScale || 1;
@@ -9265,7 +11033,50 @@ deck.addEventListener('click', (e) => {
   if (rst){ reiniciaRede(rst.closest('.slide')); return; }
   const rfz = e.target.closest('.q-refazer');
   if (rfz){ refazCampo(rfz.closest('.slide')); return; }
+  const pol = e.target.closest('.poli-btn');
+  if (pol){
+    const sl = pol.closest('.slide');
+    if (sl) sl.classList.toggle('poli-on');
+    return;
+  }
 });
+
+/* ------------------------------------------------------------
+   A NOTA DE AJUDA ANDA.
+   Ela é consulta posta por cima da cena, e a cena muda: o lugar bom
+   para ela depende de onde está a molécula que a turma tenta montar.
+   Arrasta-se por qualquer ponto — não há nada dentro dela que peça o
+   dedo para outra coisa.
+
+   O deslocamento é medido em px do PALCO, e não da janela: a nota vive
+   nas coordenadas do slide, então o caminho do dedo é dividido pela
+   escala do fit — senão ela andaria mais, ou menos, que a mão.
+   ------------------------------------------------------------ */
+let levaPoli = null;
+deck.addEventListener('pointerdown', (e) => {
+  const nota = e.target.closest('.poli-nota');
+  if (!nota || !nota.closest('.slide.poli-on')) return;
+  e.preventDefault();
+  levaPoli = { el: nota, id: e.pointerId, x: e.clientX, y: e.clientY,
+               nx: parseFloat(nota.style.left) || 0,
+               ny: parseFloat(nota.style.top)  || 0,
+               k: fitScale || 1 };
+  try { nota.setPointerCapture(e.pointerId); } catch (_){}
+  nota.classList.add('pegando');
+});
+document.addEventListener('pointermove', (e) => {
+  const g = levaPoli;
+  if (!g || e.pointerId !== g.id) return;
+  g.el.style.left = (g.nx + (e.clientX - g.x) / g.k).toFixed(0) + 'px';
+  g.el.style.top  = (g.ny + (e.clientY - g.y) / g.k).toFixed(0) + 'px';
+});
+function soltaPoli(e){
+  if (!levaPoli || (e && e.pointerId !== levaPoli.id)) return;
+  levaPoli.el.classList.remove('pegando');
+  levaPoli = null;
+}
+document.addEventListener('pointerup', soltaPoli);
+document.addEventListener('pointercancel', soltaPoli);
 
 /* ------------------------------------------------------------
    BARQUINHO: espalhar e juntar
@@ -9462,8 +11273,23 @@ function tapItem(it){
      Ampliada, ela troca o desenho por uma camada em que cada átomo se
      pega pelo dedo; encolhendo, volta a ser o desenho de sempre. */
   if (it.classList.contains('qm')){
-    const grande = it.classList.toggle('big');
+    const grande = !it.classList.contains('big');
+    /* UMA DE CADA VEZ.
+       Ampliar uma molécula devolve as outras ao tamanho delas. Duas
+       grandes no mesmo campo disputam a cena, e a que ficou para trás
+       vira estorvo: ninguém está olhando para ela, e ela continua
+       tapando o resto. */
+    if (grande){
+      const campo = it.closest('.quantum, .pn-q');
+      if (campo) campo.querySelectorAll('.qm.big').forEach(m => {
+        if (m !== it) encolheMol(m);
+      });
+    }
+    it.classList.toggle('big', grande);
     it.style.setProperty('--k', grande ? QM_BIG : (+it.dataset.k0 || 1));
+    /* A molécula 3D não se desmonta: ela já está montada em profundidade
+       e o que se faz com ela é virá-la. Ampliar é só chegar mais perto. */
+    if (eh3D(it.dataset.mol)) return;
     if (grande) montaSeparavel(it);
     else {
       it.classList.remove('assentou');
@@ -9523,14 +11349,21 @@ function tapItem(it){
     if (next){ revealItem(slide, next); return; }
   }
   /* cubo sem nada guardado na face atual: o toque gira para o próximo postulado */
-  if (it.classList.contains('cube') && nextAction(slide).type === 'turn') turnCube(slide, it);
+  if (it.classList.contains('cube')){
+    if (soltaCarga(it)) return;          /* as cargas da face vêm antes */
+    if (nextAction(slide).type === 'turn') turnCube(slide, it);
+  }
 }
 
 deck.addEventListener('pointerdown', (e) => {
   /* botões são botões, não alças de arrasto */
-  if (e.target.closest('.lego-redo, .pn-sair')) return;
-  /* a família tem arrasto próprio, dentro da face: o cubo não a leva */
-  if (e.target.closest('.ex-el .fam')) return;
+  if (e.target.closest('.lego-redo, .pn-sair, .poli-btn, .poli-nota')) return;
+  /* molécula tridimensional ampliada: o dedo nela GIRA, não leva. Pequena
+     ela continua sendo arrastada como todas as outras. */
+  if (e.target.closest('.qm.tri.big')) return;
+  /* a família e o símbolo têm arrasto próprio, dentro da face: o cubo
+     não os leva junto, nem gira por causa deles */
+  if (e.target.closest(ARRASTA_FACE)) return;
   /* na tabela periódica o toque escolhe, não arrasta */
   if (e.target.closest('.tp')) return;
   /* peça de lego solta: ela tem arrasto próprio (arrastaBrick), e o
@@ -9689,8 +11522,24 @@ deck.addEventListener('contextmenu', (e) => {
   if (e.target.closest(PEGAVEL)) e.preventDefault();
 });
 
-/* As famílias se arrastam dentro da face do cubo. O deslocamento é medido
-   na escala da face — o cubo é escalado por --base/360 e o palco por
+/* SÍMBOLOS ARRASTÁVEIS — provisório, como o QTIT_MOVEL dos rótulos.
+   Com isto em true, o símbolo do elemento (o "Na", o "O") se arrasta
+   dentro da face do cubo, e o painel do C devolve onde ele parou.
+   Depois é só voltar para false: ele deixa de pegar o dedo e a face
+   inteira volta a girar o cubo ao toque, que é como a aula precisa
+   dela. A família continua arrastável nos dois casos — ela é pequena e
+   quase não disputa a face. */
+const EX_SIM_MOVEL = true;
+/* A carga é arrastável SEMPRE, e não só no modo de posicionamento:
+   movê-las é o gesto da aula. A família também, como já era. O símbolo
+   é o único que depende do interruptor — ele tem 64px e, pegável, toma
+   a face que precisa girar o cubo ao toque. */
+const ARRASTA_FACE = '.ex-el .carga, .ex-el .fam'
+                   + (EX_SIM_MOVEL ? ', .ex-el .sim' : '');
+document.body.classList.toggle('sim-movel', EX_SIM_MOVEL);
+
+/* As peças da face se arrastam dentro dela. O deslocamento é medido na
+   escala da face — o cubo é escalado por --base/360 e o palco por
    fitScale —, senão a peça andaria mais ou menos que o dedo.
    Depois de posicionadas, o painel C entrega os números para fixá-las. */
 function escalaCubo(el){
@@ -9704,7 +11553,7 @@ function escalaCubo(el){
 }
 let arrastaFam = null;
 deck.addEventListener('pointerdown', (e) => {
-  const fam = e.target.closest && e.target.closest('.ex-el .fam');
+  const fam = e.target.closest && e.target.closest(ARRASTA_FACE);
   if (!fam) return;
   e.preventDefault();
   const cs = getComputedStyle(fam);
@@ -10158,12 +12007,25 @@ function repintaTinta(){
   }
 }
 
+/* A BOLINHA DO PONTEIRO, na cor da tinta de agora.
+   Vai como imagem no cursor, desenhada aqui porque a cor muda a cada
+   toque no botão de cor — em CSS ela teria de ser quatro regras, uma
+   por cor, e uma quinta no dia em que entrasse a quinta cor. */
+function cursorDaTinta(){
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">'
+    + '<circle cx="10" cy="10" r="5.5" fill="' + CORES[corAtual] + '"'
+    + ' stroke="rgba(3,12,22,.55)" stroke-width="1.5"/></svg>';
+  stage.style.setProperty('--cur-tinta',
+    'url("data:image/svg+xml,' + encodeURIComponent(svg) + '") 10 10, crosshair');
+}
+
 function modoCaneta(v){
   const abrir = v === undefined ? !stage.classList.contains('escrevendo') : !!v;
   stage.classList.toggle('escrevendo', abrir);
   penBtn.classList.toggle('on', abrir);
   penCor.hidden = penLimpa.hidden = !abrir;
   penCor.style.color = CORES[corAtual];
+  cursorDaTinta();
   penBtn.title = abrir ? 'Fechar a caneta (P)' : 'Escrever na tela (P)';
 }
 
@@ -10171,7 +12033,49 @@ penBtn.onclick = () => modoCaneta();
 penCor.onclick = () => {
   corAtual = (corAtual + 1) % CORES.length;
   penCor.style.color = CORES[corAtual];
+  cursorDaTinta();                         /* o ponteiro troca junto */
 };
+
+/* ------------------------------------------------------------
+   O LASER
+   Um ponto vermelho que segue a ponta da caneta. Não risca, não
+   pega em nada e não deixa rastro: serve para apontar, que numa
+   aula é meio caminho da explicação.
+
+   Só a CANETA o acende, pelo mesmo critério da escrita: quem
+   aponta é a mão do professor. Com o mouse fazendo o ponto, o
+   laser apareceria sozinho toda vez que alguém encostasse no
+   computador.
+
+   E ele se apaga depois de parado, como um laser de verdade
+   solto na mão apagaria — a luz esquecida num canto da tela
+   viraria só mais uma coisa acesa.
+   ------------------------------------------------------------ */
+const laser    = document.getElementById('laser');
+const laserBtn = document.getElementById('laser-btn');
+let laserLigado = false, laserT;
+
+function modoLaser(v){
+  laserLigado = v === undefined ? !laserLigado : !!v;
+  laserBtn.classList.toggle('on', laserLigado);
+  laserBtn.title = laserLigado ? 'Desligar o laser (L)' : 'Apontar com o laser (L)';
+  if (!laserLigado){ clearTimeout(laserT); laser.classList.remove('on'); }
+}
+laserBtn.onclick = () => modoLaser();
+
+document.addEventListener('pointermove', (e) => {
+  if (!laserLigado || e.pointerType !== 'pen') return;
+  laser.style.left = e.clientX + 'px';
+  laser.style.top  = e.clientY + 'px';
+  laser.classList.add('on');
+  clearTimeout(laserT);
+  laserT = setTimeout(() => laser.classList.remove('on'), 2200);
+}, { passive: true });
+
+/* a caneta saiu do alcance da tela: a luz se apaga na hora */
+document.addEventListener('pointerout', (e) => {
+  if (e.pointerType === 'pen'){ clearTimeout(laserT); laser.classList.remove('on'); }
+});
 penLimpa.onclick = () => { riscos[current] = []; repintaTinta(); };
 
 /* QUEM RISCA E QUEM ARRASTA.
@@ -10347,19 +12251,32 @@ function coordsFor(slide){
       + `${Math.round(G3.dist)}, ${G3.az.toFixed(3)}, ${G3.el.toFixed(3)}]\n    */`;
   }
 
-  /* posição das famílias dentro da face do cubo, para poder fixá-las */
-  const fams = [...slide.querySelectorAll('.ex-el .fam')];
+  /* Posição das peças dentro da face do cubo — o símbolo do elemento e a
+     família dele —, para poder fixá-las no CSS depois de acertadas. Sai
+     já como a regra que se cola: quem lê isto quer copiar, não traduzir. */
+  const pecas = [...slide.querySelectorAll('.ex-el .carga, .ex-el .sim, .ex-el .fam')];
   let extra = '';
-  if (fams.length){
-    const linhas = fams.map(x => {
+  if (pecas.length){
+    const linhas = pecas.map(x => {
       const cs = getComputedStyle(x);
       const fx = Math.round((parseFloat(cs.getPropertyValue('--fx')) || 0) * 10) / 10;
       const fy = Math.round((parseFloat(cs.getPropertyValue('--fy')) || 0) * 10) / 10;
-      const lado = x.closest('.ex-el') === x.closest('.ex-par').firstElementChild
-        ? 'esquerda' : 'direita';
-      return `      ${x.textContent.trim()} (${lado}): fx ${fx}px, fy ${fy}px`;
+      const el = x.closest('.ex-el');
+      const par = x.closest('.ex-par');
+      const lado = (par && el === par.firstElementChild) ? 'first' : 'last';
+      const que  = x.classList.contains('sim')   ? 'sim'
+                 : x.classList.contains('carga') ? 'carga' : 'fam';
+      return `      .ex-par .ex-el:${lado}-child .${que}`
+           + `{--fx:${fx}px;--fy:${fy}px}   /* ${x.textContent.trim()} */`;
     });
-    extra = `\n\n    /* famílias no cubo\n${linhas.join('\n')}\n    */`;
+    /* uma peça por lado basta: os quatro exemplos usam a mesma regra */
+    const vistas = new Set();
+    const unicas = linhas.filter(l => {
+      const chave = l.slice(0, l.indexOf('{'));
+      if (vistas.has(chave)) return false;
+      vistas.add(chave); return true;
+    });
+    extra = `\n\n    /* peças no cubo — cole no CSS\n${unicas.join('\n')}\n    */`;
   }
 
   /* Os rótulos escritos DENTRO do mundo quântico. Também não são
@@ -10436,7 +12353,9 @@ function showCoords(){
 }
 function hideCoords(){ coords.hidden = true; }
 
-document.getElementById('coords-btn').onclick = showCoords;
+/* A caixa das posições não tem mais botão na barra — quem a chama é a
+   tecla C. A função fica: ela é o que devolve as coordenadas depois de
+   arrastar os elementos pelo palco. */
 document.getElementById('coords-close').onclick = hideCoords;
 
 /* ------------------------------------------------------------
@@ -10493,8 +12412,9 @@ function showNotes(){
   notesTxt.setSelectionRange(notesTxt.value.length, notesTxt.value.length);
 }
 
-/* fechar é salvar: não há botão de descartar, e é essa a intenção —
-   quem abriu o caderno no meio da aula não deveria ter de confirmar */
+/* Fechar é salvar: não há botão de descartar, e é essa a intenção —
+   quem abriu o caderno no meio da aula não deveria ter de confirmar.
+   Fecham a caixa: o X, a tecla Esc e um clique no fundo do painel. */
 function hideNotes(){
   if (notes.hidden) return;
   salvaNota();
@@ -10513,8 +12433,45 @@ function salvaNota(){
 
 notesBtn.onclick = showNotes;
 document.getElementById('notes-close').onclick = hideNotes;
-/* clique no fundo do painel também fecha (e salva); dentro da caixa, não */
-notes.addEventListener('mousedown', (e) => { if (e.target === notes) hideNotes(); });
+
+/* ------------------------------------------------------------
+   A FOLHA ANDA.
+   Ela se põe sobre o slide, e o slide muda: num o desenho está à
+   esquerda, no outro à direita. Arrastando-a pelo cabeçalho, o
+   professor tira a nota da frente do que ela comenta.
+
+   O centro é preso à janela — nunca sai dela inteira —, e o lugar
+   escolhido vale para as próximas aberturas desta sessão: quem
+   achou o canto bom não deveria ter de reachá-lo a cada slide.
+   ------------------------------------------------------------ */
+const notesCab = document.getElementById('notes-cab');
+let levaNota = null;
+if (notesCab) notesCab.addEventListener('pointerdown', (e) => {
+  if (e.target.closest('button')) return;      /* o X é botão, não alça */
+  const r = notes.getBoundingClientRect();
+  levaNota = { id: e.pointerId, x: e.clientX, y: e.clientY,
+               nx: r.left + r.width / 2, ny: r.top + r.height / 2 };
+  try { notesCab.setPointerCapture(e.pointerId); } catch (_){}
+  notes.classList.add('levando');
+  e.preventDefault();
+});
+document.addEventListener('pointermove', (e) => {
+  if (!levaNota || e.pointerId !== levaNota.id) return;
+  const r = notes.getBoundingClientRect();
+  const mx = r.width / 2 + 6, my = r.height / 2 + 6;
+  const w = window.innerWidth, h = window.innerHeight;
+  notes.style.setProperty('--nx',
+    Math.min(w - mx, Math.max(mx, levaNota.nx + e.clientX - levaNota.x)).toFixed(0) + 'px');
+  notes.style.setProperty('--ny',
+    Math.min(h - my, Math.max(my, levaNota.ny + e.clientY - levaNota.y)).toFixed(0) + 'px');
+});
+function soltaNota(e){
+  if (!levaNota || (e && e.pointerId !== levaNota.id)) return;
+  levaNota = null;
+  notes.classList.remove('levando');
+}
+document.addEventListener('pointerup', soltaNota);
+document.addEventListener('pointercancel', soltaNota);
 /* rede de segurança: fechar a aba ou trocar de janela com a caixa aberta
    não pode perder o que foi escrito */
 window.addEventListener('beforeunload', salvaNota);
@@ -10587,6 +12544,7 @@ document.addEventListener('keydown', (e) => {
     case 'c': case 'C': showCoords(); break;
     case 'a': case 'A': showNotes(); break;
     case 'q': case 'Q': modoQuadro(); break;
+    case 'l': case 'L': modoLaser(); break;
   }
 });
 
