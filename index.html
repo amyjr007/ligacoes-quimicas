@@ -2752,6 +2752,20 @@ body.sim-movel .ex-el .sim.pegando{
   margin:0;
 }
 .cover .prof span{color:var(--paper-dim);font-weight:300}
+/* O CONTATO, sob o nome.
+   Em monoespaçada e pequeno: é endereço, não fala — quem lê um
+   endereço lê caractere por caractere, e a monoespaçada é a fonte que
+   não deixa o l virar 1 nem o zero virar o. Fica discreto porque a capa
+   é da aula, e não do autor; mas é clicável, para quem abrir isto num
+   aparelho poder escrever sem copiar à mão. */
+.cover .mail{
+  display:inline-block;margin-top:5px;
+  font-family:var(--mono);font-size:13px;letter-spacing:.04em;
+  color:rgba(232,241,245,.5);text-decoration:none;
+  border-bottom:1px solid rgba(69,199,176,.28);padding-bottom:1px;
+  transition:color .2s,border-color .2s;
+}
+.cover .mail:hover{color:var(--aqua);border-bottom-color:var(--aqua)}
 /* O AUTOR, NA CAPA.
    O retrato entra ao lado do nome, do tamanho de um crédito e não de um
    cartaz: a capa é da aula, não de quem a dá. E entra puxado para o tema
@@ -6079,7 +6093,11 @@ function render(){
               <img src="imagens/amauri_jr.jpg" draggable="false"
                    alt="Professor Amauri Junior no laboratório">
             </span>
-            <p class="prof"><span>Professor:</span> Amauri Junior</p>
+            <div>
+              <p class="prof"><span>Professor:</span> Amauri Junior</p>
+              <a class="mail" href="mailto:amauri.junior@escola.seduc.pa.gov.br"
+                 >amauri.junior@escola.seduc.pa.gov.br</a>
+            </div>
           </div>
         </div>
         <div class="right">${HERO}</div>`;
