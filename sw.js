@@ -1,6 +1,6 @@
 /* Service worker da aula. Guarda tudo na instalação: a aula roda inteira
    sem rede, que é como ela costuma ser dada. */
-const CACHE = 'ligacoes-v35';
+const CACHE = 'ligacoes-v36';
 const ARQUIVOS = [
   './',
   './index.html',
@@ -36,7 +36,11 @@ const ARQUIVOS = [
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE)
-    .then(c => c.addAll(ARQUIVOS))
+    /* 'reload' obriga cada um a vir da REDE. Sem isso o addAll passa
+       pelo cache do navegador, e o GitHub Pages manda guardar a página
+       por dez minutos: a instalação da versão nova podia gravar, dentro
+       do cache novo, os bytes da versão velha. */
+    .then(c => c.addAll(ARQUIVOS.map(u => new Request(u, { cache: 'reload' }))))
     .then(() => self.skipWaiting()));
 });
 
@@ -55,7 +59,12 @@ self.addEventListener('fetch', (e) => {
      Sem rede, o cache assume e a aula abre igual. */
   if (e.request.mode === 'navigate'){
     e.respondWith(
-      fetch(e.request).then(resp => {
+      /* Pela REDE de verdade, sem escala no cache do navegador. Era aqui
+         que a versão nova se perdia: o service worker pedia a página, o
+         cache HTTP respondia com a de dez minutos atrás, e ela era
+         guardada como se fosse a mais recente. O app ficava preso a uma
+         versão que ninguém conseguia explicar. */
+      fetch(e.request.url, { cache: 'reload' }).then(resp => {
         const copia = resp.clone();
         caches.open(CACHE).then(c => c.put('./index.html', copia));
         return resp;
