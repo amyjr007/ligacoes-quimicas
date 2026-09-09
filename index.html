@@ -14375,7 +14375,21 @@ window.addEventListener("resize", fit);
 window.addEventListener("orientationchange", fit);
 document.addEventListener("fullscreenchange", fit);
 if (window.visualViewport) window.visualViewport.addEventListener("resize", fit);
-document.getElementById('ver').textContent = VERSION;
+/* O RÓTULO DE VERSÃO TEM DE SE DIZER SOZINHO.
+   O VERSION acima é escrito à mão, e por isso mentia: ficou em v24.7
+   enquanto o app mudava por baixo dele, e olhar para o canto da tela
+   não respondia "este tablet já pegou a versão nova?".
+   Quem sabe a resposta é o service worker: o número do cache dele sobe
+   a cada publicação, e é o que está instalado NAQUELE aparelho. Então é
+   ele que aparece — o nome da versão continua sendo coisa de gente, e a
+   build passa a ser coisa da máquina. */
+const rotuloVer = document.getElementById('ver');
+rotuloVer.textContent = VERSION;
+if (window.caches && caches.keys) caches.keys().then(ks => {
+  const c = ks.filter(k => /^ligacoes-vd+$/.test(k))
+              .sort((x, y) => +y.slice(10) - +x.slice(10))[0];
+  if (c) rotuloVer.textContent = VERSION + ' · build ' + c.slice(10);
+}).catch(() => {});
 render(); fit(); go(0, true);
 slides.forEach(sl => { if (temReveals(sl)) resetReveals(sl); });
 </script>
