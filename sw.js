@@ -1,6 +1,6 @@
 /* Service worker da aula. Guarda tudo na instalação: a aula roda inteira
    sem rede, que é como ela costuma ser dada. */
-const CACHE = 'ligacoes-v31';
+const CACHE = 'ligacoes-v32';
 const ARQUIVOS = [
   './',
   './index.html',
@@ -17,7 +17,21 @@ const ARQUIVOS = [
   './imagens/lewis.jpg',
   './imagens/g.n.lewis.avif',
   './imagens/amauri_jr.jpg',
-  './imagens/clivagem.png'
+  './imagens/clivagem.png',
+  /* AS FONTES. Elas vinham do Google e ficavam em cache por acaso, na
+     primeira visita com rede. Agora moram aqui e entram na instalação
+     junto com o resto: a aula abre com a tipografia certa mesmo num
+     tablet que nunca viu a internet. */
+  './fontes/ibm-plex-mono-400.woff2',
+  './fontes/ibm-plex-mono-500.woff2',
+  './fontes/ibm-plex-sans-300.woff2',
+  './fontes/ibm-plex-sans-400.woff2',
+  './fontes/ibm-plex-sans-400i.woff2',
+  './fontes/ibm-plex-sans-500.woff2',
+  './fontes/ibm-plex-sans-600.woff2',
+  './fontes/space-grotesk-500.woff2',
+  './fontes/space-grotesk-600.woff2',
+  './fontes/space-grotesk-700.woff2'
 ];
 
 self.addEventListener('install', (e) => {
