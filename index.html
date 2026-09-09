@@ -190,7 +190,15 @@ body{
 @keyframes fxRing{0%{opacity:0;transform:scale(.18)}22%{opacity:.9}100%{opacity:0;transform:scale(3.3)}}
 
 /* ficha do elemento = número do slide (o slide 3 é o Li, e por aí vai) */
+:root{--elx:48.7px;--ely:-32.1px}
+/* O BLOCO DO NÚMERO DO SLIDE, no alto à direita. Ele é desenhado em
+   TODOS os slides, então o ajuste dele mora na raiz da página e vale
+   para todos de uma vez: movê-lo só num deixaria a numeração pulando de
+   lugar a cada virada. Cresce a partir da quina de cima à direita, que é
+   onde ele está encostado. */
 .elem{
+  transform:translate(var(--elx,0px), var(--ely,0px)) scale(var(--elf,1));
+  transform-origin:top right;
   position:absolute;top:42px;right:64px;
   width:88px;height:88px;border:1px solid rgba(69,199,176,.4);
   display:flex;flex-direction:column;justify-content:center;align-items:center;
@@ -378,6 +386,36 @@ body{
 .reveal-item.zoomable.zoomed{z-index:8;pointer-events:none}
 .z-svg{position:absolute;inset:0;width:100%;height:100%}
 .z-svg text{font-family:var(--mono);font-weight:500}
+/* A AMPOLA. O gás respira devagar — rarefeito e excitado, ele não tem
+   brilho parado —, e dá um clarão quando um elétron sai dali. */
+.reveal-item.ampola{cursor:grab}
+/* A tela do gás mora ATRÁS do vidro, no mesmo lugar que o miolo do tubo
+   ocupa no desenho. O recorte em cápsula é dela, e não do traço: as
+   partículas param na parede porque a parede está aqui. */
+.amp-gas{
+  position:absolute;left:62px;top:44px;width:76px;height:172px;
+  border-radius:38px;pointer-events:none;
+}
+/* O CLARÃO DE QUANDO UM ELÉTRON SAI OU ENTRA.
+   São duas coisas ao mesmo tempo: o gás acende por dentro (isso é
+   desenhado na tela, em ampPassa) e o tubo inteiro joga luz para FORA,
+   aqui. O halo é o que faz a ampola chamar o olho de longe — sem ele, o
+   efeito só existia para quem já estivesse olhando para ela. */
+.reveal-item.ampola.solta .amp-gas{animation:ampSolta .6s ease-out}
+@keyframes ampSolta{
+  0%  {filter:brightness(2.6) saturate(1.35)}
+  100%{filter:brightness(1)   saturate(1)}
+}
+.reveal-item.ampola.solta .z-stage{animation:ampHalo .6s ease-out}
+@keyframes ampHalo{
+  0%  {filter:drop-shadow(0 0 22px rgba(255,120,80,.95))
+              drop-shadow(0 0 54px rgba(255,60,30,.55))}
+  60% {filter:drop-shadow(0 0 12px rgba(255,120,80,.45))
+              drop-shadow(0 0 30px rgba(255,60,30,.22))}
+  100%{filter:drop-shadow(0 0 0 rgba(255,120,80,0))
+              drop-shadow(0 0 0 rgba(255,60,30,0))}
+}
+
 /* aviso de que dá para tocar e entrar */
 .reveal-item.zoomable{cursor:zoom-in}
 .reveal-item.zoomable.zoomed{cursor:zoom-out}
@@ -1157,6 +1195,101 @@ body{
   color:rgba(255,255,255,.82);text-shadow:0 2px 6px rgba(4,12,20,.7);
 }
 
+/* ---------- A ELETROSFERA EM CAMADAS ----------
+   A caixa é a mesma da esfera antiga, e tudo aqui dentro é medido em
+   fração dela: assim o átomo cresce e encolhe pelo --base do elemento,
+   como todo o resto do palco.
+   O núcleo leva o símbolo e o número atômico, que na esfera cheia ficavam
+   sobre a bola inteira. */
+.gas-ball.eletro{
+  --R:calc(var(--base) * 1px * var(--k));
+  display:block;background:none;
+}
+/* O NÚCLEO. Um ponto de referência de tamanho zero no meio da caixa: o
+   que se vê são os prótons, cada um posto no seu lugar da espiral.
+   O cursor sobre ele volta a ser o de sempre: dali não se arranca nada,
+   e prometer o contrário com uma mãozinha seria mentir antes do gesto. */
+.gas-ball.eletro .nuc{position:absolute;left:50%;top:50%;width:0;height:0}
+.gas-ball.eletro .prot,
+.gas-ball.eletro .nuc-halo{cursor:default}
+/* o halo que junta o punhado num corpo só */
+.gas-ball.eletro .nuc-halo{
+  position:absolute;left:0;top:0;
+  width:calc(var(--R) * .44);height:calc(var(--R) * .44);
+  margin:calc(var(--R) * -.22) 0 0 calc(var(--R) * -.22);
+  border-radius:50%;
+  background:radial-gradient(circle,
+    rgba(232,104,58,.28) 0%,rgba(232,104,58,.12) 54%,rgba(232,104,58,0) 76%);
+}
+/* O PRÓTON.
+   Não sai amarelo, apesar de amarelo ser o do cartaz clássico: o âmbar
+   aqui já é dos ELÉTRONS, e numa tela em que a aula fala das duas cargas
+   ao mesmo tempo elas não podem ter a mesma cor. Quente contra frio diz
+   positivo contra negativo sem ambiguidade.
+
+   O aro escuro em volta de cada um é o que os separa quando se
+   atravessam: amontoados, sem ele o punhado vira uma mancha única. */
+.gas-ball.eletro .prot{
+  position:absolute;left:0;top:0;
+  width:calc(var(--R) * var(--pr) * 2);height:calc(var(--R) * var(--pr) * 2);
+  margin:calc(var(--R) * var(--pr) * -1) 0 0 calc(var(--R) * var(--pr) * -1);
+  border-radius:50%;
+  background:radial-gradient(circle at 34% 28%,
+    #FFD3B0 0%,#F58A4E 42%,#CE4A20 76%,#8E2A11 100%);
+  /* o de trás sai mais escuro; o da frente, aceso. É o que dá fundo ao
+     aglomerado em vez de mosaico */
+  filter:brightness(var(--pl,1));
+  transform:translate(calc(var(--R) * var(--px)),calc(var(--R) * var(--py)));
+  box-shadow:inset 0 0 0 1.5px rgba(4,12,20,.42),
+             0 0 0 1px rgba(4,12,20,.5);
+}
+/* O SINAL DE MAIS, riscado no próton — duas barras, e não o caractere:
+   num círculo de dez pixels a fonte vira borrão, e duas barras ficam
+   nítidas em qualquer tamanho porque acompanham o raio da bolinha. */
+.gas-ball.eletro .prot::before,
+.gas-ball.eletro .prot::after{
+  content:'';position:absolute;left:50%;top:50%;
+  background:rgba(255,246,238,.92);border-radius:1px;
+}
+.gas-ball.eletro .prot::before{
+  width:calc(var(--R) * var(--pr) * 1.05);height:calc(var(--R) * var(--pr) * 0.26);
+  margin:calc(var(--R) * var(--pr) * -0.13) 0 0 calc(var(--R) * var(--pr) * -0.525);
+}
+.gas-ball.eletro .prot::after{
+  width:calc(var(--R) * var(--pr) * 0.26);height:calc(var(--R) * var(--pr) * 1.05);
+  margin:calc(var(--R) * var(--pr) * -0.525) 0 0 calc(var(--R) * var(--pr) * -0.13);
+}
+/* O traço de cada camada: fino, pontilhado e discreto. Pontilhado
+   porque a camada não é uma parede — é o lugar onde os elétrons estão,
+   e o traço contínuo prometia uma casca sólida que não existe. Quem
+   conta aqui são os pontos; a linha só diz de que camada eles são. */
+.gas-ball.eletro .anel{
+  position:absolute;left:50%;top:50%;
+  width:calc(var(--R) * var(--rf) * 2);height:calc(var(--R) * var(--rf) * 2);
+  margin:calc(var(--R) * var(--rf) * -1) 0 0 calc(var(--R) * var(--rf) * -1);
+  border-radius:50%;
+  border:1.5px dotted rgba(69,199,176,.34);
+  pointer-events:none;
+}
+/* a de valência é a que a aula mexe: mais viva que as de dentro */
+.gas-ball.eletro .anel.val{border-color:rgba(240,180,74,.52)}
+/* O elétron, parado no seu lugar da camada. O giro leva o ponto até o
+   ângulo dele e o translate o empurra até o raio — nesta ordem, senão
+   ele sairia numa reta em vez de pousar no anel. */
+.gas-ball.eletro .epto{
+  position:absolute;left:50%;top:50%;
+  width:calc(var(--R) * .056);height:calc(var(--R) * .056);
+  margin:calc(var(--R) * -.028) 0 0 calc(var(--R) * -.028);
+  border-radius:50%;background:rgba(226,240,247,.6);
+  transform:rotate(var(--ea)) translateY(calc(var(--R) * var(--rf) * -1));
+  pointer-events:none;
+}
+/* os da última camada são os que saem e entram: âmbar, e acesos */
+.gas-ball.eletro .epto.val{
+  background:var(--amber);
+  box-shadow:0 0 calc(var(--R) * .055) rgba(240,180,74,.9);
+}
+
 /* ---------- a carga do íon, escrita enquanto o elétron sai ----------
    Fica no canto de cima, à direita, como se escreve à mão: Na⁺, O²⁻.
    Âmbar quando é cátion, azul quando é ânion — a mesma dupla de cores
@@ -1173,6 +1306,14 @@ body{
 .gas-ball .carga{
   top:-6%;right:-8%;
   font-size:calc(var(--base) * 1px * var(--k) * .24);
+}
+/* Na ficha do elemento, encostada no alto do símbolo, à direita dele —
+   como se escreve Na⁺ à mão. A ficha alinha o texto à direita, então a
+   quina de cima é justamente onde o símbolo acaba. */
+.gas-id{position:relative}
+.gas-id .carga{
+  bottom:100%;right:0;margin-bottom:calc(var(--base) * 1px * var(--k) * .02);
+  font-size:calc(var(--base) * 1px * var(--k) * .2);
 }
 /* no Lewis, fora do anel de elétrons — que ocupa os quatro lados */
 .lw .carga{top:-8px;right:-32px;font-size:32px}
@@ -1608,6 +1749,120 @@ body{
 .q-refazer:hover,
 .q-reset:hover{border-color:var(--aqua);box-shadow:0 0 30px rgba(69,199,176,.42);transform:scale(1.05)}
 
+/* ------------------------------------------------------------
+   O ÍON ARRANCADO, JÁ VIRADO ÁTOMO
+   Mora dentro do mundo quântico, por cima da tela 3D, e é reposto a
+   cada quadro no lugar onde o íon está no espaço: o desenho é DOM, a
+   posição é da cena.
+   O --dx e o --dy corrigem o centro. O item é uma linha — a ficha do
+   elemento à esquerda, a esfera ao lado —, e quem tem de cair sobre o
+   ponto 3D é a ESFERA, não o meio da linha.
+   ------------------------------------------------------------ */
+/* A ficha da distribuição não entra nesta cena, venha o toque de onde
+   vier: aqui o que se conta são os elétrons desenhados na eletrosfera. */
+.q-ruth .gas-dist{display:none}
+/* ONDE O NOME DE CADA UM FICA.
+   O cátion leva o símbolo à esquerda e o ânion à direita — para fora,
+   cada um do seu lado. Postos de frente um para o outro, que é como a
+   cena é usada, os dois nomes vão para as pontas e o vão entre os átomos
+   fica livre, que é por onde o elétron atravessa.
+   Estes são os valores de origem; o arrasto do modo de posicionar
+   escreve --sx/--sy por cima deles, sem apagá-los. */
+.q-ruth{--sx0:0px;--sy0:0px;--cx0:-4px;--cy0:-16.3px}
+.q-ruth.cat{--sx0:-90px;   --sy0:-9px}
+.q-ruth.ani{--sx0:96.7px;  --sy0:-26.7px}
+.q-ruth{
+  position:absolute;z-index:8;pointer-events:auto;
+  /* só a esfera fica no fluxo: a ficha do elemento sai dele, logo abaixo.
+     Assim a caixa do item É a esfera, e o centro dela — que é o núcleo —
+     cai exatamente sobre o íon na cena. */
+  display:block;
+  transform:translate(calc(-50% - var(--dx,0px)), calc(-50% - var(--dy,0px)));
+  cursor:grab;touch-action:none;
+  user-select:none;-webkit-user-select:none;
+}
+/* O SÍMBOLO FICA EMBAIXO DA ESFERA, NA DIREÇÃO DO NÚCLEO.
+   À esquerda, como no slide 7, ele ficava entre os dois átomos justamente
+   quando eles são postos de frente um para o outro — que é o momento da
+   aula. Embaixo e centrado, o nome fica onde o olho já está, e alinhado
+   com o que nomeia: o núcleo é que diz de que elemento é o átomo. */
+.q-ruth .gas-id{
+  /* O --sx e o --sy são o acerto à mão, guardados no .q-ruth (e não aqui):
+     a ficha é refeita a cada elétron que entra ou sai, e o que estivesse
+     escrito nela se perderia. */
+  position:absolute;left:calc(50% + var(--sx,var(--sx0)));top:100%;
+  transform:translateX(-50%);
+  /* os 2px são fixos de propósito: o afastamento proporcional já dá o
+     respiro, e este é o acerto fino do olho, que não escala com nada */
+  margin-top:calc(var(--base) * 1px * var(--k) * .045 + 2px + var(--sy,var(--sy0)));
+  text-align:center;
+}
+/* A carga fica pendurada FORA, à direita do símbolo: assim o nome não sai
+   do lugar quando o átomo ganha ou perde elétron — ele continua apontando
+   para o núcleo, e o que muda ao lado é só o sinal. */
+.q-ruth .gas-id .carga{
+  /* dois pixels acima do símbolo, e menor e mais leve que ele: a carga é
+     uma marca, não um nome. Em semibold ela competia com o Na.
+     O acerto à mão entra no LEFT e no TOP, e não num transform: a
+     animação de bater da carga anima o transform, e o deslocamento
+     sumiria por meio segundo a cada elétron que entra ou sai. */
+  top:calc(-2px + var(--cy,var(--cy0)));bottom:auto;
+  left:calc(100% + var(--cx,var(--cx0)));right:auto;
+  margin:0 0 0 .16em;
+  font-size:calc(var(--base) * 1px * var(--k) * .16);
+  font-weight:400;
+}
+/* FORA DO MUNDO QUÂNTICO ABERTO, O ÁTOMO NÃO ESTÁ EM CENA.
+   O .quantum fechado é opacity:0, mas opacidade não tira nada do alcance
+   do dedo — e o átomo tem pointer-events:auto para os elétrons. Ele
+   ficava então invisível e clicável, pousado sobre o slide: arrastar por
+   cima da imagem do composto arrancava um elétron de um átomo que
+   ninguém via. Sem display, não há o que pegar. */
+.slide:not(.quantum-on) .q-ruth{display:none}
+
+/* A FICHA DO ELEMENTO — o símbolo e o número atômico — ajustável à parte.
+   O --sx e o --sy movem, o --sf redimensiona. É TRANSFORMAÇÃO, e não
+   posição no fluxo: a esfera não sai do lugar quando a ficha muda de
+   tamanho, que é o que aconteceria mexendo na fonte. A origem é a borda
+   direita, encostada na esfera, para o vão entre as duas ficar igual em
+   qualquer tamanho. */
+.reveal-item.gas .gas-id{
+  transform:translate(var(--sx,0px), var(--sy,0px)) scale(var(--sf,1));
+  transform-origin:right center;
+}
+/* o acerto de mão da ficha do átomo do octeto; o arrasto escreve por
+   cima destes, que ficam sendo o ponto de partida */
+.reveal-item.gas[data-id="atomo"]{
+  --sx:4.7px;--sy:11.3px;    /* a ficha inteira */
+  --zx:-43.3px;--zy:-0.7px;  /* e o número atômico, ao lado do símbolo */
+}
+
+/* O NÚMERO ATÔMICO anda sozinho, embaixo do símbolo. Ele e o símbolo são
+   duas informações de tamanhos diferentes — o nome do elemento e a conta
+   de prótons —, e o vão entre os dois é coisa que se acerta no olho. */
+.reveal-item.gas .gas-id i{
+  transform:translate(var(--zx,0px), var(--zy,0px));
+}
+body.ruth-movel .reveal-item.gas .gas-id i{cursor:grab}
+body.ruth-movel .reveal-item.gas .gas-id i.pegando{cursor:grabbing;color:var(--aqua)}
+body.ruth-movel .reveal-item.gas .gas-id{cursor:grab}
+body.ruth-movel .reveal-item.gas .gas-id.pegando{
+  cursor:grabbing;color:var(--aqua);
+}
+
+/* ------------------------------------------------------------
+   MODO DE POSICIONAR (temporário)
+   Com ele ligado, o símbolo e a carga se arrastam com o dedo e o painel
+   do C devolve onde pararam. A carga é pointer-events:none por padrão —
+   ela é um selo, não um alvo —, então aqui ela volta a pegar o dedo.
+   ------------------------------------------------------------ */
+body.ruth-movel .q-ruth .gas-id,
+body.ruth-movel .q-ruth .gas-id .carga{cursor:grab;pointer-events:auto}
+body.ruth-movel .q-ruth .gas-id.pegando,
+body.ruth-movel .q-ruth .gas-id .carga.pegando{
+  cursor:grabbing;color:var(--aqua);
+  text-shadow:0 0 24px rgba(69,199,176,.6);
+}
 /* rótulo da célula unitária, no mundo quântico */
 .cel-rot{
   position:absolute;z-index:9;pointer-events:none;
@@ -2143,19 +2398,54 @@ body{
    alaranjado da molécula rompida do slide 4. Quanto mais perto do alvo,
    mais calmo ele fica. */
 /* Quatro graus de instabilidade, pela distância até o octeto. Cada
-   elétron a mais ou a menos afasta o átomo do alvo e agita mais a bola —
-   são os mesmos tremores e alertas das moléculas rompidas do slide 4. */
-.gas.inst1 .gas-ball{
-  animation:molShake .40s linear infinite, qmAlert  1.6s ease-in-out infinite;
+   elétron a mais ou a menos afasta o átomo do alvo e agita mais a bola.
+   O TREMOR é o que fica dizendo "isto ainda não fechou" — ele é estado,
+   e estado se mostra o tempo todo. O clarão saiu daqui: ver abaixo. */
+.gas.inst1 .gas-ball{animation:molShake  .40s linear infinite}
+.gas.inst2 .gas-ball{animation:molShake  .26s linear infinite}
+.gas.inst3 .gas-ball{animation:shakeHard .16s linear infinite}
+.gas.inst4 .gas-ball{animation:shakeWild .09s linear infinite}
+
+/* O CLARÃO DA ESTABILIDADE.
+   Dispara UMA VEZ, no instante em que o átomo FECHA o octeto: a energia
+   que sobrava sai de um golpe, que é como energia se libera — e não em
+   prestações. Fora do octeto o átomo treme, e o tremor é estado; chegar
+   é evento, e evento tem um instante só.
+
+   Verde-água, e não alaranjado: aqui é a cor de "deu certo" no app
+   inteiro, e o laranja é a de "falta algo".
+
+   Vai num ::after, e não na própria bola: ela pode estar animando por
+   outro motivo, e duas animações na mesma caixa fazem uma apagar a outra. */
+/* Uma BOLA DE ENERGIA, e não um anel.
+   O anel era um círculo em volta do átomo — e um círculo em volta do
+   átomo, nesta tela, é uma camada: o efeito dizia a coisa errada com a
+   forma certa. Aqui é uma esfera CHEIA, que nasce apertada sobre o
+   núcleo e se abre para fora até se apagar. Bola crescendo e sumindo é
+   coisa que explode; anel piscando é coisa que fica.
+
+   Ela é maciça no meio e vai perdendo o corpo para a borda, que é como
+   uma bola de luz se vê: o miolo quase branco, o meio verde-água, e o
+   fim dissolvido no fundo. */
+.gas-ball.solta-energia::after{
+  content:'';position:absolute;left:50%;top:50%;
+  width:100%;height:100%;margin:-50% 0 0 -50%;
+  border-radius:50%;pointer-events:none;
+  background:radial-gradient(circle,
+    rgba(226,255,248,.98) 0%,
+    rgba(150,255,232,.85) 30%,
+    rgba(69,199,176,.42)  62%,
+    rgba(69,199,176,.10)  84%,
+    rgba(69,199,176,0)   100%);
+  animation:soltaEnergia .5s cubic-bezier(.1,.62,.28,1) forwards;
 }
-.gas.inst2 .gas-ball{
-  animation:molShake .26s linear infinite, qmAlert  1.1s ease-in-out infinite;
-}
-.gas.inst3 .gas-ball{
-  animation:shakeHard .16s linear infinite, qmAlert2 .6s ease-in-out infinite;
-}
-.gas.inst4 .gas-ball{
-  animation:shakeWild .09s linear infinite, qmAlert3 .3s ease-in-out infinite;
+/* De uma vez só: o começo é um estouro e o resto é o rastro dele se
+   abrindo. Por isso a curva é rápida no início e frouxa no fim, e o
+   brilho já começa a ceder antes do meio do caminho. */
+@keyframes soltaEnergia{
+  0%  {opacity:1;   transform:scale(.22)}
+  30% {opacity:.92}
+  100%{opacity:0;   transform:scale(2.9)}
 }
 /* a onda que sai da bola quando o elétron se incorpora */
 .onda-e{
@@ -2169,11 +2459,12 @@ body{
   100%{transform:scale(7);  opacity:0;border-width:1px}
 }
 /* chegou à configuração do gás nobre: a bola comemora */
-.gas.certo .gas-ball{animation:certoPulsa 1.5s ease-in-out 3 !important}
-@keyframes certoPulsa{
-  0%,100%{box-shadow:0 0 0 3px rgba(69,199,176,.7),0 0 30px rgba(69,199,176,.45)}
-  50%    {box-shadow:0 0 0 8px rgba(69,199,176,.22),0 0 62px rgba(69,199,176,.9)}
-}
+/* O átomo estável não pisca mais. Quem anuncia a chegada é a bola de
+   energia, que sai UMA vez — o pulso de três voltas que havia aqui era
+   um anel em volta da bola, e anel em volta do átomo se lê como mais uma
+   camada. Parado e sem tremor já diz o bastante: o que estava agitado
+   sossegou. */
+.gas.certo .gas-ball{animation:none !important}
 /* e a camada que mudou se acende por um instante */
 .gas-dist .cam.mudou{animation:camMudou .8s ease-out}
 @keyframes camMudou{
@@ -2186,21 +2477,24 @@ body{
    barra de comando. O rótulo mora dentro dela, em duas linhas — cabe
    porque "gás nobre" já se parte sozinho no espaço. */
 .aj{
-  display:grid;place-items:center;align-content:center;gap:calc(3px * var(--k));
-  width:calc(92px * var(--k));height:calc(92px * var(--k));
+  display:grid;place-items:center;align-content:center;
+  gap:calc(var(--base) * .033px * var(--k));
+  /* O TAMANHO VEM DO --base, como em todo o resto. Fixo em 92px, a
+     pinça mudava só o --k e o tamanho se perdia ao recarregar: o painel
+     do C devolve base × k, e no arquivo o k volta a ser 1. Medindo pelo
+     --base, o que se ajusta com a mão é o que fica escrito. */
+  width:calc(var(--base) * 1px * var(--k));
+  height:calc(var(--base) * 1px * var(--k));
   border-radius:50%;cursor:pointer;padding:0;
   border:1px solid rgba(240,180,74,.5);background:rgba(7,22,38,.9);
   color:var(--amber);font-family:var(--mono);
-  font-size:calc(10.5px * var(--k));letter-spacing:.1em;text-transform:uppercase;
+  font-size:calc(var(--base) * .114px * var(--k));
+  letter-spacing:.1em;text-transform:uppercase;
   line-height:1.25;text-align:center;
   box-shadow:0 0 22px rgba(240,180,74,.14);
   transition:border-color .2s,background .2s,box-shadow .2s;
 }
-.aj b{
-  display:block;font-weight:500;
-  font-size:calc(21px * var(--k));line-height:1;
-}
-.aj span{display:block;max-width:calc(70px * var(--k))}
+.aj span{display:block;max-width:calc(var(--base) * .76px * var(--k))}
 .reveal-item.ajuda:hover .aj{
   border-color:var(--amber);background:rgba(240,180,74,.14);
   box-shadow:0 0 22px rgba(240,180,74,.22);
@@ -2327,6 +2621,12 @@ body.sim-movel .ex-el .sim.pegando{
   font-size:calc(var(--tf,29) * 1px);line-height:1.32;
   color:var(--paper);white-space:pre-line;
 }
+/* O CUBO DOS EXEMPLOS leva duas palavras na face, e não um parágrafo:
+   centrado, e não encostado à esquerda como o texto dos postulados —
+   que é longo e precisa da margem para se ler. Dois pixels maiores, que
+   é o que a face comporta sem apertar. */
+.reveal-item.cube[data-exemplos] .face .t{text-align:center;--tf:31}
+
 /* aviso de "tem mais" para o cubo */
 .reveal-item.cube.has-more::after,
 .reveal-item.molecule.has-more::after,
@@ -2759,9 +3059,9 @@ body.sim-movel .ex-el .sim.pegando{
    é da aula, e não do autor; mas é clicável, para quem abrir isto num
    aparelho poder escrever sem copiar à mão. */
 .cover .mail{
-  display:inline-block;margin-top:5px;
-  font-family:var(--mono);font-size:13px;letter-spacing:.04em;
-  color:rgba(232,241,245,.5);text-decoration:none;
+  display:inline-block;margin-top:6px;
+  font-family:var(--mono);font-size:16px;letter-spacing:.04em;
+  color:rgba(232,241,245,.62);text-decoration:none;
   border-bottom:1px solid rgba(69,199,176,.28);padding-bottom:1px;
   transition:color .2s,border-color .2s;
 }
@@ -2801,18 +3101,57 @@ body.sim-movel .ex-el .sim.pegando{
 }
 .cover .right{display:grid;place-items:center;height:100%}
 
-/* átomos da capa */
-#hero{width:430px;height:430px}
-#hero .orbit{fill:none;stroke:rgba(69,199,176,.35);stroke-width:1.2}
-#hero .nucleus{fill:var(--ink-soft);stroke:var(--aqua);stroke-width:1.6}
-#hero .sym{font-family:var(--mono);font-size:15px;fill:var(--paper);letter-spacing:1px}
-#hero .shared{fill:var(--amber)}
-#hero .spin{animation:spin 14s linear infinite;transform-box:fill-box;transform-origin:center}
-#hero .spin.rev{animation-duration:18s;animation-direction:reverse}
-#hero .glow{animation:glow 3.2s ease-in-out infinite}
-#hero .glow.d{animation-delay:-1.6s}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes glow{0%,100%{opacity:.45;r:5}50%{opacity:1;r:7}}
+/* ------------------------------------------------------------
+   A CAPA: A LIGAÇÃO COVALENTE COMO NUVEM, EM TRÊS DIMENSÕES
+   Órbitas desenhadas são o modelo de Bohr — e Bohr não explica ligação
+   nenhuma: nele o elétron tem trajetória, e duas trajetórias não se
+   compartilham. O que se compartilha é PROBABILIDADE.
+
+   Por isso a capa não é mais um desenho, é um SORTEIO. Cada ponto é um
+   lugar onde o elétron foi encontrado, tirado da densidade de verdade da
+   molécula — o quadrado de (1s do átomo A + 1s do átomo B). Os pontos
+   vivem um instante e são sorteados de novo, e é isso que faz a nuvem
+   ferver em vez de posar: nuvem eletrônica não tem forma fixa, tem
+   chance de estar em cada lugar.
+
+   E gira. Girando é que a coisa se vê: as duas metades passam uma na
+   frente da outra e se entrelaçam no vão entre os núcleos, que é onde
+   a densidade das duas se soma. Essa região densa É a ligação covalente
+   — não um traço entre duas bolinhas.
+   ------------------------------------------------------------ */
+/* A tela sai com o dobro de pixels do tamanho em que é mostrada: a nuvem
+   é feita de pontos de dois pixels, e num painel denso eles sumiriam. */
+#hero{
+  width:430px;height:430px;display:block;
+  /* o deslocamento fica na TELA, e não no desenho: assim nada é
+     recortado quando ela sai do lugar */
+  transform:translate(var(--hx,0px), var(--hy,0px));
+  cursor:grab;touch-action:none;
+}
+#hero.pegando{cursor:grabbing}
+
+/* ------------------------------------------------------------
+   A COLUNA DOS GASES NOBRES, ALINHADA PELO NÚCLEO
+   A ficha do elemento fica à esquerda da esfera, DENTRO do fluxo, e ela
+   cresce junto com o átomo — a fonte dela é uma fração do tamanho da
+   esfera. Numa coluna de átomos que vão crescendo, cada ficha empurra a
+   própria esfera um pouco mais para a direita que a de cima: do hélio ao
+   radônio isso dá quase oito pixels de desalinhamento, e nenhum ajuste
+   de x conserta os seis de uma vez, porque o desvio é diferente em cada
+   um.
+
+   Fora do fluxo, a caixa do item passa a ser a ESFERA e nada mais. Aí o
+   x de cada elemento é a posição do NÚCLEO dele, e a coluna se alinha
+   por construção: mesmo x, mesmo eixo. A ficha continua onde estava, à
+   esquerda e à mesma distância, só que pendurada em vez de empurrando.
+   ------------------------------------------------------------ */
+.slide.nobres .reveal-item.gas{display:block}
+.slide.nobres .reveal-item.gas .gas-id{
+  position:absolute;right:100%;top:50%;
+  transform:translateY(-50%) translate(var(--sx,0px), var(--sy,0px))
+            scale(var(--sf,1));
+  margin-right:14px;
+}
 
 /* ---------- a caneta ----------
    A folha onde se escreve, por cima do palco. Ela NUNCA pega o toque:
@@ -2923,6 +3262,8 @@ body.sim-movel .ex-el .sim.pegando{
   font-family:var(--mono);font-size:14px;min-width:66px;text-align:center;
   color:var(--paper-dim);letter-spacing:.08em;user-select:none;
 }
+body.ruth-movel .elem{cursor:grab}
+body.ruth-movel .elem.pegando{cursor:grabbing;border-color:var(--aqua)}
 #counter b{color:var(--paper);font-weight:500}
 .sep{width:1px;height:24px;background:rgba(69,199,176,.22);margin:0 4px}
 
@@ -3446,18 +3787,22 @@ const SLIDES = [
   {
     title: 'Os Gases Nobres e o segredo da Estabilidade',
     tsize: 38,                             /* cabe numa linha só */
+    cls: 'nobres',                         /* a coluna alinhada pelo núcleo */
     content: '',
     reveals: [
       { auto: true, id: 'lewis6', flip: true, img: 'imagens/lewis.jpg', caption: 'G.N. Lewis - 1916',
         x: 250, y: 420, base: 260, tone: '' },
 
       /* um clique traz os seis, em sequência rápida */
-      { kind: 'gas', from: 'lewis6', sim: 'He', x: 470, y: 150, base: 46, tone: '' },
-      { kind: 'gas', from: 'lewis6', sim: 'Ne', follow: 90, x: 470, y: 245, base: 52, tone: '' },
-      { kind: 'gas', from: 'lewis6', sim: 'Ar', follow: 90, x: 470, y: 340, base: 58, tone: '' },
-      { kind: 'gas', from: 'lewis6', sim: 'Kr', follow: 90, x: 470, y: 435, base: 64, tone: '' },
-      { kind: 'gas', from: 'lewis6', sim: 'Xe', follow: 90, x: 470, y: 530, base: 70, tone: '' },
-      { kind: 'gas', from: 'lewis6', sim: 'Rn', follow: 90, x: 470, y: 625, base: 76, tone: '' },
+      /* O MESMO x nos seis: agora ele é o eixo dos núcleos. Os 495 são o
+         lugar onde a coluna já estava — a média de onde os núcleos caíam
+         com o empurrão da ficha, que agora não existe mais. */
+      { kind: 'gas', from: 'lewis6', sim: 'He', x: 495, y: 150, base: 46, tone: '' },
+      { kind: 'gas', from: 'lewis6', sim: 'Ne', follow: 90, x: 495, y: 224, base: 52, tone: '' },
+      { kind: 'gas', from: 'lewis6', sim: 'Ar', follow: 90, x: 495, y: 309, base: 58, tone: '' },
+      { kind: 'gas', from: 'lewis6', sim: 'Kr', follow: 90, x: 495, y: 408, base: 64, tone: '' },
+      { kind: 'gas', from: 'lewis6', sim: 'Xe', follow: 90, x: 495, y: 517, base: 70, tone: '' },
+      { kind: 'gas', from: 'lewis6', sim: 'Rn', follow: 90, x: 495, y: 634, base: 76, tone: '' },
 
       /* um clique por gás, na mesma ordem da coluna */
       { kind: 'acao', acao: 'dist:He', x: 470, y: 150, base: 1, tone: '' },
@@ -3489,19 +3834,29 @@ const SLIDES = [
       /* tudo isto já está na tela quando o slide abre. O cubo guarda os
          quatro exemplos; ao virar, o átomo e o gás nobre acompanham. */
       { auto: true, id: 'cuboex7', kind: 'cube', exemplos: true,
-        x: 250, y: 300, base: 300, tone: '',
+        x: 204, y: 382, base: 138.9, tone: '',
         faces: [ { n: '', t: 'Exemplo 01' }, { n: '', t: 'Exemplo 02' },
                  { n: '', t: 'Exemplo 03' }, { n: '', t: 'Exemplo 04' } ] },
       { auto: true, id: 'atomo', kind: 'gas', sim: 'Na', eatom: 'gas',
         dentro: true, conta: true,
-        x: 620, y: 280, base: 130, tone: '' },
+        x: 620, y: 280, base: 203, tone: '' },
       { auto: true, id: 'aj1', kind: 'ajuda', alvo: 'vizinho',
-        x: 1150, y: 620, base: 1, tone: '' },
+        x: 1217, y: 659, base: 92, tone: '' },
+
+      /* A FONTE. Fica na borda direita, longe do átomo: o elétron tem de
+         atravessar a tela para chegar lá, e é essa travessia que faz do
+         gesto uma transferência, e não um clique. */
+      { auto: true, id: 'fonte7', kind: 'ampola', label: 'fonte de elétrons',
+        x: 1190, y: 296, base: 150, tone: '' },
 
       /* sai de dentro do botão, da direita para a esquerda */
+      /* Do MESMO tamanho do átomo de cima: é a comparação que o slide
+         faz — o íon fica igual ao gás nobre —, e ela só vale se os dois
+         estiverem na mesma escala. Em caixas diferentes, duas
+         eletrosferas iguais sairiam de tamanhos diferentes. */
       { id: 'vizinho', manual: true, from: 'aj1', kind: 'gas', sim: 'Ne',
         dentro: true, conta: true, aberto: true,
-        x: 620, y: 500, base: 112, tone: '' }
+        x: 619, y: 544, base: 203, tone: '' }
     ]
   },
   {
@@ -3551,7 +3906,7 @@ const SLIDES = [
       /* O botão de ajuda, como no slide 7: mostra o gás nobre que aquele
          elemento está tentando imitar. Some ao segundo toque. */
       { auto: true, id: 'aj8', kind: 'ajuda', alvo: 'nobre8',
-        x: 1206, y: 659, base: 1, tone: '' },
+        x: 1206, y: 659, base: 92, tone: '' },
       { id: 'nobre8', manual: true, from: 'aj8', kind: 'gas', sim: 'Ar', sodist: true,
         conta: true, aberto: true,
         x: 960, y: 624, base: 1.7, tone: '' }
@@ -4673,31 +5028,246 @@ const grid = document.getElementById('grid');
 const overview = document.getElementById('overview');
 let current = 0;
 
-const HERO = `
-<svg id="hero" viewBox="0 0 420 420" aria-label="Dois átomos compartilhando um par de elétrons">
-  <g class="spin"><ellipse class="orbit" cx="150" cy="210" rx="104" ry="42"/></g>
-  <g class="spin"><ellipse class="orbit" cx="150" cy="210" rx="104" ry="42" transform="rotate(60 150 210)"/></g>
-  <g class="spin rev"><ellipse class="orbit" cx="150" cy="210" rx="104" ry="42" transform="rotate(120 150 210)"/></g>
-  <g class="spin rev"><ellipse class="orbit" cx="272" cy="210" rx="86" ry="34"/></g>
-  <g class="spin"><ellipse class="orbit" cx="272" cy="210" rx="86" ry="34" transform="rotate(72 272 210)"/></g>
+const HERO = `<canvas id="hero" width="880" height="880" role="img"
+  aria-label="Dois núcleos de hidrogênio dentro de uma nuvem eletrônica
+              compartilhada, girando"></canvas>`;
 
-  <g class="spin">
-    <ellipse class="orbit" cx="150" cy="210" rx="104" ry="42" transform="rotate(30 150 210)"/>
-    <circle cx="254" cy="210" r="5.5" fill="#45C7B0"/>
-  </g>
-  <g class="spin rev">
-    <ellipse class="orbit" cx="272" cy="210" rx="86" ry="34" transform="rotate(140 272 210)"/>
-    <circle cx="358" cy="210" r="5" fill="#45C7B0"/>
-  </g>
+/* ============================================================
+   A NUVEM DE H2, SORTEADA E GIRANDO
+   ============================================================ */
+const H2 = { cv: null, ctx: null, raf: 0, ang: 0, el: 0, p: null, n: 1500 };
+const H2_D    = 1.4;      /* a distância entre os prótons, em raios de Bohr —
+                             que é a do H2 de verdade */
+const H2_CX   = 4.6;      /* a caixa de onde se sorteia */
+const H2_CY   = 3.4;
+const H2_PICO = 1.56;     /* o valor de psi² em cima de um núcleo: nada no
+                             espaço passa disto, e é contra ele que se rejeita */
 
-  <circle class="nucleus" cx="150" cy="210" r="34"/>
-  <text class="sym" x="150" y="215" text-anchor="middle">H</text>
-  <circle class="nucleus" cx="272" cy="210" r="28"/>
-  <text class="sym" x="272" y="215" text-anchor="middle">H</text>
+/* A DENSIDADE. psi = 1s(A) + 1s(B), e o que se vê é psi².
+   É a soma ANTES do quadrado que faz a ligação: as duas funções se
+   reforçam no meio, e o quadrado dessa soma é maior ali do que a soma
+   dos dois quadrados seria. O elétron ganha lugar entre os núcleos, e é
+   por isso que a molécula se segura. */
+function h2Dens(x, y, z){
+  const rA = Math.hypot(x + H2_D / 2, y, z);
+  const rB = Math.hypot(x - H2_D / 2, y, z);
+  const psi = Math.exp(-rA) + Math.exp(-rB);
+  return psi * psi;
+}
+/* Um lugar onde o elétron poderia estar, sorteado por REJEIÇÃO: joga-se
+   um ponto qualquer na caixa e aceita-se com chance proporcional à
+   densidade ali. Sem fórmula fechada, sem aproximação — a nuvem que
+   aparece é a distribuição, e não um desenho dela. */
+/* O teto de tentativas. So 1,7% dos palpites caem dentro da nuvem — o
+   resto da caixa e vazio —, entao a media e de uns 60 giros, mas a cauda
+   e longa: com 500, um sorteio em 4000 desistia e o ponto nascia no
+   centro exato da molecula. Com 4000 isso deixa de acontecer neste
+   universo, e nao custa nada: o teto so pesa no caso azarado. */
+function h2Ponto(p){
+  for (let i = 0; i < 4000; i++){
+    const x = (Math.random() * 2 - 1) * H2_CX;
+    const y = (Math.random() * 2 - 1) * H2_CY;
+    const z = (Math.random() * 2 - 1) * H2_CY;
+    if (Math.random() * H2_PICO < h2Dens(x, y, z)){
+      p.x = x; p.y = y; p.z = z;
+      p.a = 0;                                 /* idade: nasce, vive, some */
+      p.va = 0.004 + Math.random() * 0.009;
+      return p;
+    }
+  }
+  /* e se ainda assim desistir, que seja em cima de um nucleo, que e o
+     lugar mais provavel de todos — e nao no meio do vao */
+  p.x = H2_D / 2; p.y = 0; p.z = 0; p.a = 0; p.va = 0.01;
+  return p;
+}
 
-  <circle class="shared glow"   cx="211" cy="200" r="6"/>
-  <circle class="shared glow d" cx="211" cy="222" r="6"/>
-</svg>`;
+function heroPassa(){
+  const cv = H2.cv, ctx = H2.ctx;
+  const sl = cv && cv.closest('.slide');
+  /* capa fora de cena não desenha: o laço morre e volta quando ela voltar */
+  if (!sl || !sl.classList.contains('is-active')){ H2.raf = 0; return; }
+  const W = cv.width, H = cv.height;
+  ctx.clearRect(0, 0, W, H);
+
+  /* Ela roda sozinha — mas para enquanto a mão a está virando, senão o
+     giro automático escorregaria por baixo do dedo. Solta, volta a rodar:
+     a capa continua viva. */
+  if (!arrastaHero || arrastaHero.modo !== 'gira') H2.ang += 0.0042;
+  /* um balanço lento no eixo, para não parecer prato giratório, mais o
+     que a mão tiver inclinado */
+  const inc = Math.max(-1.35, Math.min(1.35,
+    0.30 + Math.sin(H2.ang * 0.41) * 0.17 + H2.el));
+  const ca = Math.cos(H2.ang), sa = Math.sin(H2.ang);
+  const ci = Math.cos(inc),    si = Math.sin(inc);
+  /* 0.12 da largura por raio de Bohr. A cauda mais rarefeita passa da
+     borda em uns 0,1% dos pontos — são os mais fracos de todos, e o
+     corpo da nuvem cabe com folga. */
+  const ESC = W * 0.12, CAM = 14;
+
+  /* gira em torno do eixo vertical — é esse giro que faz as duas metades
+     passarem uma na frente da outra — e depois inclina */
+  const proj = (x, y, z) => {
+    const x1 =  x * ca + z * sa;
+    const z1 = -x * sa + z * ca;
+    const y2 =  y * ci - z1 * si;
+    const z2 =  y * si + z1 * ci;
+    const f  = CAM / (CAM - z2);
+    return [W / 2 + x1 * ESC * f, H / 2 + y2 * ESC * f, z2, f];
+  };
+
+  const nA = proj(-H2_D / 2, 0, 0), nB = proj(H2_D / 2, 0, 0);
+  const perto = nA[2] >= nB[2] ? nA : nB;      /* z maior = mais perto do olho */
+  const longe = nA[2] >= nB[2] ? nB : nA;
+  const faixa = [[], [], []];                  /* atrás dos dois, no meio, à frente */
+
+  for (const p of H2.p){
+    p.a += p.va;
+    if (p.a >= 1) h2Ponto(p);
+    const q = proj(p.x, p.y, p.z);
+    faixa[q[2] < longe[2] ? 0 : q[2] < perto[2] ? 1 : 2].push([q, p]);
+  }
+
+  const pinta = (lista) => {
+    ctx.globalCompositeOperation = 'lighter';
+    for (const [q, p] of lista){
+      /* nasce e some em seno: nenhum ponto aparece ou pisca de um quadro
+         para o outro, e o conjunto ferve sem cintilar */
+      const al = Math.sin(Math.PI * p.a);
+      const r  = 2.2 * q[3];
+      ctx.fillStyle = 'rgba(69,199,176,' + (al * 0.42 * q[3]).toFixed(3) + ')';
+      ctx.fillRect(q[0] - r / 2, q[1] - r / 2, r, r);
+    }
+  };
+  /* o próton: a MESMA esfera do núcleo do slide 7 e do retículo */
+  const bola = (q) => {
+    const R = W * 0.036 * q[3];   /* cresce junto: a molécula é uma coisa só */
+    const g = ctx.createRadialGradient(q[0] - R * 0.32, q[1] - R * 0.44, R * 0.08,
+                                       q[0], q[1], R);
+    g.addColorStop(0, '#FFD3B0'); g.addColorStop(0.42, '#F58A4E');
+    g.addColorStop(0.76, '#CE4A20'); g.addColorStop(1, '#8E2A11');
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.beginPath(); ctx.arc(q[0], q[1], R, 0, Math.PI * 2);
+    ctx.fillStyle = g; ctx.fill();
+  };
+
+  /* de trás para a frente, para o núcleo da frente tapar a nuvem de trás
+     e ser tapado pela que passa por diante dele */
+  pinta(faixa[0]); bola(longe); pinta(faixa[1]); bola(perto); pinta(faixa[2]);
+  ctx.globalCompositeOperation = 'source-over';
+  H2.raf = requestAnimationFrame(heroPassa);
+}
+
+/* ------------------------------------------------------------
+   A MOLÉCULA DA CAPA, NA MÃO
+   A mesma regra do resto da aula, para o gesto não mudar de sentido de
+   um slide para o outro:
+     um dedo, ou o botão esquerdo ....... GIRA
+     dois dedos, ou Ctrl com o botão .... LEVA pela tela
+   Girar é o que a capa tem a oferecer — é vendo as duas metades passarem
+   uma na frente da outra que se entende que a nuvem é uma só. Levar é o
+   ajuste de sala: fugir do brilho da lâmpada do projetor, abrir espaço
+   para quem vai escrever ao lado.
+
+   O deslocamento fica no ELEMENTO, e não na cena desenhada: a nuvem
+   continua no meio da sua tela e é a tela que anda, então nada é
+   recortado ao sair do lugar.
+   ------------------------------------------------------------ */
+let arrastaHero = null;
+deck.addEventListener('pointerdown', (e) => {
+  const cv = e.target.closest && e.target.closest('#hero');
+  if (!cv) return;
+  e.preventDefault();
+  /* segundo dedo na molécula: o gesto deixa de girar e passa a levar */
+  if (arrastaHero && arrastaHero.cv === cv){
+    arrastaHero.dedos.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (arrastaHero.dedos.size >= 2){
+      const v = [...arrastaHero.dedos.values()];
+      arrastaHero.modo = 'leva';
+      arrastaHero.c0 = { x: (v[0].x + v[1].x) / 2, y: (v[0].y + v[1].y) / 2 };
+    }
+    return;
+  }
+  const cs = getComputedStyle(cv);
+  arrastaHero = {
+    cv, id: e.pointerId, x: e.clientX, y: e.clientY,
+    modo: (e.ctrlKey || e.metaKey) ? 'leva' : 'gira',
+    ox: parseFloat(cs.getPropertyValue('--hx')) || 0,
+    oy: parseFloat(cs.getPropertyValue('--hy')) || 0,
+    /* o palco inteiro é escalado por fitScale: sem dividir, ela andaria
+       mais ou menos que o dedo */
+    k:  fitScale || 1,
+    dedos: new Map([[e.pointerId, { x: e.clientX, y: e.clientY }]])
+  };
+  try { cv.setPointerCapture(e.pointerId); } catch (_){}
+  cv.classList.add('pegando');
+});
+document.addEventListener('pointermove', (e) => {
+  const a = arrastaHero;
+  if (!a || !a.dedos.has(e.pointerId)) return;
+  a.dedos.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+  if (a.modo === 'leva'){
+    /* com dois dedos quem manda é o MEIO entre eles: assim a molécula
+       não salta quando um dos dois se mexe mais que o outro */
+    if (a.dedos.size >= 2){
+      const v = [...a.dedos.values()];
+      const cc = { x: (v[0].x + v[1].x) / 2, y: (v[0].y + v[1].y) / 2 };
+      a.ox += (cc.x - a.c0.x) / a.k;
+      a.oy += (cc.y - a.c0.y) / a.k;
+      a.c0 = cc;
+    } else {
+      if (e.pointerId !== a.id) return;
+      a.ox += (e.clientX - a.x) / a.k;
+      a.oy += (e.clientY - a.y) / a.k;
+      a.x = e.clientX; a.y = e.clientY;
+    }
+    a.cv.style.setProperty('--hx', a.ox.toFixed(1) + 'px');
+    a.cv.style.setProperty('--hy', a.oy.toFixed(1) + 'px');
+    return;
+  }
+  /* girar: o mesmo passo do retículo, para a mão achar o mesmo peso */
+  if (e.pointerId !== a.id) return;
+  H2.ang -= (e.clientX - a.x) * 0.006;
+  H2.el = Math.max(-1, Math.min(1, H2.el + (e.clientY - a.y) * 0.006));
+  a.x = e.clientX; a.y = e.clientY;
+});
+function soltaHero(e){
+  const a = arrastaHero;
+  if (!a) return;
+  if (e && a.dedos.has(e.pointerId)) a.dedos.delete(e.pointerId);
+  if (e && a.dedos.size > 0){
+    /* sobrou um dedo: o gesto volta a girar, a partir de onde ele está */
+    if (a.modo === 'leva'){
+      a.modo = 'gira';
+      a.id = [...a.dedos.keys()][0];
+      const d = a.dedos.get(a.id);
+      a.x = d.x; a.y = d.y;
+    }
+    return;
+  }
+  a.cv.classList.remove('pegando');
+  arrastaHero = null;
+}
+document.addEventListener('pointerup', soltaHero);
+document.addEventListener('pointercancel', soltaHero);
+
+function ligaHero(){
+  const cv = document.getElementById('hero');
+  if (!cv) return;
+  const sl = cv.closest('.slide');
+  if (!sl || !sl.classList.contains('is-active')) return;
+  if (H2.cv !== cv){
+    H2.cv = cv; H2.ctx = cv.getContext('2d');
+    /* as idades começam espalhadas: nascendo todas juntas, a nuvem
+       inteira piscaria no mesmo compasso */
+    H2.p = Array.from({ length: H2.n }, () => {
+      const p = h2Ponto({});
+      p.a = Math.random();
+      return p;
+    });
+  }
+  if (!H2.raf) H2.raf = requestAnimationFrame(heroPassa);
+}
 
 /* ------------------------------------------------------------
    A PEDRA
@@ -5414,6 +5984,167 @@ function VESSEL(r){
   </div></div>`;
 }
 
+/* ------------------------------------------------------------
+   A AMPOLA: A FONTE DOS ELÉTRONS
+   Um tubo de descarga — que é de onde os elétrons vieram na história de
+   verdade: foi num tubo assim, com gás rarefeito brilhando, que Thomson
+   achou o primeiro. Aqui ele deixa de ser ilustração e passa a ser a
+   torneira: o elétron que a mão leva até o átomo sai daqui.
+
+   Antes ele nascia de um toque em qualquer vão vazio da tela, e o gesto
+   não dizia de onde vinha a carga — parecia que elétron se inventa
+   apertando o dedo no escuro. Com a fonte à vista, a pergunta "de onde
+   saiu esse elétron?" passa a ter resposta, e a resposta está desenhada.
+   ------------------------------------------------------------ */
+function AMPOLA(){
+  const corpo = 'x="60" y="42" width="80" height="176" rx="40"';
+  /* O GÁS é uma tela à parte, ATRÁS do vidro. Um degradê parado desenha
+     uma bolha, e gás rarefeito não é bolha: é um punhado de partículas
+     que vão e vêm. O recorte em cápsula fica com o border-radius, e não
+     com o desenho — assim as partículas podem bater na parede. */
+  return `<div class="z-stage"><div class="z-body">
+    <canvas class="amp-gas" width="152" height="344" aria-hidden="true"></canvas>
+    <svg class="z-svg" viewBox="0 0 ${GLASS_W} ${GLASS_H}" aria-hidden="true">
+      <defs>
+        <linearGradient id="ampV" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0"   stop-color="#FFFFFF" stop-opacity=".07"/>
+          <stop offset=".13" stop-color="#FFFFFF" stop-opacity=".52"/>
+          <stop offset=".33" stop-color="#FFFFFF" stop-opacity=".05"/>
+          <stop offset=".70" stop-color="#06131F" stop-opacity=".20"/>
+          <stop offset="1"   stop-color="#06131F" stop-opacity=".46"/>
+        </linearGradient>
+      </defs>
+      <!-- os eletrodos, um em cada ponta: é entre eles que a descarga passa -->
+      <rect x="84" y="12"  width="32" height="13" rx="5" fill="#66727C"/>
+      <rect x="93" y="22"  width="14" height="26" fill="#7E8B96"/>
+      <rect x="84" y="235" width="32" height="13" rx="5" fill="#66727C"/>
+      <rect x="93" y="212" width="14" height="26" fill="#7E8B96"/>
+      <!-- e o vidro por cima dele. O que faz parecer vidro não é a
+           transparência: é o brilho comprido de um lado e a sombra do
+           outro, que é como um cilindro devolve a luz da sala. -->
+      <rect ${corpo} fill="url(#ampV)"/>
+      <rect ${corpo} fill="none" stroke="#A9BECC" stroke-width="2.2"
+            stroke-opacity=".6"/>
+      <path d="M76 72 Q69 130 76 188" fill="none" stroke="#FFFFFF"
+            stroke-opacity=".55" stroke-width="5" stroke-linecap="round"/>
+      <path d="M124 86 Q129 130 124 174" fill="none" stroke="#FFFFFF"
+            stroke-opacity=".18" stroke-width="3" stroke-linecap="round"/>
+    </svg>
+  </div></div>`;
+}
+
+/* ------------------------------------------------------------
+   O GÁS DA AMPOLA
+   A mesma ideia da nuvem da capa — pontos sorteados que nascem, vivem um
+   instante e são sorteados de novo —, mas aqui eles não giram: FLUTUAM.
+   Cada um leva uma deriva lenta que muda de rumo sozinha, e bate nas
+   paredes do tubo. É o que gás rarefeito faz, e é o que um degradê
+   parado não conseguia dizer.
+
+   Acende mais no eixo do tubo, que é por onde a descarga passa, e o
+   SURTO é o que a ampola faz quando um elétron sai ou entra: as
+   partículas se agitam e o brilho salta, e depois tudo assenta.
+   ------------------------------------------------------------ */
+const AMP = { cv: null, ctx: null, raf: 0, p: null, n: 380, surto: 0 };
+
+/* um ponto qualquer dentro do tubo, em coordenadas de 0 a 1 */
+function ampPonto(p){
+  /* três sorteios somados dão o amontoado no meio, sem fórmula nenhuma:
+     é a soma de acasos que se agrupa sozinha em volta do centro */
+  p.x = 0.5 + (Math.random() + Math.random() + Math.random() - 1.5) * 0.30;
+  p.y = Math.random();
+  p.vx = (Math.random() - 0.5) * 0.0018;
+  p.vy = (Math.random() - 0.5) * 0.0018 - 0.0004;   /* sobe de leve */
+  p.a  = 0;                                          /* idade: nasce e some */
+  p.va = 0.004 + Math.random() * 0.009;
+  return p;
+}
+
+function ampPassa(){
+  const cv = AMP.cv, ctx = AMP.ctx;
+  const sl = cv && cv.closest('.slide');
+  if (!sl || !sl.classList.contains('is-active')){ AMP.raf = 0; return; }
+  const W = cv.width, H = cv.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.globalCompositeOperation = 'lighter';
+
+  const s = AMP.surto;
+  for (const p of AMP.p){
+    p.a += p.va;
+    if (p.a >= 1) ampPonto(p);
+    /* a deriva muda de rumo sozinha: gás não anda em linha reta */
+    p.vx += (Math.random() - 0.5) * 0.00014;
+    p.vy += (Math.random() - 0.5) * 0.00014;
+    p.x += p.vx * (1 + 5 * s);
+    p.y += p.vy * (1 + 5 * s);
+    /* e bate na parede do tubo em vez de atravessá-la */
+    if (p.x < 0.03 || p.x > 0.97){ p.vx = -p.vx; p.x = Math.max(0.03, Math.min(0.97, p.x)); }
+    if (p.y < 0.01 || p.y > 0.99){ p.vy = -p.vy; p.y = Math.max(0.01, Math.min(0.99, p.y)); }
+
+    /* mais aceso no eixo do tubo, que é por onde a descarga passa */
+    const eixo = 1 - Math.min(1, Math.abs(p.x - 0.5) / 0.5);
+    const al = Math.sin(Math.PI * p.a) * (0.16 + 0.42 * eixo) * (1 + 2.6 * s);
+    const r = (2.1 + 1.4 * eixo) * (1 + 0.5 * s);   /* engrossam no surto */
+    ctx.fillStyle = 'rgba(255,' + (96 + Math.round(70 * eixo)) + ',64,'
+                  + Math.min(1, al).toFixed(3) + ')';
+    ctx.fillRect(p.x * W - r / 2, p.y * H - r / 2, r, r);
+  }
+  /* A DESCARGA.
+     O surto estava só somando brilho nas partículas, e brilho somado a
+     um ponto de dois pixels não se vê do fundo da sala. Aqui ele vira
+     coisa desenhada: o eixo do tubo acende de ponta a ponta e as duas
+     pontas ficam brancas, que é o que um tubo de descarga faz quando a
+     corrente passa por ele. Feito na tela, e não por filtro de CSS —
+     assim não depende de mais nada para aparecer. */
+  if (s > 0.012){
+    const q = Math.min(1, s);
+    const eixo = ctx.createLinearGradient(0, 0, W, 0);
+    eixo.addColorStop(0,   'rgba(255,90,60,0)');
+    eixo.addColorStop(0.5, 'rgba(255,214,178,' + (0.5 * q).toFixed(3) + ')');
+    eixo.addColorStop(1,   'rgba(255,90,60,0)');
+    ctx.fillStyle = eixo;
+    ctx.fillRect(0, 0, W, H);
+    /* os eletrodos, de onde ela parte */
+    for (const y of [0, H]){
+      const pt = ctx.createRadialGradient(W / 2, y, 0, W / 2, y, W);
+      pt.addColorStop(0, 'rgba(255,236,210,' + (0.55 * q).toFixed(3) + ')');
+      pt.addColorStop(1, 'rgba(255,120,70,0)');
+      ctx.fillStyle = pt;
+      ctx.fillRect(0, y - W, W, W * 2);
+    }
+  }
+  ctx.globalCompositeOperation = 'source-over';
+  /* decai mais devagar que antes: a 0,90 o clarão acabava em meio
+     segundo, e meio segundo é menos do que o olho leva para achar a
+     ampola do outro lado da tela */
+  AMP.surto = s > 0.004 ? s * 0.94 : 0;
+  AMP.raf = requestAnimationFrame(ampPassa);
+}
+
+/* o salto de brilho de quando um elétron sai ou entra */
+function pulsaAmpola(f){
+  AMP.surto = Math.min(1.4, (AMP.surto || 0) + (f || 0.5));
+  const cv = AMP.cv, it = cv && cv.closest('.reveal-item.ampola');
+  if (!it) return;
+  it.classList.remove('solta');
+  void it.offsetWidth;                       /* reinicia o clarão */
+  it.classList.add('solta');
+}
+
+function ligaAmpola(){
+  const cv = document.querySelector('.slide.is-active .amp-gas');
+  if (!cv) return;
+  if (AMP.cv !== cv){
+    AMP.cv = cv; AMP.ctx = cv.getContext('2d');
+    AMP.p = Array.from({ length: AMP.n }, () => {
+      const p = ampPonto({});
+      p.a = Math.random();                   /* idades espalhadas */
+      return p;
+    });
+  }
+  if (!AMP.raf) AMP.raf = requestAnimationFrame(ampPassa);
+}
+
 /* A esfera de ajuda e a nota que ela abre. A nota mora no palco, na
    posição que o slide pedir; a esfera mora na quina, sempre a mesma. */
 function POLI(cfg){
@@ -5798,6 +6529,190 @@ function fichaDe(sim){
   return z ? { z, cam: distDe(z) } : GASES.He;
 }
 
+/* ------------------------------------------------------------
+   O ÁTOMO EM CAMADAS
+   A esfera rígida diz o tamanho do átomo e mais nada. O que este
+   slide precisa mostrar é a ELETROSFERA SE REFAZENDO: o sódio
+   perde o elétron da camada M e a camada inteira desaparece — o
+   cátion é menor que o átomo, e isso passa a se ver acontecer em
+   vez de ser dito.
+
+   Não custou nada de máquina: quem arranca elétron já reescreve o
+   átomo inteiro com o novo saldo (ver mudaEletrons), e a
+   distribuição já sabe apagar uma camada que esvazia (ver
+   distComDelta). Só faltava o desenho ter camadas para apagar.
+
+   Vale para os quatro exemplos do slide e para os gases nobres com
+   quem cada um se compara. Quem não estiver nesta lista continua
+   saindo como a esfera lisa de antes.
+   ------------------------------------------------------------ */
+const CAMADAS_REAIS = ['Na', 'Ne', 'Cl', 'Ar', 'Ca', 'O', 'Mg', 'Al',
+                        /* OS SEIS GASES NOBRES, e não só os dois do meio.
+                           O slide dos gases nobres os põe em coluna, do hélio
+                           ao radônio, e a coluna só diz o que tem a dizer se
+                           todos forem desenhados do mesmo jeito: com dois
+                           deles em camadas e quatro em esfera lisa, a
+                           comparação passava a ser entre desenhos, e não
+                           entre átomos. Em camadas vê-se o que a coluna
+                           existe para mostrar — a última camada fechada,
+                           igual em todos, com o átomo crescendo por baixo
+                           dela. */
+                        'He', 'Kr', 'Xe', 'Rn'];
+
+/* ONDE CADA CAMADA FICA, em fração da caixa.
+   O raio é da POSIÇÃO da camada — K sempre em 20%, L em 29%, M em 38%,
+   N em 47% —, e não de quantas o átomo tem. É isso que faz o desenho
+   dizer a verdade: perdendo a camada M, o sódio fica com o anel de fora
+   em 29% e a eletrosfera ENCOLHE à vista. Espalhando as camadas pelo
+   espaço disponível, o cátion sairia do mesmo tamanho do átomo — e some
+   justamente o que este slide tem a mostrar.
+   Pela mesma razão, o neônio ao lado nasce menor que o sódio: ele tem
+   duas camadas, e o sódio três. */
+/* ONDE CADA CAMADA FICA, em fração da caixa.
+   São DUAS escadas, e não uma. A de até três camadas é larga — cada
+   anel com meio elétron de folga para o vizinho, que é o que faz a
+   eletrosfera se ler de longe. Quatro camadas nessa mesma escada não
+   caberiam na caixa; e apertar todas para o cálcio caber estragaria o
+   sódio, que é o exemplo com que a aula abre. Então o átomo de quatro
+   camadas usa a sua: degraus iguais e mais curtos. Cabe — e é verdade, porque as camadas
+   de fora de um átomo grande são mesmo mais próximas umas das outras.
+
+   Nas duas, o raio é o da POSIÇÃO da camada, e não de quantas o átomo
+   tem: é isso que faz a eletrosfera ENCOLHER quando ele perde a última.
+   O cátion é menor, e se vê. */
+const CAM_ATE3 = [0.215, 0.345, 0.465];
+const CAM_4    = [0.185, 0.29, 0.395, 0.50, 0.575, 0.63, 0.67];
+function raiosCamadas(n){
+  const esc = n <= 3 ? CAM_ATE3 : CAM_4;
+  return Array.from({ length: n }, (_, i) => esc[i] || esc[esc.length - 1]);
+}
+
+/* O NÚCLEO, COM OS PRÓTONS QUE O ELEMENTO TEM.
+   Onze bolinhas no sódio, dez no neônio: o número atômico deixa de ser
+   um algarismo escrito ao lado e passa a ser uma coisa que se CONTA na
+   tela. E é ele que não muda quando o átomo vira íon — a eletrosfera
+   encolhe, o núcleo fica igual, e é justamente essa a diferença entre
+   mudar de carga e mudar de elemento.
+
+   Arrumados em espiral de girassol, no ângulo de ouro: é o arranjo que
+   reparte N pontos por igual num disco, seja qual for o N, sem deixar
+   buraco no meio nem fila na borda. O raio de cada próton cai com a
+   raiz de N, então um núcleo de dez e um de vinte ocupam o mesmo lugar
+   — o que muda é o quanto se aperta lá dentro. */
+const OURO = 137.50776;                    /* o ângulo de ouro, em graus */
+const RAIO_NUC = 0.135;                    /* o núcleo, em fração da caixa */
+
+/* ------------------------------------------------------------
+   O NÚCLEO, EM TRÊS DIMENSÕES
+   Espalhados num disco, os prótons formavam uma roda chata — e
+   núcleo não é roda, é AGLOMERADO. Aqui eles são repartidos por
+   dentro de uma ESFERA e depois projetados na tela, e o conjunto
+   passa a ter volume.
+
+   Onde cada um fica: a direção vem da rede de Fibonacci, que
+   reparte pontos por igual sobre uma esfera; o raio vem da raiz
+   CÚBICA da posição na fila, e não da quadrada — num volume, a
+   quantidade de lugares cresce com o cubo do raio, e usar a raiz
+   quadrada empilharia todo mundo na casca deixando o meio oco.
+
+   O que dá a profundidade são três coisas juntas, que é o que um
+   renderizador faria:
+     quem está à frente sai MAIOR (perspectiva),
+     quem está à frente sai MAIS CLARO (a luz vem de cá),
+     e a ordem no HTML é do fundo para a frente, para o de trás
+     ser tapado pelo da frente e não o contrário.
+   ------------------------------------------------------------ */
+/* O QUANTO OS PRÓTONS SE AMONTOAM.
+   Do tamanho exato em que se tocam, o núcleo saía com cara de contagem:
+   bolinhas arrumadas, uma ao lado da outra, cada uma pedindo para ser
+   contada. Núcleo não é isso — é um AGLOMERADO, e as partículas de um
+   aglomerado se atravessam à vista, uma tapando o pedaço da outra.
+   Este fator as engorda além do ponto de encostar; com a ordem de
+   profundidade e a luz que já havia, o que se vê passa a ser um corpo
+   compacto, e não um mostruário. */
+const ADENSA = 1.55;
+
+function NUCLEO(sim, z){
+  const n = Math.max(1, z | 0);
+  /* os centros, dentro de uma bola de raio 1 */
+  const p = [];
+  for (let i = 0; i < n; i++){
+    const u  = (i + 0.5) / n;
+    const cz = 1 - 2 * u;                          /* fatias de igual área */
+    const sf = Math.sqrt(Math.max(0, 1 - cz * cz));
+    const a  = i * OURO * Math.PI / 180;
+    const r  = Math.cbrt(u);                       /* volume, não superfície */
+    p.push([Math.cos(a) * sf * r, Math.sin(a) * sf * r, cz * r]);
+  }
+
+  /* O TAMANHO DO PRÓTON SAI MEDIDO, e não chutado: quem manda nele é a
+     MENOR distância entre dois vizinhos, agora no espaço. É até ali que
+     todos podem crescer sem se atravessarem, e assim eles saem do maior
+     tamanho que aquele núcleo comporta — encostados, como num
+     aglomerado de verdade.
+       2·rp = m·alc  e  alc = RAIO_NUC − rp   ->   rp = m·RAIO_NUC/(2+m) */
+  let m = Infinity;
+  for (let i = 0; i < n; i++)
+    for (let j = i + 1; j < n; j++)
+      m = Math.min(m, Math.hypot(p[i][0] - p[j][0], p[i][1] - p[j][1], p[i][2] - p[j][2]));
+  if (!isFinite(m)) m = 2;                 /* um próton só: ele toma o núcleo */
+  /* O ponto de encostar, e depois o adensamento por cima dele: assim o
+     tamanho continua saindo MEDIDO do arranjo — cada elemento tem o seu
+     —, e o amontoado fica igual em todos, com muitos prótons ou poucos. */
+  const rp  = RAIO_NUC * m / (2 + m) * ADENSA;
+  const alc = RAIO_NUC - rp;               /* até onde vai o CENTRO de um próton */
+
+  /* A câmera fica a esta distância do centro do núcleo. Perto demais e a
+     perspectiva exagera — o próton da frente vira um balão; longe demais
+     e some o volume. */
+  const foco = alc * 3.4;
+  const bolas = p
+    .map(([x, y, zz]) => ({ x: x * alc, y: y * alc, z: zz * alc }))
+    .sort((a, b) => a.z - b.z)             /* do fundo para a frente */
+    .map(q => {
+      const e = foco / (foco - q.z);       /* aumenta quem está à frente */
+      /* Amontoados, os de trás precisam escurecer MAIS: é a sombra que
+         separa um próton do que está por cima dele. Com todos no mesmo
+         tom, o aglomerado viraria uma mancha só. */
+      const luz = (0.58 + 0.5 * (q.z / alc + 1) / 2).toFixed(3);
+      return `<s class="prot" style="--px:${(q.x * e).toFixed(4)};`
+        + `--py:${(q.y * e).toFixed(4)};--pr:${(rp * e).toFixed(4)};`
+        + `--pl:${luz}"></s>`;
+    }).join('');
+  /* um halo fraco por trás, para o punhado se ler como UM corpo em vez
+     de bolinhas soltas no meio dos anéis */
+  return `<i class="nuc"><b class="nuc-halo"></b>${bolas}</i>`;
+}
+
+function ELETROSFERA(sim, cam, z){
+  const raios = raiosCamadas(cam.length);
+  const conta = (sub) => [...sub.matchAll(/<sup>(\d+)<\/sup>/g)]
+    .reduce((a, m) => a + +m[1], 0);
+  let aneis = '', pontos = '';
+  cam.forEach(([, sub], i) => {
+    const rf = raios[i].toFixed(3);
+    const val = i === cam.length - 1;       /* a camada de valência */
+    aneis += `<i class="anel${val ? ' val' : ''}" style="--rf:${rf}"></i>`;
+    const n = conta(sub);
+    /* Os elétrons ficam PARADOS e repartidos em volta. É um retrato da
+       eletrosfera, e não uma animação de órbita: o que se conta aqui é
+       quantos há em cada camada, e conta-se melhor o que não anda.
+       Cada camada começa num ângulo seu, para os pontos de uma não
+       caírem na mesma linha dos da outra. */
+    const giro = i * 17;
+    for (let k = 0; k < n; k++){
+      const a = giro + k * 360 / n;
+      pontos += `<s class="epto${val ? ' val' : ''}"`
+             + ` style="--rf:${rf};--ea:${a.toFixed(1)}deg"></s>`;
+    }
+  });
+  /* O símbolo e o número atômico moram FORA, à esquerda do átomo: é
+     onde se escreve a ficha de um elemento, e onde eles cabem grandes o
+     bastante para ler de longe. No meio fica o núcleo, que aqui não é um
+     enfeite — são os prótons, contados. */
+  return NUCLEO(sim, z) + aneis + pontos;
+}
+
 function GAS(sim, op){
   op = op || {};
   const g = fichaDe(sim);
@@ -5820,9 +6735,18 @@ function GAS(sim, op){
   if (op.sodist) return `<div class="gas-dist">${camadas}</div>`;
 
   const rotulo = `<b>${sim}</b><i>${g.z}</i>`;
-  return (op.dentro ? '' : `<div class="gas-id">${rotulo}</div>`)
-       + `<div class="gas-ball" style="background:${sphereBg(EL_COLOR[sim])}">`
-       + `${op.dentro ? rotulo : ''}</div>`
+  const emCamadas = CAMADAS_REAIS.includes(sim);
+  /* em camadas, ou na esfera de sempre */
+  const bola = emCamadas
+    ? `<div class="gas-ball eletro">${ELETROSFERA(sim, cam0, g.z)}</div>`
+    : `<div class="gas-ball" style="background:${sphereBg(EL_COLOR[sim])}">`
+      + `${op.dentro ? rotulo : ''}</div>`;
+  /* A ficha do elemento fica à ESQUERDA do átomo em camadas, mesmo com
+     'dentro': na esfera cheia ela cabia por cima da bola, mas um núcleo
+     de bolinha não comporta nome — e a ficha ali fora ainda ganha o
+     lugar da carga, que passa a se escrever sobre o símbolo. */
+  return (op.dentro && !emCamadas ? '' : `<div class="gas-id">${rotulo}</div>`)
+       + bola
        + `<div class="gas-dist">${camadas}</div>`;
 }
 
@@ -5927,6 +6851,7 @@ const REVEALS = (list, cfg) => {
       : r.kind === 'cube'     ? CUBE(r.faces || [], r.id)
       : r.kind === 'molecule' ? MOLECULE()
       : r.kind === 'glass'    ? GLASS(r.tag)
+      : r.kind === 'ampola'   ? AMPOLA()
       : r.kind === 'vessel'   ? VESSEL(r)
       : r.kind === 'gas'      ? GAS(r.sim, r)
       : r.kind === 'caixa'    ? `<div class="cx"><div class="cx-tit">${r.tit || ''}</div>`
@@ -5957,7 +6882,10 @@ const REVEALS = (list, cfg) => {
       : r.kind === 'tabela'   ? TABELA()
       : r.kind === 'lewis'    ? `<div class="lw-stage">${LEWIS_VAZIO}</div>`
       : r.kind === 'acao'     ? ''
-      : r.kind === 'ajuda'    ? `<div class="aj"><b>?</b><span>${r.rot || 'gás nobre'}</span></div>`
+      /* Sem a interrogação: ela prometia uma dúvida a ser esclarecida, e
+         o botão não faz isso — ele TRAZ o gás nobre para a comparação.
+         O nome dele, em duas linhas, já diz o que vem. */
+      : r.kind === 'ajuda'    ? `<div class="aj"><span>${r.rot || 'Gás<br>Nobre'}</span></div>`
       : r.kind === 'sphere'
         ? (() => {                         /* sem cor explícita, vale a do elemento */
             const c = r.color || EL_COLOR[r.label];
@@ -6176,6 +7104,22 @@ const DESLIZE = {
 const deslizeDe = (a, b) =>
   DESLIZE[Math.min(a, b) + '-' + Math.max(a, b)] || 0;
 
+/* ------------------------------------------------------------
+   PASSAGENS QUE VIRAM COMO CAIXA
+   A virada de cubo marca começo de assunto, e por isso ela costuma ser
+   do SLIDE (virada: 'cube'): entrando ou saindo dele, a cena roda.
+   Mas há passagem que pede a virada sem que nenhum dos dois lados a
+   peça sempre — marcar o slide ali viraria também a passagem seguinte,
+   que não é a que se quer. Esta lista é do PAR, como a de DESLIZE, e
+   vale nos dois sentidos: voltar roda como ir.
+   Índices contam do zero: '3-4' é a passagem do slide 4 para o 5.
+   ------------------------------------------------------------ */
+const CAIXA = {
+  '3-4': true     /* slide 4 -> 5 */
+};
+const caixaDe = (a, b) =>
+  !!CAIXA[Math.min(a, b) + '-' + Math.max(a, b)];
+
 function go(n, instant){
   const to = Math.max(0, Math.min(SLIDES.length - 1, n));
   const from = current;
@@ -6192,6 +7136,8 @@ function go(n, instant){
   sobeDoMergulho(slides[from]);
   current = to;
   slides.forEach((el, i) => el.classList.toggle('is-active', i === to));
+  ligaHero();                                /* a nuvem da capa só ferve na capa */
+  ligaAmpola();                              /* e o gás da ampola, no slide dela */
 
   if (animate){
     const dir  = to > from ? 'next' : 'prev';
@@ -6199,7 +7145,7 @@ function go(n, instant){
        de assunto: vale para o slide 1 e para todo slide que peça
        virada 'cube', entrando ou saindo dele. */
     const emCaixa = i => i === 0 || (SLIDES[i] && SLIDES[i].virada === 'cube');
-    const cube = emCaixa(from) || emCaixa(to);
+    const cube = caixaDe(from, to) || emCaixa(from) || emCaixa(to);
     const kind = cube ? 'cube' : 'desl';       /* os dois seguem o sentido */
     /* Passagens que pedem outro tempo — ver DESLIZE. Vale nos dois
        sentidos, e o relógio que limpa a animação segue o mesmo número:
@@ -6254,6 +7200,14 @@ const G3 = {
   lupaG: null, giro: 0,
   modo: 'pedra', celOff: [0, 0, 0], celC: [0, 0, 0], cantos: [], slide: null,
   volta: 0, pulso: 0, drama: 0, voo: 0, distAlvo: 0, celQ: null,
+  /* O quanto a célula foi tirada de casa PELA MÃO. Enquanto ela girava
+     junto com o retículo, isso era o mesmo que o comprimento de celOff e
+     não precisava ser guardado. Agora não é: girar o retículo reescreve
+     celOff para a célula não sair do lugar na tela, e esse comprimento
+     muda sozinho. Se o encolhimento continuasse a ler dali, a célula
+     cresceria e minguaria enquanto o retículo gira — que é justamente o
+     laço que se quer cortar. */
+  celD: 0,
   agita: 0, funde: 0, fundeAlvo: 0, t9: 0, cliva: 0, clivaAlvo: 0, dissolve: 0
 };
 
@@ -6544,32 +7498,35 @@ const CPK = {
      Cl- 181pm -> 21   O2- 140pm -> 16   Na+ 102pm -> 12   Mg2+ 72pm -> 8  */
 const REDES = {
   /* sal-gema: 1:1, cada íon cercado por seis do outro */
+  /* O SÍMBOLO de cada íon. A cor e o raio bastavam enquanto ele era só
+     uma esfera no cristal; arrancado, ele vira o átomo de Rutherford do
+     elemento, e para desenhar camadas é preciso saber QUE elemento é. */
   nacl: { forma: 'salgema',
-          anion:  { cor: CPK.Cl, raio: 21 },
-          cation: { cor: CPK.Na, raio: 12 } },
+          anion:  { sim: 'Cl', cor: CPK.Cl, raio: 21 },
+          cation: { sim: 'Na', cor: CPK.Na, raio: 12 } },
   mgo:  { forma: 'salgema',
-          anion:  { cor: CPK.O,  raio: 16 },
-          cation: { cor: CPK.Mg, raio:  8 } },
+          anion:  { sim: 'O',  cor: CPK.O,  raio: 16 },
+          cation: { sim: 'Mg', cor: CPK.Mg, raio:  8 } },
   /* antifluorita: 2:1. O óxido de sódio NÃO é sal-gema — os oxigênios
      formam um cubo de faces centradas e os sódios ocupam TODOS os oito
      buracos tetraédricos, então há dois cátions para cada ânion. */
   na2o: { forma: 'antifluorita',
-          anion:  { cor: CPK.O,  raio: 16 },
-          cation: { cor: CPK.Na, raio: 12 } },
+          anion:  { sim: 'O',  cor: CPK.O,  raio: 16 },
+          cation: { sim: 'Na', cor: CPK.Na, raio: 12 } },
   /* camadas (tipo CdCl2): 1:2. O cloreto de magnésio não é sal-gema nem
      antifluorita — ele se arruma em lamelas Cl–Mg–Cl empilhadas, com uma
      folga entre elas. Cada Mg fica no centro de um octaedro de seis Cl,
      e cada Cl toca três Mg, o que dá dois cloretos por magnésio. */
   mgcl2:{ forma: 'camadas',
-          anion:  { cor: CPK.Cl, raio: 21 },
-          cation: { cor: CPK.Mg, raio:  8 } },
+          anion:  { sim: 'Cl', cor: CPK.Cl, raio: 21 },
+          cation: { sim: 'Mg', cor: CPK.Mg, raio:  8 } },
   /* corindo: 2:3. Os oxigênios se empilham em hexagonal compacta e os
      alumínios ocupam DOIS TERÇOS dos buracos octaédricos — o terço vazio
      muda de lugar a cada camada. É essa lacuna ordenada que dá a
      proporção Al2O3, e é o que faz o corindo (rubi, safira) tão duro. */
   al2o3:{ forma: 'corindo',
-          anion:  { cor: CPK.O,  raio: 16 },
-          cation: { cor: CPK.Al, raio:  6 } }
+          anion:  { sim: 'O',  cor: CPK.O,  raio: 16 },
+          cation: { sim: 'Al', cor: CPK.Al, raio:  6 } }
 };
 
 /* Onde cada íon vai parar quando o retículo desaba, e a fase própria do
@@ -6783,8 +7740,9 @@ function iniciaG3(canvas){
 
 function montaCena(modo){
   const c = REDES[modo] ? cenaRede(modo) : cenaPedra();
+  limpaRuths();                            /* a cena anterior sai inteira */
   G3.atomos = c.at; G3.hastes = c.lig; G3.modo = modo;
-  G3.celOff = [0, 0, 0];
+  G3.celOff = [0, 0, 0]; G3.celD = 0;
   G3.cantos = c.cantos || [];
   G3.celC = [0, 0, 0];
   G3.volta = 0; G3.pulso = 0; G3.drama = 0;
@@ -6900,7 +7858,7 @@ function desenhaG3(canvas){
   const c5 = Math.min(1, cl - 4);
   const off  = G3.celOff;
   const dist = Math.hypot(off[0], off[1], off[2]);
-  const enc  = 1 - (1 - CEL_ESC) * Math.min(1, dist / CEL_MAX);
+  const enc  = encAtual();   /* a mesma conta de mundoDoAtomo, num lugar só */
   const cC   = G3.celC;
   const pos = G3.atomos.map(a => {
     const u = Math.max(0, Math.min(1, (G3.t - a.atraso) / (1 - a.atraso)));
@@ -7026,6 +7984,9 @@ function desenhaG3(canvas){
   usa(ESF);
   gl.uniform1f(uEsp, 0.85);
   G3.atomos.forEach((a, i) => {
+    /* quem virou átomo de Rutherford é desenhado em DOM, e não aqui:
+       duas coisas no mesmo lugar seriam uma esfera dentro da outra */
+    if (a.ruth) return;
     /* clarao curto ao arrancar e ao reencaixar */
     const fx = a.fx || 0;
     const b = 1 + 2.0 * fx + (a.cel ? 1.2 * G3.pulso + 1.6 * G3.drama : 0);
@@ -7127,14 +8088,19 @@ function lacoG3(canvas){
     }
     /* a celula volta sozinha ao encaixe, e o clarao decai depois */
     if (G3.volta){
+      /* Voando de volta, ela também não leva ninguém a reboque: o átomo
+         que já foi arrancado fica onde está, e vê a célula encaixar. */
+      semMexerNosSoltos(() => {
       for (let e = 0; e < 3; e++) G3.celOff[e] *= 0.74;
+      G3.celD = celFora();               /* voltando, ela cresce de novo */
       /* o giro próprio também se desfaz: ela tem que reencaixar alinhada */
       if (G3.celQ){
         G3.celQ = qNorm([ G3.celQ[0] + (1 - G3.celQ[0]) * 0.26,
                           G3.celQ[1] * 0.74, G3.celQ[2] * 0.74, G3.celQ[3] * 0.74 ]);
       }
+      });
       if (celFora() < 1.5){
-        G3.celOff = [0, 0, 0]; G3.celQ = null; G3.volta = 0; G3.pulso = 1;
+        G3.celOff = [0, 0, 0]; G3.celD = 0; G3.celQ = null; G3.volta = 0; G3.pulso = 1;
       }
     }
     /* atomos a caminho de volta para a celula */
@@ -7143,12 +8109,14 @@ function lacoG3(canvas){
       for (let e = 0; e < 3; e++) a.off[e] *= 0.72;
       if (Math.hypot(a.off[0], a.off[1], a.off[2]) < 1.5){
         a.off = null; a.solto = false; a.voltando = false; a.fx = 1;
+        tiraRuth(a);               /* de volta ao cristal, torna a ser íon */
       }
     });
     G3.atomos.forEach(a => { if (a.fx) a.fx = a.fx > 0.004 ? a.fx * 0.88 : 0; });
     G3.pulso = G3.pulso > 0.004 ? G3.pulso * 0.86 : 0;
     G3.drama = G3.drama > 0.004 ? G3.drama * 0.89 : 0;
     desenhaG3(canvas);
+    poeRuths();                  /* os átomos seguem os íons deles */
     const parado = Math.abs(G3.alvo - G3.t) < 0.002;
     if (parado && G3.alvo === 0){
       G3.t = 0; desenhaG3(canvas); G3.laco = 0; return;
@@ -7236,6 +8204,7 @@ function fechaRede(it){
   slide.classList.remove('quantum-on', 'rede-on', 'rede-livre');
   /* a lente vai embora e leva com ela a medida e o giro em curso: sem
      isto, reabrir no meio de uma virada retomaria o recorte estreito */
+  limpaRuths();          /* os átomos arrancados não sobrevivem à saída */
   G3.lupa = null; G3.lupaCv = null; G3.lupaClip = '';
   G3.lupaG = null; G3.giro = 0; G3.lupaPara = 0;
   const rot = slide.querySelector('.cel-rot');
@@ -7246,14 +8215,83 @@ function fechaRede(it){
   /* quem estiver mergulhando termina de voltar sozinho, pela animação */
   slide.querySelectorAll('.caco:not(.volta-grao)')
        .forEach(c => { c.classList.remove('mergulha'); c.style.opacity = ''; });
-  G3.alvo = 0; G3.celOff = [0, 0, 0]; G3.volta = 0; G3.pulso = 0;
+  G3.alvo = 0; G3.celOff = [0, 0, 0]; G3.celD = 0; G3.volta = 0; G3.pulso = 0;
   G3.drama = 0; G3.celQ = null;
   const cv = slide.querySelector('.q3d');
   if (cv && iniciaG3(cv)) lacoG3(cv);
 }
+/* ------------------------------------------------------------
+   O QUE JÁ SE SOLTOU NÃO GIRA COM A REDE
+   Tudo aqui é desenhado por UMA câmera, e girar a câmera gira o
+   mundo inteiro. Enquanto a célula é parte do retículo, isso é o
+   certo: ela é o retículo. Depois de arrancada, não — arrancar é
+   justamente tirar do conjunto, e uma célula que continua girando
+   com ele não foi arrancada, foi só afastada. O mesmo vale para o
+   átomo tirado da célula.
+
+   Como não há uma segunda câmera, o que se faz é o inverso: a
+   cada giro da rede, o que está solto é REPOSTO no lugar onde
+   estava na TELA. As contas abaixo leem a posição na base da
+   câmera de antes e a reescrevem na base de agora — o mundo gira
+   por baixo, e o que se soltou fica onde a mão o deixou.
+   ------------------------------------------------------------ */
+function baseCam(){
+  const c = camG3();
+  const L = Math.hypot(c.olho[0], c.olho[1], c.olho[2]) || 1;
+  return { dir: c.dir, cim: c.cim,
+           olh: [c.olho[0] / L, c.olho[1] / L, c.olho[2] / L] };
+}
+/* o mesmo ponto da tela, na base nova */
+function fixaNaTela(p, a, b){
+  const u = p[0]*a.dir[0] + p[1]*a.dir[1] + p[2]*a.dir[2];
+  const v = p[0]*a.cim[0] + p[1]*a.cim[1] + p[2]*a.cim[2];
+  const w = p[0]*a.olh[0] + p[1]*a.olh[1] + p[2]*a.olh[2];
+  return [0,1,2].map(e => u*b.dir[e] + v*b.cim[e] + w*b.olh[e]);
+}
+/* A MESMA troca de base, escrita como quatérnio: a posição da célula é
+   reposta pelo cálculo de cima, e a ORIENTAÇÃO dela tem de acompanhar —
+   senão ela ficaria parada no lugar mas rodopiando sobre si mesma. */
+function quatDaBase(a, b){
+  const M = [];                            /* M[e][j], por linha */
+  for (let e = 0; e < 3; e++)
+    M.push([ a.dir[0]*b.dir[e] + a.cim[0]*b.cim[e] + a.olh[0]*b.olh[e],
+             a.dir[1]*b.dir[e] + a.cim[1]*b.cim[e] + a.olh[1]*b.olh[e],
+             a.dir[2]*b.dir[e] + a.cim[2]*b.cim[e] + a.olh[2]*b.olh[e] ]);
+  const tr = M[0][0] + M[1][1] + M[2][2];
+  /* o giro de um quadro é sempre pequeno, então o traço nunca chega
+     perto de -1: o caso geral não precisa das outras três raízes */
+  if (tr <= -0.999) return Q0;
+  const s = Math.sqrt(tr + 1) * 2;
+  return qNorm([ s / 4,
+                 (M[2][1] - M[1][2]) / s,
+                 (M[0][2] - M[2][0]) / s,
+                 (M[1][0] - M[0][1]) / s ]);
+}
+
 function orbitaG3(dx, dy){
+  const antes = baseCam();
   G3.az -= dx * 0.006;
   G3.el = Math.max(-1.45, Math.min(1.45, G3.el + dy * 0.006));
+  soltosNaTela(antes);
+}
+
+/* Repõe na tela o que já não pertence ao retículo: a célula arrancada e
+   os átomos tirados dela. Chamada depois de QUALQUER giro da câmera. */
+function soltosNaTela(antes){
+  const agora = baseCam();
+  /* a célula, só depois de sair do lugar dela na rede */
+  if (celFora() > 0.01){
+    /* a posição no mundo é celC + celOff, e celC gira com a rede: o que
+       se corrige é o celOff, para a SOMA das duas ficar parada na tela */
+    const p = [0,1,2].map(e => G3.celC[e] + G3.celOff[e]);
+    const q = fixaNaTela(p, antes, agora);
+    G3.celOff = [0,1,2].map(e => q[e] - G3.celC[e]);
+    G3.celQ = qNorm(qMul(quatDaBase(antes, agora), G3.celQ || Q0));
+  }
+  /* e cada átomo que já foi arrancado */
+  (G3.atomos || []).forEach(a => {
+    if (a.solto && a.off) a.off = fixaNaTela(a.off, antes, agora);
+  });
 }
 /* posicao da camera e seus eixos, do jeito que desenhaG3 os monta */
 function camG3(){
@@ -7307,7 +8345,13 @@ function ap3(M, v){
            M[6]*v[0] + M[7]*v[1] + M[8]*v[2] ];
 }
 const Q0 = [1, 0, 0, 0];
-function celGirada(){ return G3.celQ && G3.celQ[0] < 0.99999; }
+/* A célula tem giro próprio? A folga aqui era de 0,99999 — larga o
+   bastante para uma volta de meio grau ser tratada como volta nenhuma.
+   Isso não fazia mal enquanto o giro só crescia; agora o giro do retículo
+   é dobrado dentro de celQ a cada quadro, e uma sobra descartada num
+   quadro e aplicada no seguinte vira um pulinho da célula na tela.
+   Apertada assim, o que se despreza fica abaixo de um décimo de pixel. */
+function celGirada(){ return G3.celQ && G3.celQ[0] < 0.9999999; }
 /* de onde o íon da célula sai depois de encolher e girar */
 function desloCel(p, enc){
   const cC = G3.celC;
@@ -7315,17 +8359,44 @@ function desloCel(p, enc){
   if (celGirada()) d = ap3(qMat(G3.celQ), d);
   return d;
 }
+/* ------------------------------------------------------------
+   O ÁTOMO ARRANCADO NÃO ANDA COM A CÉLULA
+   O off de um átomo solto é medido a partir da vaga dele DENTRO da
+   célula — e essa vaga anda quando a célula é arrastada e gira quando
+   ela gira. Guardar assim é o que permite devolvê-lo depois (basta o
+   off encolher até zero e ele acha o lugar), mas faz o átomo ser
+   rebocado por uma célula da qual ele já saiu.
+
+   Então o off é corrigido: mede-se onde o átomo está no mundo, deixa-se
+   a célula fazer o que tem de fazer, e o off recebe de volta a diferença.
+   A vaga se move, o átomo não. Ele continua sabendo o caminho de casa
+   sem ser arrastado por ela.
+   ------------------------------------------------------------ */
+function semMexerNosSoltos(muda){
+  /* menos os que estao voltando: esses querem a vaga, e a vaga esta na
+     celula — se ficassem parados, nunca a alcancariam */
+  const soltos = (G3.atomos || []).filter(a => a.solto && a.off && !a.voltando);
+  const antes = soltos.map(mundoDoAtomo);
+  muda();
+  soltos.forEach((a, i) => {
+    const dep = mundoDoAtomo(a);
+    for (let e = 0; e < 3; e++) a.off[e] += antes[i][e] - dep[e];
+  });
+}
+
 /* arrastar em cima da célula solta gira só ela */
 function giraCelula(dx, dy){
-  const c = camG3();
-  const q = qMul(qEixo(c.dir, dy * 0.008),
-                 qEixo(c.cim, dx * 0.008));
-  G3.celQ = qNorm(qMul(q, G3.celQ || Q0));
+  semMexerNosSoltos(() => {
+    const c = camG3();
+    const q = qMul(qEixo(c.dir, dy * 0.008),
+                   qEixo(c.cim, dx * 0.008));
+    G3.celQ = qNorm(qMul(q, G3.celQ || Q0));
+  });
 }
 
 /* quanto a celula esta encolhida agora */
 function encAtual(){
-  return 1 - (1 - CEL_ESC) * Math.min(1, celFora() / CEL_MAX);
+  return 1 - (1 - CEL_ESC) * Math.min(1, G3.celD / CEL_MAX);
 }
 /* onde um atomo esta no mundo neste instante */
 function mundoDoAtomo(a){
@@ -7380,14 +8451,99 @@ function celulaNoPonto(x, y){
 }
 /* arranca a celula da rede: as hastes rompem e a cena sacode */
 function quebraCelula(){
-  G3.celOff = [0, 0, 0];
+  G3.celOff = [0, 0, 0]; G3.celD = 0;
   G3.volta = 0; G3.pulso = 0;
   G3.drama = 1;
 }
+/* ============================================================
+   O ÍON ARRANCADO VIRA ÁTOMO
+   Dentro do retículo ele é um íon, e é assim que tem de ser
+   desenhado: o que segura o cristal é a carga. Sozinho na mão,
+   porém, a pergunta muda — de ONDE veio essa carga? Aí ele volta a
+   ser o átomo NEUTRO de que saiu, com o núcleo e as camadas à
+   vista, e a ligação iônica deixa de ser uma frase: arranca-se um
+   elétron de um átomo, leva-se ao outro, e os dois fecham o octeto
+   porque a mão os fez fechar.
+
+   O desenho e as mecânicas são os do slide 7, de propósito: quem
+   mexeu lá reconhece a coisa aqui. A diferença é que lá havia um
+   átomo e um destino, e aqui há DOIS átomos que trocam entre si.
+   ============================================================ */
+const NOBRES_PERTO = [['He',2],['Ne',10],['Ar',18],['Kr',36],['Xe',54],['Rn',86]];
+/* O gás nobre mais próximo: é para a configuração DELE que o átomo
+   caminha, e é a diferença de número atômico que diz quantos elétrons
+   ele tem de perder ou ganhar. O sódio (11) mira o neônio (10) e perde
+   um; o cloro (17) mira o argônio (18) e ganha um. */
+function nobrePerto(sim){
+  const z = Z_EL[sim] || 0;
+  return NOBRES_PERTO.reduce((a, b) =>
+    Math.abs(b[1] - z) < Math.abs(a[1] - z) ? b : a)[0];
+}
+/* que elemento é este íon: quem leva carga negativa é o ânion da rede */
+function simDoIon(a){
+  const R = REDES[G3.modo];
+  if (!R) return null;
+  const q = (a.carga || 0) < 0 ? R.anion : R.cation;
+  return (q && q.sim) || null;
+}
+/* Onde a esfera está dentro da linha. Medido, e não suposto: a ficha do
+   elemento muda de largura quando a carga aparece ao lado do símbolo. */
+function medeRuth(el){
+  const b = el.querySelector('.gas-ball');
+  if (!b) return;
+  el.style.setProperty('--dx',
+    (b.offsetLeft + b.offsetWidth  / 2 - el.offsetWidth  / 2).toFixed(1) + 'px');
+  el.style.setProperty('--dy',
+    (b.offsetTop  + b.offsetHeight / 2 - el.offsetHeight / 2).toFixed(1) + 'px');
+  el._medido = el.dataset.delta;
+}
+/* o átomo nasce NEUTRO: o íon tinha carga porque estava no cristal, e
+   fora dele a conta recomeça do elemento */
+function criaRuth(slide, a){
+  const sim = simDoIon(a);
+  const q = slide && slide.querySelector('.quantum');
+  if (!sim || !q || a.ruthEl) return;
+  const el = document.createElement('div');
+  /* cátion ou ânion: é isso que decide de que lado o nome dele fica */
+  el.className = 'q-ruth gas ' + ((a.carga || 0) < 0 ? 'ani' : 'cat');
+  el.dataset.eatom = 'gas';
+  el.dataset.sim   = sim;
+  el.dataset.delta = 0;
+  /* quantos faltam (positivo) ou sobram (negativo) para o octeto */
+  el.dataset.alvo  = ((GASES[nobrePerto(sim)] || {}).z || 0) - (Z_EL[sim] || 0);
+  /* do tamanho do átomo do slide 7: no retículo ele é uma bolinha de
+     poucos pixels, e não há como contar elétrons numa bolinha */
+  el.style.setProperty('--base', 203);
+  el.style.setProperty('--k', 1);
+  el.innerHTML = GAS(sim, { dentro: true, conta: true });
+  q.appendChild(el);
+  el._at = a; a.ruthEl = el; a.ruth = true;
+  marcaEstado(el);                       /* nasce fora do octeto, e treme */
+  medeRuth(el);
+}
+/* devolvido ao retículo, ele torna a ser íon: o desenho sai de cena */
+function tiraRuth(a){
+  if (a.ruthEl) a.ruthEl.remove();
+  a.ruthEl = null; a.ruth = false;
+}
+function limpaRuths(){ (G3.atomos || []).forEach(tiraRuth); }
+/* a cada quadro, cada átomo é reposto onde o íon dele está no espaço */
+function poeRuths(){
+  (G3.atomos || []).forEach(a => {
+    const el = a.ruthEl;
+    if (!el) return;
+    const t = paraTela(mundoDoAtomo(a));
+    el.style.left = t.x.toFixed(1) + 'px';
+    el.style.top  = t.y.toFixed(1) + 'px';
+    if (el._medido !== el.dataset.delta) medeRuth(el);
+  });
+}
+
 /* arranca um atomo da celula */
 function arrancaAtomo(a){
   a.solto = true; a.voltando = false; a.off = [0, 0, 0]; a.fx = 1;
   if (G3.drama < 0.55) G3.drama = 0.55;
+  criaRuth(G3.slide, a);
 }
 /* devolve o atomo ao lugar dele na celula */
 function devolveAtomo(a){ a.voltando = true; a.fx = 1; }
@@ -7406,7 +8562,8 @@ function moveAtomo(a, dx, dy){
 }
 /* tudo de volta ao lugar dentro do reticulo */
 function reiniciaRede(slide){
-  G3.celOff = [0, 0, 0];
+  limpaRuths();
+  G3.celOff = [0, 0, 0]; G3.celD = 0;
   G3.volta = 0; G3.pulso = 0; G3.drama = 0; G3.celQ = null;
   G3.atomos.forEach(a => {
     a.cel = false; a.solto = false; a.voltando = false; a.off = null; a.fx = 0;
@@ -7431,7 +8588,10 @@ function puxaCelula(dx, dy){
   const prof = [0,1,2].reduce((s, e) => s + (p[e] - c.olho[e]) * (-c.olho[e] / L), 0);
   const ppw = 2 * Math.max(60, prof) * Math.tan(0.85 / 2) / 720;
   const ex = (dx / k) * ppw, ey = -(dy / k) * ppw;
-  for (let e = 0; e < 3; e++) G3.celOff[e] += c.dir[e] * ex + c.cim[e] * ey;
+  semMexerNosSoltos(() => {
+    for (let e = 0; e < 3; e++) G3.celOff[e] += c.dir[e] * ex + c.cim[e] * ey;
+    G3.celD = celFora();      /* levada pela mão: aqui o encolhimento conta */
+  });
 }
 function celFora(){ return Math.hypot(G3.celOff[0], G3.celOff[1], G3.celOff[2]); }
 const ENCAIXE = 70;        /* perto assim, ela se encaixa de volta na rede */
@@ -9651,7 +10811,7 @@ function duploNoGrao(caco){
 const CAM_MS   = 653;                      /* o avanço da câmera */
 const DASH_MS  = 597;                      /* o grão engolindo a tela */
 const FADE_MS  = 340;                      /* o grão aparecendo ou se apagando */
-const CHIA_MS  = 430;                      /* quanto o chiado dura */
+const CHIA_MS  = 215;                      /* quanto o chiado dura */
 const CHIA_TAPA = 90;                      /* quando ele já é parede opaca */
 const G3_RECUA = 260;                      /* o recuo da câmera dentro do retículo */
 
@@ -10482,6 +11642,19 @@ function marcaEstado(at){
   if (!falta) alvo.classList.add('certo');
   /* um elétron de distância já agita; quatro ou mais é o grau máximo */
   else alvo.classList.add('inst' + Math.min(4, falta));
+
+  /* O CLARÃO SAI UMA VEZ, AO FECHAR O OCTETO.
+     É a energia que sobrava indo embora, e isso acontece num instante —
+     piscar sem parar faria dele mais um enfeite da tela. Guardar o
+     estado anterior no próprio elemento é o que distingue "acabou de
+     estabilizar" de "continua estável": sem isso ele estouraria a cada
+     redesenho, e o átomo é redesenhado a cada elétron.
+     Voltando a ficar instável, a marca se apaga — para que estabilizar
+     de novo volte a valer um clarão. */
+  const estavel = falta ? 0 : 1;
+  if (estavel && !(+alvo.dataset.estavel || 0)) repete(bolaDo(at), 'solta-energia');
+  alvo.dataset.estavel = estavel;
+
   poeCarga(at);
 }
 
@@ -10493,9 +11666,14 @@ function marcaEstado(at){
    Roda dentro de marcaEstado porque mudaEletrons reescreve o innerHTML
    do átomo a cada elétron: o selo precisa ser refeito junto. */
 function poeCarga(at){
+  /* Onde a carga se escreve. No átomo em camadas ela vai sobre a FICHA,
+     à esquerda: é ali que está o símbolo, e Na⁺ se escreve no símbolo, e
+     não no desenho da eletrosfera. Na esfera cheia continua na quina de
+     cima dela, que é onde sempre esteve. */
   const casa = at.dataset.eatom === 'lewis'
     ? at.querySelector('.lw')                /* o símbolo, não a moldura */
-    : at.querySelector('.gas-ball');
+    : (at.querySelector('.gas-ball.eletro') ? at.querySelector('.gas-id') : null)
+      || at.querySelector('.gas-ball');
   if (!casa) return;
   const t = textoCarga(+at.dataset.delta || 0);
   let selo = casa.querySelector(':scope > .carga');
@@ -10556,25 +11734,73 @@ function mudaEletrons(at, d){
   const u = cams[cams.length - 1];
   if (u) u.classList.add('mudou');
 
+  /* A FONTE RESPONDE ao que acontece com o átomo. Tirar um elétron dele
+     ou entregar-lhe um são as duas metades do mesmo trânsito, e o
+     trânsito começa e termina aqui: a ampola marcar os dois é o que
+     amarra as duas pontas do gesto. */
+  pulsaAmpola(0.55);
   marcaEstado(at);
   const certo = noAlvo(at, d);
-  if (slide) slide.classList.toggle('acertou', certo);
-  /* a festa é só na chegada, não a cada elétron depois dela */
+  /* A marca de acerto é do SLIDE, e por isso só vale onde há um átomo só.
+     No retículo são dois, cada um com o seu octeto: um deles fechar não
+     pode acender o estilo da cena inteira. */
+  if (slide && !at.classList.contains('q-ruth'))
+    slide.classList.toggle('acertou', certo);
+  /* A festa é só na chegada, não a cada elétron depois dela — e sai de
+     dentro da ELETROSFERA, não do meio do item. O item é a linha inteira,
+     com a ficha do elemento à esquerda e a distribuição à direita: o meio
+     dele cai no vão entre as três coisas, e o estouro nascia ao lado do
+     átomo em vez de dentro dele. Quem tem centro aqui é a bola. */
   if (certo && !antes && slide){
-    const p = noPalco(at);
+    const p = noPalco(bolaDo(at) || at);
     confete(slide, p.x, p.y);
   }
+}
+
+/* O dedo caiu dentro do núcleo?
+   Mede a distância até o centro dele, e não o alvo do toque: o núcleo é
+   um punhado de bolinhas com vãos entre elas, e um toque num vão pegaria
+   a bola por trás como se fosse eletrosfera. O que conta é o RAIO. */
+function noNucleo(e){
+  const nuc = e.target.closest('[data-eatom]');
+  const bola = nuc && nuc.querySelector('.gas-ball.eletro');
+  if (!bola) return false;                 /* átomo sem camadas: como era */
+  const r = bola.getBoundingClientRect();
+  const d = Math.hypot(e.clientX - (r.left + r.width / 2),
+                       e.clientY - (r.top  + r.height / 2));
+  /* uma folga por fora da casca, para o dedo não arrancar elétron
+     raspando a borda do núcleo */
+  return d <= r.width * (RAIO_NUC + 0.02);
 }
 
 deck.addEventListener('pointerdown', (e) => {
   const slide = e.target.closest('.slide');
   if (!slide || segurandoE) return;
-  const at = slide.querySelector('.reveal-item[data-eatom]');
+  /* Ctrl é o gesto de LEVAR, não o de mexer com elétrons: no mundo
+     quântico ele arrasta o átomo inteiro pela tela. */
+  if (e.ctrlKey || e.metaKey) return;
+  /* O ÁTOMO DO GESTO é o que está debaixo do dedo, quando há mais de um
+     — o caso dos dois íons arrancados do retículo, um de frente para o
+     outro. Onde há um só, como no slide 7, ele continua sendo o do
+     slide, e nada muda. */
+  const at = e.target.closest('[data-eatom]')
+          || slide.querySelector('.reveal-item[data-eatom]');
   if (!at || at.dataset.alvo === undefined || at.hidden) return;
 
-  /* dedo na bola: puxar arranca um elétron de dentro dela */
-  if (e.target.closest('.reveal-item[data-eatom] .gas-ball, .reveal-item[data-eatom] .lw')){
-    segurandoE = { id: e.pointerId, slide, at, modo: 'tira', el: null,
+  /* CADA PARTE DO ÁTOMO RESPONDE PELO QUE ELA É.
+     Na ELETROSFERA, puxar arranca um elétron: é de lá que eles saem.
+     No NÚCLEO, não — elétron não sai de núcleo, e deixar que saísse
+     seria ensinar errado com o próprio gesto. Mas o núcleo também não
+     pode ser um lugar morto: ele é o que diz QUE elemento é aquele, e
+     por isso é dele que se chama a distribuição eletrônica. Um toque
+     ali abre a ficha; outro a recolhe.
+     Os dois começam o mesmo gesto e mudam só no modo: 'tira' pode
+     arrancar, 'nuc' nunca — no arrasto ele não faz nada, e só o toque
+     seco tem efeito. */
+  if (e.target.closest('[data-eatom] .gas-ball, [data-eatom] .lw')){
+    segurandoE = { id: e.pointerId, slide, at, el: null,
+                   modo: noNucleo(e) ? 'nuc' : 'tira',
+                   ruth: at._at || null,      /* íon do retículo, se for um */
                    x: e.clientX, y: e.clientY };
     e.preventDefault();
     return;
@@ -10585,19 +11811,23 @@ deck.addEventListener('pointerdown', (e) => {
      toda a tela: fora só o que tem função própria no toque. */
   /* o átomo é o destino, então não é lugar de fazer nascer elétron:
      se fosse, soltar sem sair do lugar já o entregaria sem querer */
-  if (e.target.closest('.tp,'
-                     + ' .reveal-item[data-eatom],'
-                     + ' .reveal-item[data-id="vizinho"], .reveal-item.cube,'
-                     + ' .q-board, button')) return;
+  /* O ELÉTRON SAI DA AMPOLA, E DE MAIS LUGAR NENHUM.
+     Ele nascia de um toque demorado em qualquer vão vazio da tela: o
+     gesto funcionava, mas não dizia de onde vinha a carga — e um elétron
+     que se inventa apertando o dedo no escuro ensina o contrário do que
+     esta aula tem a dizer. Agora ele tem procedência, e ela se vê. */
+  const fonte = e.target.closest('.reveal-item.ampola');
+  if (!fonte || fonte.hidden) return;
   if ((+at.dataset.delta || 0) >= MAX_E) return;        /* no teto de entrada */
-  const p = pontoPalco(e);
+  /* Nasce na AMPOLA, e não sob o dedo. Ele vem de lá, e a distância até
+     o átomo é justamente o que faz do gesto um transporte. */
+  /* o VIDRO, e não a caixa do item: a caixa inclui a label por cima,
+     e o elétron nasceria acima do gás em vez de dentro dele */
+  const c = noPalco(fonte.querySelector('.z-stage') || fonte);
   segurandoE = { id: e.pointerId, slide, at, modo: 'traz', el: null,
-                 x: e.clientX, y: e.clientY, px: p.x, py: p.y };
-  segurandoE.t = setTimeout(() => {
-    const g = segurandoE;
-    /* nasce onde o dedo está agora, não onde ele encostou */
-    if (g && g.modo === 'traz' && !g.el) g.el = criaEletron(g.slide, g.px, g.py);
-  }, 260);
+                 x: e.clientX, y: e.clientY };
+  segurandoE.el = criaEletron(slide, c.x, c.y);
+  pulsaAmpola(1);                            /* saiu um: a fonte estremece */
   /* com a captura, o arrasto chega até nós mesmo passando por cima de
      outros elementos */
   if (e.target.setPointerCapture){
@@ -10641,6 +11871,20 @@ document.addEventListener('pointermove', (e) => {
   g.el.style.top  = p.y.toFixed(0) + 'px';
 });
 
+/* Larga o elétron que está na mão sem entregá-lo a ninguém. O que já
+   tinha saído do átomo VOLTA para ele: o gesto não chegou ao fim, e um
+   elétron não pode sumir no caminho só porque a mão mudou de ideia. */
+function cancelaEletron(){
+  const g = segurandoE;
+  if (!g) return;
+  segurandoE = null;
+  clearTimeout(g.t);
+  if (g.el){
+    if (g.tirou) mudaEletrons(g.at, (+g.at.dataset.delta || 0) + 1);
+    g.el.remove();
+  }
+}
+
 function soltaEletron(e){
   if (!segurandoE || (e && e.pointerId !== segurandoE.id)) return;
   const g = segurandoE;
@@ -10650,7 +11894,11 @@ function soltaEletron(e){
     /* Clique seco na bola, sem puxar nada: mostra ou esconde a
        distribuição. Puxar é o outro gesto, e ele já teria criado o
        elétron a esta altura. */
-    if (g.modo === 'tira'){
+    /* No retículo, não: ali o átomo é uma peça da cena, e um toque que
+       não puxou nada tem de não deixar rastro. A ficha da distribuição é
+       do slide 7, onde ela é o assunto. */
+    if ((g.modo === 'tira' || g.modo === 'nuc')
+        && !g.at.classList.contains('q-ruth')){
       g.at.classList.toggle('aberto');
       /* No slide da tabela, o toque seco no símbolo de Lewis é o que
          chama a configuração eletrônica do elemento — e o toque seguinte
@@ -10669,18 +11917,29 @@ function soltaEletron(e){
     }
     return;
   }
-  const d = +g.at.dataset.delta || 0;
+  /* PARA ONDE O ELÉTRON VAI.
+     No slide 7 há um átomo só, e soltá-lo em cima dele o devolve. No
+     retículo há DOIS, um de frente para o outro, e é justamente isso que
+     a cena tem a mostrar: o elétron que sai de um ENTRA NO OUTRO. Então
+     o destino é procurado entre todos os átomos do slide, e não
+     presumido como sendo aquele de onde ele saiu. É esta linha que
+     transforma "arranquei um elétron" em ligação iônica. */
+  const destino = !e ? null
+    : ([...g.slide.querySelectorAll('[data-eatom]')].find(at =>
+         !at.hidden && at.dataset.alvo !== undefined && sobreAtomo(at, e))
+       || (sobreAtomo(g.at, e) ? g.at : null));
+  const d = destino ? (+destino.dataset.delta || 0) : 0;
   /* além do limite do sandbox, o desenho de Lewis só comporta 8 */
-  const cabe = d + 1 <= MAX_E
-    && (g.at.dataset.eatom !== 'lewis' || (+g.at.dataset.val || 0) + d + 1 <= 8);
-  const naBola = e && sobreAtomo(g.at, e) && cabe;
+  const cabe = !!destino && d + 1 <= MAX_E
+    && (destino.dataset.eatom !== 'lewis' || (+destino.dataset.val || 0) + d + 1 <= 8);
+  const naBola = cabe;
   if (naBola && (g.modo === 'traz' || g.tirou)){
-    ondaNaBola(g.at);                      /* o estouro da incorporação */
-    mudaEletrons(g.at, d + 1);
+    ondaNaBola(destino);                   /* o estouro da incorporação */
+    mudaEletrons(destino, d + 1);
   }
   if (naBola){
     /* mede o caminho que falta até o centro, para ele mergulhar lá */
-    const c = centroBola(g.at);
+    const c = centroBola(destino);
     if (c){
       g.el.style.setProperty('--tx',
         (c.x - parseFloat(g.el.style.left)).toFixed(0) + 'px');
@@ -10869,7 +12128,9 @@ function largaSubnivel(cam){
     setTimeout(() => cam.classList.remove('voltando'), 400);
     return;
   }
-  const p = noPalco(cam);
+  /* o estouro da chegada sai da eletrosfera, e não de onde o dedo largou
+     o subnível: é o átomo que ficou estável, não a mão */
+  const p = noPalco(bolaDo(item) || item || cam);
   cam.classList.add('indo');
   setTimeout(() => {
     cam.classList.remove('indo');
@@ -11396,6 +12657,9 @@ deck.addEventListener('pointerdown', (e) => {
   /* O átomo do octeto é fixo: a bola arranca elétron e o resto da área
      dele serve para fazer nascer um elétron. Nada ali move o átomo. */
   if (e.target.closest('.reveal-item[data-eatom]')) return;
+  /* A ampola, idem: o toque nela é para tirar um elétron, e arrastá-la
+     no mesmo gesto levaria a fonte junto com o que saiu dela. */
+  if (e.target.closest('.reveal-item.ampola')) return;
   let it = e.target.closest(PEGAVEL);
   /* o quadro está atrás do retículo: o canvas recebe o toque por ele */
   if (!it && e.target.classList && e.target.classList.contains('q3d')){
@@ -11598,6 +12862,101 @@ function soltaFam(e){
 document.addEventListener('pointerup', soltaFam);
 document.addEventListener('pointercancel', soltaFam);
 
+/* ------------------------------------------------------------
+   O SÍMBOLO E A CARGA DO ÁTOMO DE RUTHERFORD, À MÃO  (temporário)
+   Mesmo arranjo das peças da face do cubo: arrasta-se com o dedo, o C
+   devolve os números, e depois eles vão para o CSS aqui de cima — aí é
+   só pôr RUTH_MOVEL em false e as duas peças deixam de pegar o dedo.
+
+   O deslocamento é guardado no .q-ruth, e não na peça arrastada: a
+   ficha e a carga são refeitas a cada elétron que entra ou sai, e o que
+   estivesse escrito nelas se perderia no meio do ajuste.
+   ------------------------------------------------------------ */
+const RUTH_MOVEL = true;
+document.body.classList.toggle('ruth-movel', RUTH_MOVEL);
+/* Onde a peça ESTÁ: o valor arrastado, se já houve um, e senão o de
+   origem do CSS. Sem isto o arrasto começava do zero enquanto a peça
+   estava desenhada no lugar de origem, e ela pulava para o dedo no
+   instante em que era pega. É também este número que o painel do C
+   devolve — o que ele diz e o que se vê passam a ser a mesma coisa. */
+function valRuth(cs, nome){
+  const v = (cs.getPropertyValue(nome) || '').trim();
+  return parseFloat(v !== '' ? v : cs.getPropertyValue(nome + '0')) || 0;
+}
+/* AS PEÇAS QUE SE AJUSTAM À MÃO, e onde cada ajuste fica guardado.
+   O ajuste nunca mora na peça arrastada: a ficha e a carga são refeitas a
+   cada elétron que entra ou sai, e o que estivesse escrito nelas se
+   perderia no meio do acerto. Mora no dono — o átomo, ou o próprio
+   contador, que não é refeito. */
+const AJUSTAVEL = '.elem, .q-ruth .gas-id, .q-ruth .gas-id .carga,'
+                + ' .reveal-item.gas .gas-id i, .reveal-item.gas .gas-id';
+function pecaAjuste(alvo){
+  if (!alvo) return null;
+  /* o bloco do número é o mesmo em todo slide: o ajuste vai para a raiz */
+  if (alvo.classList.contains('elem'))
+    return { dono: document.documentElement, x: '--elx', y: '--ely', f: '--elf' };
+  const ruth = alvo.closest('.q-ruth');
+  if (ruth) return alvo.classList.contains('carga')
+    ? { dono: ruth, x: '--cx', y: '--cy', f: null }
+    : { dono: ruth, x: '--sx', y: '--sy', f: null };
+  const gas = alvo.closest('.reveal-item.gas');
+  if (!gas) return null;
+  /* o número atômico anda sozinho; a ficha inteira leva o símbolo junto */
+  return alvo.tagName === 'I'
+    ? { dono: gas, x: '--zx', y: '--zy', f: null }
+    : { dono: gas, x: '--sx', y: '--sy', f: '--sf' };
+}
+
+let arrastaRuth = null;
+deck.addEventListener('pointerdown', (e) => {
+  if (!RUTH_MOVEL || !e.target.closest) return;
+  const peca = e.target.closest(AJUSTAVEL);
+  const p = peca && pecaAjuste(peca);
+  if (!p) return;
+  const cs = getComputedStyle(p.dono);
+  e.preventDefault();
+  arrastaRuth = {
+    peca, p, id: e.pointerId, x: e.clientX, y: e.clientY,
+    ox: valRuth(cs, p.x), oy: valRuth(cs, p.y),
+    k:  fitScale || 1
+  };
+  try { peca.setPointerCapture(e.pointerId); } catch (_){}
+  peca.classList.add('pegando');
+});
+document.addEventListener('pointermove', (e) => {
+  if (!arrastaRuth || e.pointerId !== arrastaRuth.id) return;
+  const a = arrastaRuth;
+  a.p.dono.style.setProperty(a.p.x,
+    (a.ox + (e.clientX - a.x) / a.k).toFixed(1) + 'px');
+  a.p.dono.style.setProperty(a.p.y,
+    (a.oy + (e.clientY - a.y) / a.k).toFixed(1) + 'px');
+});
+/* A RODA REDIMENSIONA a peça que estiver debaixo do ponteiro. Sem Ctrl:
+   com Ctrl quem responde é a pinça do item inteiro, que já existia, e as
+   duas no mesmo gesto brigariam. */
+document.addEventListener('wheel', (e) => {
+  if (!RUTH_MOVEL || e.ctrlKey || e.metaKey || !e.target.closest) return;
+  const p = pecaAjuste(e.target.closest(AJUSTAVEL));
+  if (!p || !p.f) return;
+  e.preventDefault();
+  const f = parseFloat(getComputedStyle(p.dono).getPropertyValue(p.f)) || 1;
+  p.dono.style.setProperty(p.f,
+    Math.max(0.3, Math.min(3, f * (e.deltaY < 0 ? 1.06 : 1 / 1.06))).toFixed(3));
+}, { passive: false });
+function soltaRuth(e){
+  if (!arrastaRuth || (e && e.pointerId !== arrastaRuth.id)) return;
+  arrastaRuth.peca.classList.remove('pegando');
+  arrastaRuth = null;
+}
+/* o valor de origem do redimensionamento é 1, e não 0 como o dos
+   deslocamentos: uma peça sem ajuste está no tamanho dela */
+function fatorAjuste(cs, nome){
+  const v = (cs.getPropertyValue(nome) || '').trim();
+  return v === '' ? 1 : (parseFloat(v) || 1);
+}
+document.addEventListener('pointerup', soltaRuth);
+document.addEventListener('pointercancel', soltaRuth);
+
 /* No retículo, arrastar sobre o fundo puxa a célula unitária para fora;
    ao soltar, ela ganha o rótulo. */
 /* Gestos do reticulo:
@@ -11661,18 +13020,47 @@ deck.addEventListener('pointerdown', (e) => {
   if (e.target.closest('.q-board, .q-reset, .q-refazer, .q-voltar, .q-tit')) return;
   if (sobreQuadro(e)) return;               /* o toque é do quadro, atrás da cena */
 
-  /* segundo dedo: o gesto vira arrasto da rede com pinca */
+  /* SEGUNDO dedo com um elétron na mão, em cima de um átomo: a mão
+     desiste do elétron e passa a LEVAR o átomo. Dois dedos arrastam,
+     aqui como em todo o resto — sem isto o átomo seria o único objeto da
+     cena que um tablet não conseguiria mover, já que o primeiro dedo
+     nele é sempre dos elétrons.
+
+     O teste do PONTEIRO é o que faz dele o segundo. Os dois handlers
+     ouvem o mesmo pointerdown, e o dos elétrons corre primeiro: sem esta
+     comparação, o próprio dedo que acabava de pegar o elétron chegava
+     aqui, se via como "o segundo", e cancelava o gesto que ele mesmo
+     tinha começado — arrancar elétron nunca funcionava. */
+  if (!puxando && segurandoE && segurandoE.ruth
+      && e.pointerId !== segurandoE.id){
+    const aRuth = segurandoE.ruth;
+    cancelaEletron();
+    puxando = { id: e.pointerId, slide, andou: 0, modo: 'atomo', alvo: aRuth,
+                naCel: false,
+                dedos: new Map([[e.pointerId, { x: e.clientX, y: e.clientY }]]) };
+    if (e.target.setPointerCapture){
+      try { e.target.setPointerCapture(e.pointerId); } catch (_){}
+    }
+    e.preventDefault();
+    return;
+  }
+
+  /* Segundo dedo: DOIS DEDOS ARRASTAM, seja o que for. Se o gesto começou
+     na célula, arrastam a célula; se começou no retículo, arrastam a cena.
+     A pinça continua aproximando a câmera nos dois casos. */
   if (puxando){
     puxando.dedos.set(e.pointerId, { x: e.clientX, y: e.clientY });
     if (puxando.dedos.size >= 2){
-      /* o segundo dedo em cima da célula que já estava sendo levada
-         troca o gesto: em vez de arrastar a cena, gira a célula */
-      if (puxando.modo === 'cel'){ puxando.modo = 'giracel'; return; }
       const v = [...puxando.dedos.values()];
       puxando.modo  = 'dois';
       puxando.d0    = Math.hypot(v[0].x - v[1].x, v[0].y - v[1].y) || 1;
       puxando.c0    = { x: (v[0].x + v[1].x) / 2, y: (v[0].y + v[1].y) / 2 };
       puxando.dist0 = G3.dist;
+      /* levando a célula, o nome dela sai da frente */
+      if (puxando.naCel){
+        const r0 = puxando.slide.querySelector('.cel-rot');
+        if (r0) r0.classList.remove('on');
+      }
     }
     return;
   }
@@ -11683,44 +13071,88 @@ deck.addEventListener('pointerdown', (e) => {
   ultimoDown = agora; ultimoPt = { x: e.clientX, y: e.clientY };
 
   const p = pontoPalco(e);
-  /* "nada" é o padrão: arrastar no vazio não mexe em nada. Girar exige
-     que o dedo comece em cima da estrutura — na rede gira a cena, na
-     célula solta gira só a célula. */
-  let modo = 'nada', alvo = null;
-  /* Chromebook: sem dois dedos na tela, Ctrl + arrasto faz o mesmo
-     que os dois dedos fariam — leva a rede e a célula juntas. */
-  if (e.ctrlKey || e.metaKey){
-    modo = 'arrasta';
-  } else {
-    if (duplo){
-      if (celFora() > 4 || G3.drama > 0.02){
-        /* celula ja fora: o toque duplo pega um atomo dela */
-        const a = atomoNoPonto(p.x, p.y, b => b.cel || b.solto);
-        if (a){
-          if (!a.solto) arrancaAtomo(a);
-          else a.voltando = false;           /* pegou de novo um que voltava */
-          modo = 'atomo'; alvo = a;
-        }
-      } else if (celulaNoPonto(p.x, p.y)){
-        quebraCelula();
-        modo = 'cel';
+  /* ------------------------------------------------------------
+     UM GESTO SÓ, PARA OS DOIS OBJETOS
+     Um dedo — ou o botão esquerdo do mouse — GIRA o que está debaixo
+     dele: no retículo gira a cena, na célula arrancada gira só a célula.
+     Dois dedos — ou Ctrl com o botão esquerdo — ARRASTAM esse mesmo
+     objeto pela tela. A regra é a mesma para os dois, e cada um anda
+     sozinho: girar ou arrastar um não mexe no outro.
+
+     No vazio, girar não faz nada (não há o que pegar), mas Ctrl ainda
+     arrasta a cena: é o modo de recompor o enquadramento.
+     ------------------------------------------------------------ */
+  const arrastar = !!(e.ctrlKey || e.metaKey);
+  let modo = 'nada', alvo = null, naCel = false;
+  /* O NÚCLEO É A ALÇA; A ELETROSFERA É DE ONDE SAEM OS ELÉTRONS.
+     A divisão é a própria física do desenho, e não uma convenção: o
+     núcleo é o que o átomo tem de maciço, e é por ele que se pega a
+     coisa; a eletrosfera é nuvem, e o que se tira de uma nuvem é um
+     elétron. Assim o mesmo dedo faz as duas coisas sem precisar de modo
+     nenhum para escolher entre elas — o que decide é ONDE ele encosta.
+
+     O íon virado átomo tem o desenho em DOM, bem maior que a esfera que
+     havia ali, então quem responde é o elemento debaixo do dedo, e não o
+     acerto no ponto 3D. Ctrl continua levando o átomo de qualquer ponto,
+     que é a regra geral da cena. */
+  const ruth = e.target.closest('.q-ruth');
+  if (ruth && ruth._at){
+    if (!arrastar && !noNucleo(e)) return;   /* na eletrosfera: é dos elétrons */
+    /* este mesmo toque já pode ter começado um puxão: desfaz-se aqui,
+       senão o dedo faria as duas coisas ao mesmo tempo */
+    cancelaEletron();
+    ruth._at.voltando = false;         /* pegou de novo um que já voltava */
+    modo = 'atomo'; alvo = ruth._at;
+  }
+  if (modo === 'nada' && duplo){
+    if (celFora() > 4 || G3.drama > 0.02){
+      /* celula ja fora: o toque duplo pega um atomo dela */
+      const a = atomoNoPonto(p.x, p.y, b => b.cel || b.solto);
+      if (a){
+        if (!a.solto) arrancaAtomo(a);
+        else a.voltando = false;           /* pegou de novo um que voltava */
+        modo = 'atomo'; alvo = a;
       }
+    } else if (celulaNoPonto(p.x, p.y)){
+      /* ARRANCAR é o único arrasto que dispensa Ctrl. A célula nasce
+         dentro da rede, e é este gesto que a tira de lá: se o toque duplo
+         girasse, ela nunca sairia. Depois de fora, ela obedece à regra
+         geral como todo o resto. */
+      quebraCelula();
+      modo = 'cel'; naCel = true;
     }
-    if (modo === 'nada'){
-      /* folga de 1,5 raio para o dedo pegar também as hastes entre os íons */
-      const a = atomoNoPonto(p.x, p.y, null, 1.5);
-      /* célula já fora: um dedo em cima dela a leva (e ela encaixa de
-         volta se for solta perto de casa); dois dedos nela a giram */
-      if (a && a.cel && !a.solto && celFora() > 4) modo = 'cel';
-      else if (a) modo = 'gira';
-    }
+  }
+  if (modo === 'nada'){
+    /* QUEM JÁ SE SOLTOU TEM A PREFERÊNCIA DO TOQUE, do menor para o maior:
+       primeiro o íon isolado, depois a célula, e o retículo por último.
+       atomoNoPonto devolve o íon mais PERTO DA CÂMERA entre os que estão
+       debaixo do dedo, e a face da frente do retículo está uns 160 na
+       frente do resto. Com a folga de 1,5 raio, cada íon dessa face pega
+       um círculo maior que o espaço até o vizinho: ela cobre tudo. Sem
+       esta ordem, o dedo em cima do íon ou da célula pegava um íon do
+       retículo e o gesto ia parar na cena inteira — girar o íon girava o
+       mundo, e arrastá-lo arrastava todo mundo junto.
+
+       O íon vem antes da célula porque saiu dela: quem se soltou por
+       último está por cima, e é nele que a mão está mirando. */
+    const fora = celFora() > 4;
+    /* folga de 1,5 raio para o dedo pegar também as hastes entre os íons */
+    const ion = atomoNoPonto(p.x, p.y, b => b.solto, 1.5);
+    const a = ion
+           || (fora && atomoNoPonto(p.x, p.y, b => b.cel && !b.solto, 1.5))
+           || atomoNoPonto(p.x, p.y, null, 1.5);
+    naCel = !ion && !!(a && a.cel && !a.solto && fora);
+    if (ion){ alvo = ion; modo = arrastar ? 'atomo' : 'giraion'; }
+    else if (naCel)     modo = arrastar ? 'cel'     : 'giracel';
+    else if (a)         modo = arrastar ? 'arrasta' : 'gira';
+    else if (arrastar)  modo = 'arrasta';      /* no vazio, Ctrl ainda move a cena */
   }
   if (modo === 'cel'){
     const rot0 = slide.querySelector('.cel-rot');
     if (rot0) rot0.classList.remove('on');
   }
 
-  puxando = { id: e.pointerId, slide, andou: 0, modo, alvo,
+  puxando = { id: e.pointerId, slide, andou: 0, modo, alvo, naCel,
               dedos: new Map([[e.pointerId, { x: e.clientX, y: e.clientY }]]) };
   /* Sem captura, um gesto que sai de cima do canvas deixa de nos alcancar
      e o arrasto morre pela metade. Com captura, os eventos vem ate o fim. */
@@ -11746,7 +13178,10 @@ document.addEventListener('pointermove', (e) => {
     /* afastar os dedos aproxima a camera: a cena cresce */
     G3.voo = 0;                             /* a mão assume o comando */
     G3.dist = Math.max(150, Math.min(1500, puxando.dist0 * (puxando.d0 / dd)));
-    moveRede((cc.x - puxando.c0.x) / k, (cc.y - puxando.c0.y) / k);
+    /* o mesmo arrasto, aplicado a quem o gesto pegou */
+    if (puxando.alvo) moveAtomo(puxando.alvo, cc.x - puxando.c0.x, cc.y - puxando.c0.y);
+    else if (puxando.naCel) puxaCelula(cc.x - puxando.c0.x, cc.y - puxando.c0.y);
+    else moveRede((cc.x - puxando.c0.x) / k, (cc.y - puxando.c0.y) / k);
     puxando.c0 = cc;
     poeRotulo(puxando.slide, true);
     poeRotuloRede(puxando.slide);
@@ -11761,6 +13196,12 @@ document.addEventListener('pointermove', (e) => {
     poeRotuloRede(puxando.slide);
   } else if (puxando.modo === 'giracel'){
     giraCelula(dx, dy);
+  } else if (puxando.modo === 'giraion'){
+    /* Um íon é uma esfera lisa, e o sinal da carga fica sempre virado
+       para quem olha: girá-lo não muda nada do que se vê. O gesto existe
+       assim mesmo, e é ele que segura o dedo aqui — sem isto o toque
+       escorregava para o retículo e girava a cena inteira, que é o que
+       não se quer. Para LEVAR o íon, dois dedos ou Ctrl. */
   } else if (puxando.modo === 'arrasta'){
     moveRede(dx / k, dy / k);
     poeRotulo(puxando.slide, true);
@@ -11776,24 +13217,32 @@ function soltaCelula(e){
   if (!puxando) return;
   if (e && puxando.dedos.has(e.pointerId)) puxando.dedos.delete(e.pointerId);
   if (e && puxando.dedos.size > 0){
-    /* sobrou um dedo: o gesto continua como giro, a partir de onde ele esta */
+    /* sobrou um dedo: o gesto continua como giro, a partir de onde ele
+       esta — e gira o mesmo objeto que os dois dedos arrastavam */
     if (puxando.modo === 'dois'){
-      puxando.modo = 'gira';
+      puxando.modo = puxando.alvo ? 'giraion'
+                   : puxando.naCel ? 'giracel' : 'gira';
       puxando.id = [...puxando.dedos.keys()][0];
     }
     return;
   }
   const slide = puxando.slide;
-  const modo = puxando.modo, alvo = puxando.alvo;
+  const modo = puxando.modo, alvo = puxando.alvo, naCel = puxando.naCel;
   puxando = null;
 
-  if (modo === 'cel'){
+  /* levada com Ctrl ou com dois dedos, dá no mesmo: é a célula que andou */
+  if (modo === 'cel' || (modo === 'dois' && naCel)){
     /* soltou perto de casa: encaixa de volta e o nome some */
     if (celFora() < ENCAIXE) devolveCelula(slide);
     else poeRotulo(slide);
     return;
   }
-  if (modo === 'atomo'){
+  /* Girou a célula, e ela não saiu do lugar. Ainda assim o nome pode ter
+     sido escondido: um arrasto de dois dedos que perdeu um dedo no meio
+     do caminho termina como giro, e sem isto o nome não voltaria mais. */
+  if (modo === 'giracel'){ poeRotulo(slide); return; }
+  /* levado com Ctrl ou com dois dedos, dá no mesmo: é o íon que andou */
+  if (modo === 'atomo' || (modo === 'dois' && alvo)){
     const d = alvo && alvo.off
       ? Math.hypot(alvo.off[0], alvo.off[1], alvo.off[2]) : 0;
     if (alvo && d < ATOMO_VOLTA) devolveAtomo(alvo);
@@ -12349,6 +13798,46 @@ function coordsFor(slide){
       linhas.push('        ' + pares.slice(i, i + 4).join(', '));
     molTxt = `\n\n    /* moléculas do mundo quântico — cole no recipiente\n`
       + `      qmols: [\n${linhas.join(',\n')}\n      ]\n    */`;
+  }
+
+  /* O símbolo e a carga dos átomos arrancados do retículo, depois de
+     arrumados à mão. Sai já como a regra que se cola: quem lê isto quer
+     copiar, não traduzir. Os dois átomos saem separados — se ficarem
+     diferentes, é escolher qual vira a regra. */
+  /* A ficha do elemento, o contador e o que mais tiver sido acertado à
+     mão. Sai como os números que se colam de volta. */
+  const fichas = [...slide.querySelectorAll('.reveal-item.gas')]
+    .filter(g => g.querySelector('.gas-id'));
+  if (fichas.length){
+    const linhas = fichas.map(g => {
+      const cs = getComputedStyle(g);
+      const n = (v) => Math.round(valRuth(cs, v) * 10) / 10;
+      return `      ${(g.dataset.sim || '?').padEnd(3)}`
+           + ` ficha --sx:${n('--sx')}px --sy:${n('--sy')}px`
+           + `  --sf:${fatorAjuste(cs, '--sf').toFixed(3)}`
+           + `   número --zx:${n('--zx')}px --zy:${n('--zy')}px`;
+    });
+    extra += `\n\n    /* símbolo e número atômico, acertados à mão\n`
+           + `${linhas.join('\n')}\n    */`;
+  }
+  const raiz = getComputedStyle(document.documentElement);
+  const nz = (v) => Math.round(valRuth(raiz, v) * 10) / 10;
+  if (nz('--elx') || nz('--ely') || fatorAjuste(raiz, '--elf') !== 1)
+    extra += `\n\n    /* bloco do número do slide — vale em TODOS os slides\n`
+           + `      --elx:${nz('--elx')}px --ely:${nz('--ely')}px`
+           + `  --elf:${fatorAjuste(raiz, '--elf').toFixed(3)}\n    */`;
+
+  const ruths = [...slide.querySelectorAll('.q-ruth')];
+  if (ruths.length){
+    const num = (cs, v) => Math.round(valRuth(cs, v) * 10) / 10;
+    const linhas = ruths.map(r => {
+      const cs = getComputedStyle(r);
+      return `      ${(r.dataset.sim || '?').padEnd(3)}`
+           + ` símbolo --sx:${num(cs, '--sx')}px --sy:${num(cs, '--sy')}px`
+           + `   carga --cx:${num(cs, '--cx')}px --cy:${num(cs, '--cy')}px`;
+    });
+    extra += `\n\n    /* átomos do retículo — símbolo e carga, deslocados à mão\n`
+           + `${linhas.join('\n')}\n    */`;
   }
 
   return `    reveals: [\n${rows.join(',\n')}\n    ]${camTxt}${molTxt}${extra}`;
