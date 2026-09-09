@@ -1885,6 +1885,26 @@ body.ruth-movel .q-ruth .gas-id .carga.pegando{
   cursor:grabbing;color:var(--aqua);
   text-shadow:0 0 24px rgba(69,199,176,.6);
 }
+/* O ESCUTADOR, ferramenta de diagnóstico. Fica por cima de tudo, à
+   esquerda, e some com a mesma tecla que o abriu. */
+#diag{
+  position:fixed;left:14px;top:14px;z-index:120;width:340px;max-width:46vw;
+  background:rgba(4,14,24,.94);border:1px solid rgba(69,199,176,.45);
+  border-radius:8px;padding:10px 12px;color:var(--paper);
+  font-family:var(--mono);font-size:12px;line-height:1.45;
+  box-shadow:0 18px 50px rgba(0,0,0,.55);
+}
+#diag[hidden]{display:none}
+#diag h4{margin:0 0 6px;font-size:12px;color:var(--aqua);font-weight:500;
+         letter-spacing:.06em;text-transform:uppercase}
+#diag h4 b{float:right;font-weight:400;color:var(--paper-dim)}
+#diag ol{margin:0;padding:0;list-style:none;max-height:44vh;overflow:auto}
+#diag li{padding:2px 0;border-bottom:1px solid rgba(232,241,245,.08);
+         white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#diag li:first-child{color:var(--amber)}
+#diag p{margin:8px 0 0;color:var(--paper-dim);font-size:11px;
+        line-height:1.5;white-space:normal}
+
 /* rótulo da célula unitária, no mundo quântico */
 .cel-rot{
   position:absolute;z-index:9;pointer-events:none;
@@ -3514,6 +3534,19 @@ body.ruth-movel .elem.pegando{cursor:grabbing;border-color:var(--aqua)}
 <!-- a luz do laser: fora do palco, porque ela segue o ponteiro da tela,
      e não uma posição da cena -->
 <i id="laser" aria-hidden="true"></i>
+
+<!-- O ESCUTADOR. Mostra tudo o que chega ao app: teclas, toques, botões
+     de caneta. Serve para descobrir o que um controle remoto de verdade
+     manda — e se manda alguma coisa. Abre com D, ou com três toques
+     seguidos no bloco do número do slide, que é como se chega até ele
+     num tablet sem teclado. -->
+<div id="diag" hidden aria-live="polite">
+  <h4>o que o app está recebendo <b>D para fechar</b></h4>
+  <ol></ol>
+  <p>Aperte o botão da caneta — perto da tela e longe dela — e veja se
+     aparece alguma linha. Se não aparecer nada com a caneta longe, o
+     tablet não está entregando esse clique ao navegador.</p>
+</div>
 
 <nav id="bar" aria-label="Controles da apresentação">
   <button class="btn" id="prev" title="Slide anterior (←)" aria-label="Slide anterior">
@@ -13837,6 +13870,67 @@ grid.onclick = (e) => {
   if (b){ go(+b.dataset.go); toggleOverview(false); }
 };
 /* ------------------------------------------------------------
+   O ESCUTADOR
+   Um app web só recebe o que o sistema lhe entrega, e o que o sistema
+   entrega muda de aparelho para aparelho. Em vez de afirmar o que a
+   caneta manda, isto MOSTRA: liga-se o painel, aperta-se o botão, e o
+   que chegar aparece escrito.
+
+   Se o clique da caneta longe da tela não produzir linha nenhuma, é
+   porque o tablet o está consumindo antes — e aí não há código no app
+   que resolva. Se produzir, o que aparecer vira um atalho.
+   ------------------------------------------------------------ */
+const diag = document.getElementById('diag');
+const diagLista = diag && diag.querySelector('ol');
+let diagOn = false;
+
+function anota(txt){
+  if (!diagOn || !diagLista) return;
+  const li = document.createElement('li');
+  const t = new Date();
+  li.textContent = String(t.getSeconds()).padStart(2, '0') + '.'
+    + String(t.getMilliseconds()).padStart(3, '0') + '  ' + txt;
+  diagLista.prepend(li);
+  while (diagLista.children.length > 16) diagLista.lastElementChild.remove();
+}
+function modoDiag(v){
+  if (!diag) return;
+  diagOn = v === undefined ? !diagOn : !!v;
+  diag.hidden = !diagOn;
+  if (diagOn){
+    diagLista.innerHTML = '';
+    anota('escutando. aperte o botão da caneta.');
+  }
+}
+/* Na captura, e na janela: assim nada que o app trate antes some do
+   registro — o que se quer ver é o que CHEGA, e não o que sobra. */
+window.addEventListener('keydown', (e) =>
+  anota('tecla     key=' + e.key + '  code=' + e.code + '  n=' + e.keyCode), true);
+window.addEventListener('pointerdown', (e) =>
+  anota('ponta↓    ' + e.pointerType + '  button=' + e.button
+        + '  buttons=' + e.buttons), true);
+window.addEventListener('pointerup', (e) =>
+  anota('ponta↑    ' + e.pointerType + '  button=' + e.button), true);
+window.addEventListener('auxclick', (e) =>
+  anota('auxclick  button=' + e.button), true);
+window.addEventListener('contextmenu', () => anota('menu de contexto'), true);
+/* alguns controles se anunciam como controle de jogo, e não como teclado */
+window.addEventListener('gamepadconnected', (e) =>
+  anota('controle conectado: ' + (e.gamepad && e.gamepad.id)), true);
+
+/* TRÊS TOQUES no bloco do número do slide abrem o painel. Num tablet não
+   há tecla D para apertar, e o escutador precisa existir justamente onde
+   não há teclado. O bloco é decorativo e fica na quina: ninguém chega
+   nele sem querer três vezes seguidas. */
+let diagToques = 0, diagT;
+document.addEventListener('pointerup', (e) => {
+  if (!e.target.closest || !e.target.closest('.elem')) return;
+  clearTimeout(diagT);
+  if (++diagToques >= 3){ diagToques = 0; modoDiag(); return; }
+  diagT = setTimeout(() => { diagToques = 0; }, 600);
+});
+
+/* ------------------------------------------------------------
    FERRAMENTA DE MONTAGEM
    C (ou o botão da barra) mostra as posições e tamanhos atuais
    dos elementos do slide, no formato que vai direto pro código.
@@ -14247,6 +14341,7 @@ document.addEventListener('keydown', (e) => {
     case 'a': case 'A': showNotes(); break;
     case 'q': case 'Q': modoQuadro(); break;
     case 'l': case 'L': modoLaser(); break;
+    case 'd': case 'D': modoDiag(); break;
   }
 });
 
