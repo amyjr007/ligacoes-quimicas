@@ -6123,6 +6123,15 @@ function ampPassa(){
 
 /* o salto de brilho de quando um elétron sai ou entra */
 function pulsaAmpola(f){
+  /* A FONTE PODE AINDA NÃO TER SIDO ACHADA.
+     O laço só a procurava na troca de slide, e guardava a tela num
+     AMP.cv que podia estar vazio, ou apontando para a ampola de um slide
+     que já saiu de cena. Nesses casos o clarão sumia sem dizer nada:
+     AMP.surto subia para um laço que não estava desenhando, e a classe
+     nunca era posta. Procurar aqui custa uma consulta ao DOM e tira o
+     silêncio da jogada. */
+  if (!AMP.cv || !AMP.cv.isConnected || !AMP.cv.closest('.slide.is-active'))
+    ligaAmpola();
   AMP.surto = Math.min(1.4, (AMP.surto || 0) + (f || 0.5));
   const cv = AMP.cv, it = cv && cv.closest('.reveal-item.ampola');
   if (!it) return;
@@ -6132,7 +6141,10 @@ function pulsaAmpola(f){
 }
 
 function ligaAmpola(){
-  const cv = document.querySelector('.slide.is-active .amp-gas');
+  /* a do slide em cena; e, se ele ainda não foi marcado, qualquer uma —
+     é melhor acender a fonte errada por um quadro do que não acender */
+  const cv = document.querySelector('.slide.is-active .amp-gas')
+          || document.querySelector('.amp-gas');
   if (!cv) return;
   if (AMP.cv !== cv){
     AMP.cv = cv; AMP.ctx = cv.getContext('2d');
@@ -11858,6 +11870,11 @@ document.addEventListener('pointermove', (e) => {
     const c = centroBola(g.at);
     g.el = criaEletron(g.slide, c.x, c.y);
     mudaEletrons(g.at, (+g.at.dataset.delta || 0) - 1);
+    /* O ELÉTRON ACABOU DE SAIR DA ELETROSFERA, e a fonte marca isso mais
+       forte do que marca uma entrega: arrancar é o gesto que esta cena
+       existe para ensinar. Aqui, e não só lá dentro de mudaEletrons — o
+       clarão do momento mais importante não depende de outra função. */
+    pulsaAmpola(0.9);
     g.tirou = true;
   }
   if (!g.el) return;
@@ -11936,6 +11953,11 @@ function soltaEletron(e){
   if (naBola && (g.modo === 'traz' || g.tirou)){
     ondaNaBola(destino);                   /* o estouro da incorporação */
     mudaEletrons(destino, d + 1);
+    /* O ELÉTRON CHEGOU. Como no arranque, o clarão da chegada é dado
+       AQUI, e não só lá dentro de mudaEletrons: os dois extremos do
+       trânsito são o que a cena tem a mostrar, e nenhum deles deve
+       depender de outra função para acontecer. */
+    pulsaAmpola(0.9);
   }
   if (naBola){
     /* mede o caminho que falta até o centro, para ele mergulhar lá */
@@ -11948,6 +11970,10 @@ function soltaEletron(e){
     }
     g.el.classList.add('entra');
   } else {
+    /* soltou no vazio: o elétron se desfaz, e a fonte estremece de leve —
+       ela é o começo e o fim do caminho dele, inclusive quando ele se
+       perde no meio */
+    pulsaAmpola(0.3);
     dissipa(g.slide, parseFloat(g.el.style.left), parseFloat(g.el.style.top));
     g.el.classList.add('some');
   }
