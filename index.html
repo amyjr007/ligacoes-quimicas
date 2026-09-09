@@ -3645,7 +3645,7 @@ body.ruth-movel .elem.pegando{cursor:grabbing;border-color:var(--aqua)}
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v24.7';
+const VERSION = 'v25.0';
 
 const SLIDES = [
   {
@@ -14385,11 +14385,24 @@ if (window.visualViewport) window.visualViewport.addEventListener("resize", fit)
    build passa a ser coisa da máquina. */
 const rotuloVer = document.getElementById('ver');
 rotuloVer.textContent = VERSION;
-if (window.caches && caches.keys) caches.keys().then(ks => {
-  const c = ks.filter(k => /^ligacoes-vd+$/.test(k))
-              .sort((x, y) => +y.slice(10) - +x.slice(10))[0];
-  if (c) rotuloVer.textContent = VERSION + ' · build ' + c.slice(10);
-}).catch(() => {});
+function poeBuild(){
+  if (!window.caches || !caches.keys) return;
+  caches.keys().then(ks => {
+    const c = ks.filter(k => /^ligacoes-vd+$/.test(k))
+                .sort((x, y) => +y.slice(10) - +x.slice(10))[0];
+    if (c) rotuloVer.textContent = VERSION + ' · build ' + c.slice(10);
+  }).catch(() => {});
+}
+poeBuild();
+/* E DE NOVO quando o service worker acabar de instalar.
+   Numa aba recém-limpa ele ainda não existe na hora em que esta linha
+   corre: caches.keys() volta vazio, o sufixo não aparece, e o rodapé
+   fica só com o VERSION — justamente para quem acabou de chegar, que é
+   quem mais precisa saber se pegou a versão nova. Foi o que aconteceu:
+   o rótulo que eu fiz para responder "estou atualizado?" respondia a
+   mesma coisa em qualquer caso. */
+if (navigator.serviceWorker && navigator.serviceWorker.ready)
+  navigator.serviceWorker.ready.then(poeBuild).catch(() => {});
 render(); fit(); go(0, true);
 slides.forEach(sl => { if (temReveals(sl)) resetReveals(sl); });
 </script>
