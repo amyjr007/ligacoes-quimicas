@@ -13761,10 +13761,76 @@ function largaRisco(e){
 }
 window.addEventListener('pointerup', largaRisco, true);
 window.addEventListener('pointercancel', largaRisco, true);
-/* o botão lateral da caneta chega como clique direito: com a caneta
-   armada ele é borracha, não menu do navegador */
+/* ------------------------------------------------------------
+   O BOTÃO DA S PEN PASSA OS SLIDES
+   Um clique avança; dois cliques seguidos voltam; segurar não passa
+   nada — segurando com a ponta encostada, o botão já é a borracha, e
+   um gesto não pode ser duas coisas.
+
+   O PRIMEIRO CLIQUE AVANÇA NA HORA, em vez de esperar meio segundo
+   para saber se vem um segundo. Numa aula esse atraso se sente em toda
+   passagem, e o preço de não esperar é barato: vindo o segundo clique,
+   ele desfaz o avanço e recua mais um — dá no mesmo que a seta para
+   trás, e só quem clicou duas vezes paga a espera.
+
+   O botão chega de dois jeitos, e qual deles depende do driver: como um
+   pointerdown de botão secundário, ou apenas como o bit 2 aparecendo no
+   meio de um pointermove enquanto a caneta paira sobre o vidro. Os dois
+   são ouvidos, e o relógio impede que o mesmo clique conte duas vezes.
+   ------------------------------------------------------------ */
+const SPEN_DUPLO  = 380;                   /* dois cliques dentro disto: duplo */
+const SPEN_SEGURA = 450;                   /* passou disto, foi segurar */
+let spenApertou = 0, spenUltimo = 0, spenTinhaBotao = false, spenPerto = false;
+
+function spenClique(){
+  const agora = Date.now();
+  if (agora - spenUltimo < SPEN_DUPLO){
+    spenUltimo = 0;
+    stepBack();                            /* desfaz o avanço do primeiro */
+    stepBack();                            /* e recua de verdade */
+    return;
+  }
+  spenUltimo = agora;
+  stepForward();
+}
+function spenBaixo(e){
+  if (e.buttons & 1) return;               /* a ponta na tela: isso é desenho */
+  if (spenApertou) return;                 /* já estava apertado */
+  spenApertou = Date.now();
+}
+function spenSolta(){
+  if (!spenApertou) return;
+  const durou = Date.now() - spenApertou;
+  spenApertou = 0;
+  if (durou <= SPEN_SEGURA) spenClique();
+}
+document.addEventListener('pointerdown', (e) => {
+  if (e.pointerType === 'pen' && e.button === 2) spenBaixo(e);
+}, true);
+document.addEventListener('pointerup', (e) => {
+  if (e.pointerType === 'pen' && e.button === 2) spenSolta();
+}, true);
+document.addEventListener('pointermove', (e) => {
+  if (e.pointerType !== 'pen') return;
+  spenPerto = true;
+  /* encostou a ponta com o botão apertado: virou borracha, e o clique
+     que estava começando deixa de ser clique */
+  if (e.buttons & 1){ spenApertou = 0; spenTinhaBotao = !!(e.buttons & 2); return; }
+  const tem = !!(e.buttons & 2);
+  if (tem && !spenTinhaBotao) spenBaixo(e);
+  else if (!tem && spenTinhaBotao) spenSolta();
+  spenTinhaBotao = tem;
+}, true);
+/* a caneta saiu do alcance: nada fica pendurado esperando o resto */
+document.addEventListener('pointerout', (e) => {
+  if (e.pointerType === 'pen'){ spenApertou = 0; spenTinhaBotao = false; }
+}, true);
+
+/* O botão lateral da caneta chega como clique direito. Com a caneta
+   armada ele é borracha; fora dela, passa slide. Nos dois casos o menu
+   do navegador não tem o que fazer em cima da aula. */
 stage.addEventListener('contextmenu', (e) => {
-  if (stage.classList.contains('escrevendo')) e.preventDefault();
+  if (stage.classList.contains('escrevendo') || spenPerto) e.preventDefault();
 }, true);
 grid.onclick = (e) => {
   const b = e.target.closest('[data-go]');
