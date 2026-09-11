@@ -1,6 +1,6 @@
 /* Service worker da aula. Guarda tudo na instalação: a aula roda inteira
    sem rede, que é como ela costuma ser dada. */
-const CACHE = 'ligacoes-v38';
+const CACHE = 'ligacoes-v39';
 const ARQUIVOS = [
   './',
   './index.html',
@@ -18,6 +18,7 @@ const ARQUIVOS = [
   './imagens/g.n.lewis.avif',
   './imagens/amauri_jr.jpg',
   './imagens/clivagem.png',
+  './imagens/x%20ray.jpeg',
   /* AS FONTES. Elas vinham do Google e ficavam em cache por acaso, na
      primeira visita com rede. Agora moram aqui e entram na instalação
      junto com o resto: a aula abre com a tipografia certa mesmo num
