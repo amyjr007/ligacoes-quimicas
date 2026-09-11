@@ -3984,7 +3984,7 @@ body.ruth-movel .elem.pegando{cursor:grabbing;border-color:var(--aqua)}
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v25.3';
+const VERSION = 'v25.4';
 
 const SLIDES = [
   {
@@ -8048,7 +8048,18 @@ void main(){
    cruz do mais. Como os eixos são os da câmera, o sinal sempre encara
    quem olha, gire a cena para onde girar. */
 const FS = `
+/* ALTA PRECISÃO ONDE A PLACA TIVER.
+   No computador o mediump costuma ser implementado como highp e ninguém
+   nota; num tablet ele é fp16 de verdade — dez bits de mantissa —, e as
+   contas de luz feitas com a posição do mundo (centenas de unidades) e a
+   da câmera (centenas também) perdem casas justamente onde o brilho é
+   decidido. O #ifdef é o contrato do GLSL: onde houver highp no
+   fragmento, usa-se highp; onde não houver, cai no que havia. */
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
 precision mediump float;
+#endif
 varying vec3 vN, vP;
 uniform vec3 uCor, uCam, uDir, uCim;
 uniform float uOpaco, uEsp, uCarga;
@@ -8073,7 +8084,9 @@ void main(){
     marca *= smoothstep(0.55, 0.75, frente);
     c = mix(c, vec3(1.0), marca * 0.92);
   }
-  gl_FragColor = vec4(c, uOpaco);
+  /* JÁ PRÉ-MULTIPLICADA: é o que o contexto passou a esperar, e o que
+     tira a segunda multiplicação que escurecia a borda de cada esfera. */
+  gl_FragColor = vec4(c * uOpaco, uOpaco);
 }`;
 
 function compila(gl, tipo, src){
@@ -8443,8 +8456,22 @@ function iniciaG3(canvas){
     return true;
   }
 
+  /* premultipliedAlpha: TRUE, e não false.
+     O canvas do retículo é transparente e o navegador o compõe por cima
+     da página. Dizendo a ele que a cor NÃO está pré-multiplicada, ele
+     faz `cor x alfa` na hora de compor — e a mistura aqui dentro
+     (SRC_ALPHA/ONE_MINUS_SRC_ALPHA) já tinha multiplicado uma vez. Onde
+     o alfa vale 1 isso não muda nada, mas na BORDA de cada esfera, que é
+     onde o antialiasing deixa cobertura parcial, a cor saía multiplicada
+     DUAS vezes pela cobertura e vinha escura.
+     Num retículo visto de longe cada íon tem uns 20px e quase um quinto
+     dos pixels dele é borda: o conjunto inteiro parecia mal iluminado.
+     Aproximando, a esfera cresce, a borda vira 2% do desenho e a cena
+     voltava ao normal — que é exatamente o que se via no tablet.
+     Com `true`, a mistura passa a ser ONE/ONE_MINUS_SRC_ALPHA e o
+     sombreador entrega a cor já multiplicada; o navegador só soma. */
   const gl = canvas.getContext('webgl', { alpha: true, antialias: true,
-                                          premultipliedAlpha: false });
+                                          premultipliedAlpha: true });
   if (!gl) return false;
   G3.gl = gl;
   G3.canvas = canvas;
@@ -8470,7 +8497,9 @@ function iniciaG3(canvas){
 
   gl.enable(gl.DEPTH_TEST);
   gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+  /* a mistura do alfa pré-multiplicado: a origem entra inteira (ela já
+     vem multiplicada pelo próprio alfa) e o destino cede o que falta */
+  gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
   G3POR.set(canvas, { gl, prog: G3.prog,
                       esfera: G3.esfera,  bastao: G3.bastao,
@@ -8562,7 +8591,21 @@ function desenhaG3(canvas){
   const ce = Math.cos(G3.el), se = Math.sin(G3.el);
   const olho = [ Math.sin(G3.az) * ce * G3.dist, se * G3.dist,
                  Math.cos(G3.az) * ce * G3.dist ];
-  const proj = m4perspectiva(0.85, 1280 / 720, 10, 4000);
+  /* O ALCANCE DA CÂMERA, COLADO NA CENA.
+     Era 10 a 4000, fixos: uma faixa 400 vezes mais funda do que o que há
+     para ver. O buffer de profundidade reparte a resolução dele por essa
+     faixa toda, e concentrada perto do plano de perto — de modo que, lá
+     no fundo onde o retículo realmente está, sobravam pouquíssimos
+     degraus para separar uma esfera da outra. No computador o buffer tem
+     24 bits e ainda assim dá; num tablet que entrega 16, as superfícies
+     encostadas (a esfera e a haste que entra nela) passam a disputar o
+     mesmo degrau e a cena fica manchada — o que se lê como cristal mal
+     iluminado, e some ao aproximar, porque aproximar é justamente o que
+     devolve resolução.
+     Agora o par acompanha a distância: perto o bastante para não cortar
+     nada quando se mergulha no cristal, e longe só até onde há cena. */
+  const perto = Math.max(6, G3.dist * 0.06);
+  const proj = m4perspectiva(0.85, 1280 / 720, perto, G3.dist + 1400);
   /* o rompimento sacode a camera; o tremor nao se acumula porque nao
      encosta em G3.px/py, so no quadro que esta sendo desenhado */
   const tr = G3.drama * 9;
@@ -8929,6 +8972,9 @@ function abreRede(it, modo, px, py, largura, altura){
               && !slide.classList.contains('rede-livre')
               && !(it && it.dataset && it.dataset.lupa);
   montaAmpolaRede(slide, naTela ? modo : null);
+  /* com o escutador aberto, a ficha da placa sai aqui: é neste momento
+     que o contexto 3D existe e dá para medir o que ele entregou */
+  anota(fichaGL());
   G3.alvo = 1;
   lacoG3(cv);
 }
@@ -15131,6 +15177,26 @@ function anota(txt){
   diagLista.prepend(li);
   while (diagLista.children.length > 16) diagLista.lastElementChild.remove();
 }
+/* O QUE A PLACA DESTE APARELHO ENTREGA.
+   O retículo é desenhado na GPU, e o mesmo código sai diferente num
+   tablet e num computador por causa de três números que ninguém vê: os
+   bits do buffer de profundidade (24 num PC, às vezes 16 num tablet),
+   quantas amostras o antialiasing conseguiu, e se o fragmento tem
+   precisão alta. Esta linha põe os três na tela — é o que permite
+   responder "por que lá está escuro" sem ter o aparelho na mão. */
+function fichaGL(){
+  const gl = G3.gl;
+  if (!gl) return 'webgl    (abra um retículo para medir)';
+  const p = gl.getShaderPrecisionFormat &&
+            gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT);
+  const dbg = gl.getExtension('WEBGL_debug_renderer_info');
+  return 'webgl    prof=' + gl.getParameter(gl.DEPTH_BITS) + 'bits'
+       + '  amostras=' + gl.getParameter(gl.SAMPLES)
+       + '  highp=' + (p ? p.precision : '?')
+       + '  dpr=' + (window.devicePixelRatio || 1)
+       + (dbg ? '  ' + gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : '');
+}
+
 function modoDiag(v){
   if (!diag) return;
   diagOn = v === undefined ? !diagOn : !!v;
@@ -15138,6 +15204,7 @@ function modoDiag(v){
   if (diagOn){
     diagLista.innerHTML = '';
     anota('escutando. aperte o botão da caneta.');
+    anota(fichaGL());
   }
 }
 /* Na captura, e na janela: assim nada que o app trate antes some do
