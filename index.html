@@ -3984,7 +3984,7 @@ body.ruth-movel .elem.pegando{cursor:grabbing;border-color:var(--aqua)}
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v25.5';
+const VERSION = 'v25.6';
 
 const SLIDES = [
   {
@@ -14838,15 +14838,38 @@ let riscando = null;
 function chaveRisco(){
   const s = slides[current];
   if (!s || !s.classList.contains('quantum-on')) return 'p' + current;
-  const z  = s.querySelector('.reveal-item.zoomed');
+  const daqui = (q) => 'p' + current + '/' + q;
+
+  /* QUAL MUNDO ESTÁ ABERTO, perguntado DO MAIS FECHADO PARA O MAIS AMPLO.
+     A ordem é o que faz a regra valer em toda situação, e não só no
+     retículo do grão:
+
+     — O PAINEL vem primeiro porque ele pode conter um retículo. Quem
+       nomeia a cena é a caixa, não a rede que ela abriu; perguntando ao
+       G3 antes, o mesmo painel mudava de folha no meio do caminho (ele
+       acende a caixa e só depois sobe a rede), e o que tivesse sido
+       escrito no intervalo se perdia.
+       Uma folha só para o estado quântico do slide, e não uma por
+       painel: naquele slide as duas caixas ficam LADO A LADO na tela e
+       podem estar abertas ao mesmo tempo. Separadas, fechar uma apagaria
+       o que foi escrito sobre a outra, que continua ali à vista.
+
+     — O RECIPIENTE mergulhado vem antes do G3 pelo mesmo motivo: a cena
+       é dele, e o G3 guarda o nome do último retículo que abriu — que
+       pode ser de um mergulho já fechado, noutro slide.
+
+     — O G3 é o último, e ainda pergunta se a cena 3D é DESTE slide.
+       É ele que separa os cinco cristais do slide dos compostos iônicos:
+       cada retículo tem a sua folha, e a conta feita no cloreto de sódio
+       não reaparece dentro do óxido de magnésio. */
   const pn = s.querySelector('.pn.q-on');
-  /* qual mundo está aberto: o retículo (ou a pedra) desenhado na GPU, o
-     campo de moléculas de um recipiente, ou o de um painel confinado */
-  const onde = (G3.slide === s && G3.modo) ? 'g3:' + G3.modo
-             : z  ? 'z:'  + (z.dataset.id || z.dataset.mol || z.dataset.tag || '1')
-             : pn ? 'pn:' + (pn.dataset.rede || pn.dataset.campo || '1')
-             : 'q';
-  return 'p' + current + '/' + onde;
+  if (pn) return daqui('pn');
+  const z = s.querySelector('.reveal-item.zoomed');
+  if (z) return daqui('z:' + (z.dataset.id || z.dataset.mol || z.dataset.tag || '1'));
+  if (G3.slide === s && G3.modo) return daqui('g3:' + G3.modo);
+  /* mundo quântico aberto por um caminho que não se anuncia: ainda assim
+     é um mundo, e o que se escreve nele não sobe para o slide */
+  return daqui('q');
 }
 
 /* Trocou de mundo: a tela passa a mostrar a folha daquele mundo. Só
