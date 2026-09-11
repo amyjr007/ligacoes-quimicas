@@ -1,6 +1,6 @@
 /* Service worker da aula. Guarda tudo na instalação: a aula roda inteira
    sem rede, que é como ela costuma ser dada. */
-const CACHE = 'ligacoes-v37';
+const CACHE = 'ligacoes-v38';
 const ARQUIVOS = [
   './',
   './index.html',

@@ -3291,6 +3291,9 @@ body.sim-movel .ex-el .sim.pegando{
 #laser.on{opacity:1}
 /* o botão dele não acende em âmbar como os outros: acende na cor da luz */
 #laser-btn.on{color:#FF5A4A}
+/* a borracha armada fica clara, e não âmbar: âmbar é a cor de "isto está
+   aceso", e ela não escreve nada — tira */
+#pen-borracha.on{color:#E8F1F5;background:rgba(232,241,245,.16)}
 
 /* a moldura acesa lembra que o palco está no modo caneta */
 #stage.escrevendo::after{
@@ -3575,6 +3578,16 @@ body.ruth-movel .elem.pegando{cursor:grabbing;border-color:var(--aqua)}
   <button class="btn" id="pen-cor" title="Trocar a cor da caneta" aria-label="Trocar a cor da caneta" hidden>
     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="9.5"/></svg>
   </button>
+  <!-- A BORRACHA. Ela existia só no botão lateral da caneta, e num tablet
+       onde esse botão não chega ao navegador ela simplesmente não existia:
+       sobrava apagar tudo, que é outra coisa. Aqui ela vira modo, como a
+       cor — liga, apaga o que precisa, desliga. -->
+  <button class="btn" id="pen-borracha" title="Borracha: apagar por pedaço"
+          aria-label="Borracha" aria-pressed="false" hidden>
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+    ><path d="M8 20H20"/><path d="M14.5 3.5l6 6-8 8h-6l-3-3z"/><path d="M9 7.5l6 6"/></svg>
+  </button>
   <button class="btn" id="pen-limpa" title="Apagar tudo deste slide" aria-label="Apagar o que foi escrito neste slide" hidden>
     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 20H21"/><path d="M15.5 4.5l4 4L10 18H6v-4z"/></svg>
   </button>
@@ -3645,7 +3658,7 @@ body.ruth-movel .elem.pegando{cursor:grabbing;border-color:var(--aqua)}
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v25.0';
+const VERSION = 'v25.1';
 
 const SLIDES = [
   {
@@ -13614,11 +13627,21 @@ function repintaTinta(){
    toque no botão de cor — em CSS ela teria de ser quatro regras, uma
    por cor, e uma quinta no dia em que entrasse a quinta cor. */
 function cursorDaTinta(){
-  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">'
-    + '<circle cx="10" cy="10" r="5.5" fill="' + CORES[corAtual] + '"'
-    + ' stroke="rgba(3,12,22,.55)" stroke-width="1.5"/></svg>';
+  /* Escrevendo, um ponto CHEIO da cor da tinta. Apagando, um anel VAZADO
+     do tamanho do que a borracha come: o ponteiro passa a dizer as duas
+     coisas de uma vez — o que a ponta vai fazer, e onde vai pegar. */
+  const svg = borrachaOn
+    ? '<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40">'
+      + '<circle cx="20" cy="20" r="17" fill="rgba(232,241,245,.10)"'
+      + ' stroke="rgba(232,241,245,.9)" stroke-width="1.6"'
+      + ' stroke-dasharray="5 4"/></svg>'
+    : '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20">'
+      + '<circle cx="10" cy="10" r="5.5" fill="' + CORES[corAtual] + '"'
+      + ' stroke="rgba(3,12,22,.55)" stroke-width="1.5"/></svg>';
+  const meio = borrachaOn ? 20 : 10;
   stage.style.setProperty('--cur-tinta',
-    'url("data:image/svg+xml,' + encodeURIComponent(svg) + '") 10 10, crosshair');
+    'url("data:image/svg+xml,' + encodeURIComponent(svg) + '") '
+    + meio + ' ' + meio + ', crosshair');
 }
 
 function modoCaneta(v){
@@ -13630,11 +13653,24 @@ function modoCaneta(v){
   if (abrir) modoLaser(false);
   stage.classList.toggle('escrevendo', abrir);
   penBtn.classList.toggle('on', abrir);
-  penCor.hidden = penLimpa.hidden = !abrir;
+  penCor.hidden = penLimpa.hidden = penBorracha.hidden = !abrir;
+  /* fechando a caneta, a borracha se desarma: reabrir e riscar sem
+     querer apagando seria uma surpresa no meio da aula */
+  if (!abrir && borrachaOn) modoBorracha(false);
   penCor.style.color = CORES[corAtual];
   cursorDaTinta();
   penBtn.title = abrir ? 'Fechar a caneta (P)' : 'Escrever na tela (P)';
 }
+
+const penBorracha = document.getElementById('pen-borracha');
+function modoBorracha(v){
+  borrachaOn = v === undefined ? !borrachaOn : !!v;
+  penBorracha.classList.toggle('on', borrachaOn);
+  penBorracha.setAttribute('aria-pressed', borrachaOn ? 'true' : 'false');
+  penBorracha.title = borrachaOn ? 'Voltar a escrever' : 'Borracha: apagar por pedaço';
+  cursorDaTinta();                         /* o ponteiro avisa o que a ponta faz */
+}
+penBorracha.onclick = () => modoBorracha();
 
 penBtn.onclick = () => modoCaneta();
 penCor.onclick = () => {
@@ -13723,7 +13759,11 @@ const canetaRisca = (e) => stage.classList.contains('escrevendo')
    Como o botão lateral entra somado ao contato da ponta (1|2 = 3), a
    conta é sobre a máscara 34, e não uma comparação de igualdade. */
 const BORRACHA = 34;                       /* 32 (ponta-borracha) | 2 (botão) */
-const eBorracha = (e) => (e.buttons & BORRACHA) !== 0;
+/* ou o botão lateral, ou a borracha armada na barra. O botão continua
+   valendo onde ele chega — há caneta que o entrega — e a barra atende
+   onde ele não chega, que é o caso do tablet desta aula. */
+let borrachaOn = false;
+const eBorracha = (e) => borrachaOn || (e.buttons & BORRACHA) !== 0;
 const RAIO_BORRACHA = 20;                  /* em px do palco */
 
 /* Apaga por PEDAÇO, e não o traço inteiro: a borracha corta o risco onde
