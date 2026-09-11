@@ -3984,7 +3984,7 @@ body.ruth-movel .elem.pegando{cursor:grabbing;border-color:var(--aqua)}
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v25.4';
+const VERSION = 'v25.5';
 
 const SLIDES = [
   {
@@ -7908,7 +7908,7 @@ function go(n, instant){
   progress.style.width = ((current+1) / SLIDES.length * 100) + '%';
   atualizaBarra();
   sincronizaQuadro();                         /* o ícone é o do quadro deste slide */
-  repintaTinta();                             /* o que foi escrito neste slide */
+  sincronizaTinta();                          /* a folha deste slide, ou a do mundo aberto nele */
   [...grid.children].forEach((c,i) => c.classList.toggle("current", i === current));
 }
 
@@ -8943,6 +8943,7 @@ function abreRede(it, modo, px, py, largura, altura){
     q.style.setProperty('--qoy', G3.py + 'px');
   }
   slide.classList.add('quantum-on');
+  sincronizaTinta();     /* a folha da caneta acompanha o mundo aberto */
   poeRotuloRede(slide);
   slide.classList.toggle('rede-on', !!REDES[modo]);
   /* O nome do composto, da legenda da imagem, vai a dois lugares: ao
@@ -8999,6 +9000,7 @@ function fechaRede(it){
   const slide = it.closest ? it.closest('.slide') : it;
   if (!slide) return;
   slide.classList.remove('quantum-on', 'rede-on', 'rede-livre');
+  sincronizaTinta();     /* a folha da caneta acompanha o mundo aberto */
   /* a lente vai embora e leva com ela a medida e o giro em curso: sem
      isto, reabrir no meio de uma virada retomaria o recorte estreito */
   limpaRuths();          /* os átomos arrancados não sobrevivem à saída */
@@ -11229,6 +11231,7 @@ function openQuantum(it){
   povoaCampo(q, it);
   it.classList.add('zoomed');
   slide.classList.add('quantum-on');
+  sincronizaTinta();     /* a folha da caneta acompanha o mundo aberto */
   /* a partir daqui o objeto fica pointer-events:none, então o "click"
      desta mesma tocada será roteado para o fundo. Marcamos a hora para
      o ouvinte global não confundir a abertura com um pedido de saída. */
@@ -11402,6 +11405,7 @@ function closeQuantum(it){
   const slide = it.closest('.slide');
   if (!slide) return;
   slide.classList.remove('quantum-on', 'rede-on', 'rede-livre');
+  sincronizaTinta();     /* a folha da caneta acompanha o mundo aberto */
   paraConflito();
   limpaConflito(slide.querySelector('.quantum'));
   const q = slide.querySelector('.quantum .q-board');  /* o quadro não fica para o próximo */
@@ -13358,6 +13362,7 @@ function abrePainel(pn){
   if (!slide || pn.classList.contains('q-on')) return;
   pn.classList.add('q-on');
   slide.classList.add('quantum-on');
+  sincronizaTinta();     /* a folha da caneta acompanha o mundo aberto */
   if (pn.dataset.rede){
     const cv = slide.querySelector('.q3d');
     const r  = retanguloPainel(pn);
@@ -13381,6 +13386,7 @@ function fechaPainel(pn){
   /* o outro mundo pode continuar aberto: a classe do slide segue ele */
   if (slide.querySelector('.pn.q-on')) slide.classList.add('quantum-on');
   else slide.classList.remove('quantum-on');
+  sincronizaTinta();     /* a folha da caneta acompanha o mundo aberto */
 }
 
 /* centro de um elemento em coordenadas do palco */
@@ -14811,8 +14817,49 @@ const ctx     = tinta.getContext('2d');
 const CORES = ['#F0B44A', '#45C7B0', '#FF7A5C', '#E8F1F5'];
 let corAtual = 0;
 const TRACO = 4.5;                         /* espessura, em px do palco */
-const riscos = {};                         /* índice do slide -> lista de traços */
+const riscos = {};                         /* chave da folha -> lista de traços */
 let riscando = null;
+
+/* ------------------------------------------------------------
+   A FOLHA É DO MUNDO EM QUE SE ESTÁ ESCREVENDO
+
+   O que se risca submerso no retículo é sobre o retículo: a distância
+   entre os íons, a carga que atravessou, a célula que foi arrancada. Ao
+   emergir, isso não tem o que fazer por cima da fotografia do sal —
+   ficava a anotação de uma cena pousada sobre outra, e o professor
+   precisava apagar à mão toda vez que subia.
+
+   A folha passa a ser endereçada pelo MUNDO, e não só pelo slide. Cada
+   mergulho tem a sua, o slide tem a dele, e voltar a qualquer um deles
+   devolve o que estava escrito lá. No slide dos cinco compostos cada
+   cristal tem a sua também: a conta feita dentro do cloreto de sódio
+   não reaparece dentro do óxido de magnésio.
+   ------------------------------------------------------------ */
+function chaveRisco(){
+  const s = slides[current];
+  if (!s || !s.classList.contains('quantum-on')) return 'p' + current;
+  const z  = s.querySelector('.reveal-item.zoomed');
+  const pn = s.querySelector('.pn.q-on');
+  /* qual mundo está aberto: o retículo (ou a pedra) desenhado na GPU, o
+     campo de moléculas de um recipiente, ou o de um painel confinado */
+  const onde = (G3.slide === s && G3.modo) ? 'g3:' + G3.modo
+             : z  ? 'z:'  + (z.dataset.id || z.dataset.mol || z.dataset.tag || '1')
+             : pn ? 'pn:' + (pn.dataset.rede || pn.dataset.campo || '1')
+             : 'q';
+  return 'p' + current + '/' + onde;
+}
+
+/* Trocou de mundo: a tela passa a mostrar a folha daquele mundo. Só
+   repinta quando a chave muda de verdade — uma transição encosta aqui
+   mais de uma vez, e repintar à toa custa um quadro. */
+let chaveTinta = null;
+function sincronizaTinta(){
+  const k = chaveRisco();
+  if (k === chaveTinta) return;
+  chaveTinta = k;
+  riscando = null;              /* um traço não atravessa a troca de mundo */
+  repintaTinta();
+}
 
 /* A folha acompanha o palco: o desenho é guardado em px de palco, mas o
    bitmap nasce no tamanho REAL em que ele vai aparecer — densidade da
@@ -14830,7 +14877,7 @@ function repintaTinta(){
   ctx.clearRect(0, 0, 1280, 720);
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
-  (riscos[current] || []).forEach(t => {
+  (riscos[chaveRisco()] || []).forEach(t => {
     if (t.p.length < 2) {                  /* um toque só: vira um ponto */
       ctx.beginPath();
       ctx.fillStyle = t.c;
@@ -14965,7 +15012,7 @@ document.addEventListener('pointermove', (e) => {
 document.addEventListener('pointerout', (e) => {
   if (e.pointerType === 'pen'){ clearTimeout(laserT); laser.classList.remove('on'); }
 });
-penLimpa.onclick = () => { riscos[current] = []; repintaTinta(); };
+penLimpa.onclick = () => { riscos[chaveRisco()] = []; repintaTinta(); };
 
 /* ------------------------------------------------------------
    A TINTA NÃO ATRAVESSA A VIRADA
@@ -14982,6 +15029,7 @@ penLimpa.onclick = () => { riscos[current] = []; repintaTinta(); };
 function limpaRiscos(){
   for (const k in riscos) delete riscos[k];
   riscando = null;                           /* nem um traço pela metade */
+  chaveTinta = null;                         /* a próxima folha repinta do zero */
   repintaTinta();
 }
 /* fechou, recarregou ou saiu: a folha não sobrevive à saída */
@@ -15014,7 +15062,7 @@ const RAIO_BORRACHA = 20;                  /* em px do palco */
    passa e o que sobra de cada lado continua na tela. É o que se espera de
    uma borracha — quem quer limpar tudo tem o botão da barra. */
 function apagaEm(x, y){
-  const lista = riscos[current];
+  const lista = riscos[chaveRisco()];
   if (!lista || !lista.length) return;
   const saida = [];
   let mudou = false;
@@ -15030,7 +15078,7 @@ function apagaEm(x, y){
     if (pedaco.length === t.p.length) saida.push(t);          /* nem encostou */
     else if (pedaco.length > 1) saida.push({ c: t.c, w: t.w, p: pedaco });
   });
-  if (mudou){ riscos[current] = saida; repintaTinta(); }
+  if (mudou){ riscos[chaveRisco()] = saida; repintaTinta(); }
 }
 
 /* Os ouvintes ficam na FASE DE CAPTURA, acima de tudo: quando o risco
@@ -15048,7 +15096,8 @@ stage.addEventListener('pointerdown', (e) => {
     return;
   }
   riscando = { id: e.pointerId, t: { c: CORES[corAtual], w: TRACO, p: [[p.x, p.y]] } };
-  (riscos[current] = riscos[current] || []).push(riscando.t);
+  const ch = chaveRisco();
+  (riscos[ch] = riscos[ch] || []).push(riscando.t);
   repintaTinta();
 }, true);
 
