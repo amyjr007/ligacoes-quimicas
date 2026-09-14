@@ -3984,7 +3984,7 @@ body.ruth-movel .elem.pegando{cursor:grabbing;border-color:var(--aqua)}
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v25.7';
+const VERSION = 'v25.8';
 
 const SLIDES = [
   {
@@ -4328,6 +4328,17 @@ const SLIDES = [
       /* o símbolo subiu mais uma linha (40px) sozinho, sem o título */
       { id: 'lewis8', follow: 0, entra: 'dir', kind: 'lewis', eatom: 'lewis',
         x: 960, y: 380, base: 150, tone: '' },
+
+      /* A FONTE, como no slide 7. Entra junto com a coluna de Lewis, pela
+         direita, e fica na borda, ao lado do símbolo: é dali que saem os
+         elétrons que o ânion ganha e é para ali que vão os que o cátion
+         perde. Sem ela o Lewis só sabia perder — o elétron solto se
+         desfazia no ar — e nunca ganhar.
+         Antes de escolher o elemento o símbolo não tem alvo, e a fonte
+         não entrega nada: não há ainda a quem entregar. */
+      { id: 'fonte8', follow: 0, entra: 'dir', kind: 'ampola',
+        label: 'fonte de elétrons',
+        x: 1180, y: 430, base: 140, tone: '' },
 
       /* A configuração eletrônica do elemento escolhido. Quem a chama é
          um toque no próprio símbolo de Lewis, ali em cima — o desenho
@@ -13172,10 +13183,10 @@ function soltaEletron(e){
   const vidro = fonteVisivel && (fonteVisivel.querySelector('.z-stage') || fonteVisivel);
   const naFonte = !naBola && !!vidro && !!e && sobreAtomo(vidro, e);
   /* Voltar para onde saiu só faz sentido onde havia OUTRO lugar para ir:
-     uma fonte, ou outra eletrosfera. No slide 8 o símbolo de Lewis está
-     sozinho — sem vidro, sem vizinho —, e ali soltar fora é a única
-     maneira de o elétron sair. Devolvê-lo sempre tornaria impossível
-     tirar um elétron sequer. */
+     uma fonte, ou outra eletrosfera. Numa cena com um átomo sozinho,
+     sem vidro nem vizinho, soltar fora seria a única maneira de o
+     elétron sair, e devolvê-lo sempre tornaria impossível tirar um
+     elétron sequer. (Os slides 7 e 8 têm, os dois, a sua fonte.) */
   const haOutroDestino = !!fonteVisivel
     || [...(g.slide ? g.slide.querySelectorAll('[data-eatom]') : [])].some(at =>
          at !== g.at && !at.hidden && at.dataset.alvo !== undefined);
@@ -13211,8 +13222,8 @@ function soltaEletron(e){
   } else {
     /* Nasceu na ampola e não foi entregue a ninguém: volta para dentro
        dela, que é de onde veio. A fonte é o começo e o fim do caminho.
-       Sem fonte na cena — o Lewis sozinho do slide 8 —, o elétron que
-       saiu se desfaz no ar, que é como aquele slide sempre funcionou. */
+       Sem fonte na cena e sem ninguém mais a quem entregá-lo, o elétron
+       que saiu se desfaz no ar. */
     const c = vidro ? noPalco(vidro) : null;
     if (miraEletron(g.el, c)) g.el.classList.add('pousa');
     else {
