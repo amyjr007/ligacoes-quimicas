@@ -3984,7 +3984,7 @@ body.ruth-movel .elem.pegando{cursor:grabbing;border-color:var(--aqua)}
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v25.6';
+const VERSION = 'v25.7';
 
 const SLIDES = [
   {
@@ -13161,6 +13161,25 @@ function soltaEletron(e){
        depender de outra função para acontecer. */
     pulsaAmpola(0.9);
   }
+  /* A FONTE DE ELÉTRONS TAMBÉM É DESTINO. No slide 7 o vidro é de onde
+     o elétron vem e para onde ele vai: largado em cima dele, o arrancado
+     entra ali e o átomo fica sem ele — é assim que o sódio chega ao
+     octeto naquele slide, que só tem um átomo. Sem esta pergunta o vidro
+     contava como vazio, e a regra de baixo devolvia o elétron à
+     eletrosfera de onde ele tinha acabado de sair. */
+  const fonte = g.slide && g.slide.querySelector('.reveal-item.ampola');
+  const fonteVisivel = fonte && !fonte.hidden ? fonte : null;
+  const vidro = fonteVisivel && (fonteVisivel.querySelector('.z-stage') || fonteVisivel);
+  const naFonte = !naBola && !!vidro && !!e && sobreAtomo(vidro, e);
+  /* Voltar para onde saiu só faz sentido onde havia OUTRO lugar para ir:
+     uma fonte, ou outra eletrosfera. No slide 8 o símbolo de Lewis está
+     sozinho — sem vidro, sem vizinho —, e ali soltar fora é a única
+     maneira de o elétron sair. Devolvê-lo sempre tornaria impossível
+     tirar um elétron sequer. */
+  const haOutroDestino = !!fonteVisivel
+    || [...(g.slide ? g.slide.querySelectorAll('[data-eatom]') : [])].some(at =>
+         at !== g.at && !at.hidden && at.dataset.alvo !== undefined);
+
   if (naBola){
     /* mede o caminho que falta até O LUGAR DELE NA CAMADA, e é para lá
        que ele corre — não para o centro da bola, que é o núcleo.
@@ -13168,15 +13187,21 @@ function soltaEletron(e){
        vale o centro, como antes. */
     miraEletron(g.el, entregue ? pousoDoEletron(destino) : centroBola(destino));
     g.el.classList.add('pousa');
-  } else if (g.tirou && g.at && g.at.isConnected){
+  } else if (naFonte){
+    /* entra no vidro: corre até o meio dele e se apaga lá dentro, e a
+       fonte acende como acende quando recebe */
+    miraEletron(g.el, noPalco(vidro));
+    g.el.classList.add('pousa');
+    pulsaAmpola(0.9);
+  } else if (g.tirou && g.at && g.at.isConnected && haOutroDestino){
     /* SOLTO NO VAZIO, O ELÉTRON NÃO SE PERDE.
        Carga não evapora, e a cena não pode ensinar que evapora — era o
        que acontecia: ele se desfazia no ar e o átomo ficava a menos um,
        sem nada na tela dizendo para onde a carga tinha ido. Agora ele
        volta para o lugar de onde saiu, a eletrosfera se refaz com ele
-       dentro e o átomo pisca ao reavê-lo. O único destino de um elétron
-       arrancado é uma eletrosfera: a do vizinho, se a mão o levou até
-       lá; a dele mesmo, se não levou. */
+       dentro e o átomo pisca ao reavê-lo. O destino de um elétron
+       arrancado é uma eletrosfera — a do vizinho, se a mão o levou até
+       lá — ou a fonte, onde houver uma; fora disso, a dele mesmo. */
     const volta = g.at;
     ondaNaBola(volta);
     mudaEletrons(volta, (+volta.dataset.delta || 0) + 1);
@@ -13185,10 +13210,10 @@ function soltaEletron(e){
     pulsaAmpola(0.3);
   } else {
     /* Nasceu na ampola e não foi entregue a ninguém: volta para dentro
-       dela, que é de onde veio. A fonte é o começo e o fim do caminho. */
-    const fonte = g.slide && g.slide.querySelector('.reveal-item.ampola');
-    const c = fonte && !fonte.hidden
-      ? noPalco(fonte.querySelector('.z-stage') || fonte) : null;
+       dela, que é de onde veio. A fonte é o começo e o fim do caminho.
+       Sem fonte na cena — o Lewis sozinho do slide 8 —, o elétron que
+       saiu se desfaz no ar, que é como aquele slide sempre funcionou. */
+    const c = vidro ? noPalco(vidro) : null;
     if (miraEletron(g.el, c)) g.el.classList.add('pousa');
     else {
       dissipa(g.slide, parseFloat(g.el.style.left), parseFloat(g.el.style.top));
