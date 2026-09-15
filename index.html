@@ -12,6 +12,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="icone-192.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icone-192.png">
+<!-- Three.js (r150), para o lego 3D do slide 2 — a mesma cópia local do
+     app dos modelos atômicos, de onde a interação veio -->
+<script src="three.min.js"></script>
 <style>
 /* ============================================================
    AS FONTES MORAM AQUI DENTRO
@@ -3216,85 +3219,29 @@ body.sim-movel .ex-el .sim.pegando{
 }
 
 /* ---------- o barquinho de lego ---------- */
-.lego-stage{
-  position:relative;width:240px;height:200px;
-  transform:scale(calc(var(--base) / 240 * var(--k)));
-  transform-origin:center center;
+/* O LEGO EM 3D (Three.js), a interação do app dos modelos atômicos. A
+   tela é bem maior que o objeto: é nela que as peças caem e se espalham
+   pelo chão. Transparente — o fundo do slide aparece por trás. */
+.lego-viewer{
+  position:relative;
+  width:calc(var(--base) * 2.6px * var(--k));
+  height:calc(var(--base) * 1.8px * var(--k));
+  cursor:grab;touch-action:none;
 }
-.brick{
-  position:absolute;left:0;top:0;
-  width:calc(var(--w) * 24px);height:26px;border-radius:3px;
-  background:
-    linear-gradient(180deg,rgba(255,255,255,.32),rgba(255,255,255,0) 44%,rgba(0,0,0,.22)),
-    var(--c);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.3),
-    inset 0 -3px 0 rgba(0,0,0,.2),
-    0 2px 5px rgba(3,12,22,.45);
-  transform:translate3d(var(--hx),var(--hy),0) rotate(0deg);
-  transition:transform .82s cubic-bezier(.2,.82,.28,1);
-  transition-delay:var(--d,0ms);
+.lego-viewer:active{cursor:grabbing}
+/* As bordas da tela se apagam: a grade do chão e as peças que voam longe
+   somem aos poucos, em vez de serem cortadas seco no retângulo. */
+.lego-cv{
+  display:block;width:100%;height:100%;
+  -webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 62%,transparent 100%);
+          mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 62%,transparent 100%);
 }
-/* os pinos de encaixe, um a cada 24px */
-.brick::before{
-  content:'';position:absolute;left:0;top:-7px;width:100%;height:9px;
-  background-image:radial-gradient(ellipse 9px 7px at 12px 8px,var(--c) 0 70%,rgba(0,0,0,0) 72%);
-  background-size:24px 9px;background-repeat:repeat-x;
+/* o anel do segurar: enche em 1s e o objeto explode */
+.lego-anel{
+  position:absolute;top:50%;left:50%;width:80px;height:80px;margin:-40px 0 0 -40px;
+  pointer-events:none;opacity:0;transition:opacity .15s;
 }
-.brick::after{
-  content:'';position:absolute;left:0;top:-7px;width:100%;height:9px;
-  background-image:radial-gradient(ellipse 7px 3px at 12px 4px,rgba(255,255,255,.5) 0 70%,rgba(0,0,0,0) 72%);
-  background-size:24px 9px;background-repeat:repeat-x;
-}
-.lego.exploded .brick{
-  transform:translate3d(var(--sx,0px),var(--sy,0px),0) rotate(var(--sr,0deg));
-}
-
-/* ---------- remontar o barquinho peça por peça ----------
-   Desmontado, cada tijolo se pega pelo dedo e vai onde se quiser. O
-   lugar dele no barquinho continua guardado em --hx/--hy: é a distância
-   até esse ponto que decide o encaixe. */
-.lego.exploded .brick{cursor:grab}
-.brick.pegando{
-  transition:none;transition-delay:0ms;z-index:6;cursor:grabbing;
-  filter:brightness(1.15);
-}
-/* perto do lugar: a peça avisa que vai encaixar se for solta ali */
-.brick.perto{box-shadow:0 0 0 2px rgba(130,255,228,.75),0 0 20px rgba(130,255,228,.5)}
-/* Peça encaixada: volta para a casa dela mesmo com o barquinho ainda
-   desmontado. Vem depois da regra do .exploded para ganhar dela. */
-.lego.exploded .brick.posta{
-  transform:translate3d(var(--hx),var(--hy),0) rotate(0deg);
-  transition:transform .24s cubic-bezier(.2,.92,.3,1);
-  transition-delay:0ms;z-index:2;cursor:default;
-}
-/* o estalo do encaixe: um clarão curto, e só. A posição não entra na
-   animação, senão ela brigaria com a transição que trouxe a peça. */
-.brick.encaixou{animation:brickEncaixa .42s ease-out}
-@keyframes brickEncaixa{
-  0%  {filter:brightness(2.6);
-       box-shadow:0 0 0 3px rgba(130,255,228,.95),0 0 28px rgba(130,255,228,.9)}
-  100%{filter:brightness(1);
-       box-shadow:inset 0 1px 0 rgba(255,255,255,.3),
-                  inset 0 -3px 0 rgba(0,0,0,.2),
-                  0 2px 5px rgba(3,12,22,.45)}
-}
-/* A última peça fecha o barquinho: ele cresce, acende e volta ao
-   tamanho — a ênfase grande, antes de assentar e virar objeto parado
-   de novo. A escala repete a conta do .lego-stage porque a animação
-   substitui o transform dele enquanto roda. */
-.lego.completo .lego-stage{
-  animation:legoPronto 1s cubic-bezier(.22,.85,.3,1);
-}
-@keyframes legoPronto{
-  0%  {transform:scale(calc(var(--base) / 240 * var(--k)));
-       filter:drop-shadow(0 0 0 rgba(130,255,228,0))}
-  34% {transform:scale(calc(var(--base) / 240 * var(--k) * 1.17));
-       filter:drop-shadow(0 0 30px rgba(130,255,228,.95)) brightness(1.3)}
-  62% {transform:scale(calc(var(--base) / 240 * var(--k) * .985))}
-  100%{transform:scale(calc(var(--base) / 240 * var(--k)));
-       filter:drop-shadow(0 0 0 rgba(130,255,228,0))}
-}
+.lego-anel.on{opacity:1}
 
 /* botão de refazer: fora da escala do barquinho, para o texto não encolher */
 .lego-redo{
@@ -3309,7 +3256,8 @@ body.sim-movel .ex-el .sim.pegando{
   transition:opacity .3s ease,transform .3s cubic-bezier(.2,.85,.3,1),
              border-color .2s,background .2s;
 }
-.lego.exploded .lego-redo{
+.lego.exploded .lego-redo,
+.lego.tirou .lego-redo{                    /* tirou: há peça arrancada à mão */
   opacity:1;pointer-events:auto;
   transform:translate(-50%,calc(var(--base) * var(--k) * .417px + 18px)) scale(1);
 }
@@ -3331,30 +3279,28 @@ body.sim-movel .ex-el .sim.pegando{
   transition:transform .62s cubic-bezier(.24,.86,.3,1);
   perspective:900px;                       /* dá volume ao corpo da pedra */
 }
-/* A pedra é um sólido: a silhueta é repetida em camadas cada vez mais
-   ao fundo e mais escuras, e o conjunto é visto de três quartos.
-   É a lateral dessa pilha que o olho lê como espessura. */
-.rock-3d{
-  position:absolute;inset:0;transform-style:preserve-3d;
-  transform:rotateX(-11deg) rotateY(-19deg);
-}
-.rock-layer{
-  position:absolute;inset:0;width:100%;height:100%;overflow:visible;
-  transform:translateZ(var(--z));
-  transition:opacity .22s ease;
-}
 .rock.broken .rock-zoom{--zoom:2.05}
 .reveal-item.rock.broken{z-index:8}       /* a rede aberta passa por cima do resto */
-/* a textura da pedra custa caro para calcular, então ela é desenhada uma vez
-   e daí em diante só a opacidade muda — isso o compositor faz de graça */
-.rock-svg{
+/* A foto da pedra: inteira dentro do palco, sem deformar, com a sombra
+   que ela projetaria na mesa. Ao desmontar só a opacidade muda — isso o
+   compositor faz de graça. */
+.rock-img{
   position:absolute;inset:0;width:100%;height:100%;
-  overflow:visible;                        /* a sombra do filtro passa da borda */
+  object-fit:contain;
+  filter:drop-shadow(0 12px 14px rgba(3,12,22,.65));
+  -webkit-user-drag:none;user-select:none;pointer-events:none;
   will-change:opacity;
   transition:opacity .22s ease;
 }
-.rock.broken .rock-svg,
-.rock.broken .rock-layer{opacity:0}
+.rock.broken .rock-img{opacity:0}
+/* A moldura das fotos do slide (a das amostras, com borda e fundo) não
+   vale aqui: a pedra tem fundo transparente e fica solta na cena. */
+.reveal-item.rock .rock-img{
+  width:100%;height:100%;                  /* o palco da pedra, e não o --base */
+  border:0;outline:0;padding:0;margin:0;border-radius:0;
+  background:none;box-shadow:none;
+  max-width:none;max-height:none;
+}
 
 /* brilho instantâneo ao encostar: resposta antes mesmo de desmontar */
 .rock-glow{
@@ -4093,7 +4039,7 @@ body.ruth-movel .elem.pegando{cursor:grabbing;border-color:var(--aqua)}
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v25.8';
+const VERSION = 'v25.9';
 
 const SLIDES = [
   {
@@ -4122,11 +4068,13 @@ const SLIDES = [
       { from: 'atomo',
         text: 'Construtor básico',      x: 939, y: 284, base: 24,   tone: 'amber' },
       /* segurar o dedo (ou o mouse) sobre ela desmonta a pedra na rede de átomos */
-      { kind: 'rock',                   x: 1000, y: 450, base: 230, tone: ''      },
+      /* desde: surge duas células da grade (2 x 40px) à esquerda e desliza
+         para a direita até o lugar dela */
+      { kind: 'rock', desde: [-80, 0],  x: 1000, y: 450, base: 230, tone: ''      },
       /* pressionar espalha as peças; o botão Refazer monta de novo.
          'esq': entra reto pela esquerda. Sem isto ele viria pela diagonal,
          que é a direção do canto onde ele para. */
-      { kind: 'lego', entra: 'esq',     x: 285,  y: 515, base: 200, tone: ''      }
+      { kind: 'lego', entra: 'esq',     x: 285,  y: 495, base: 200, tone: ''      }
     ]
   },
   {
@@ -6318,32 +6266,14 @@ function ligaHero(){
 
 /* ------------------------------------------------------------
    A PEDRA
-   silhueta irregular + textura de rocha feita com ruído e luz
-   (feTurbulence + feDiffuseLighting), sem nenhum arquivo externo.
+   a foto de uma rocha de verdade (imagens/rock.webp, com fundo
+   transparente). Antes era desenhada: silhueta com textura de ruído e
+   luz e quinze fatias por trás para dar espessura. A foto já traz o
+   volume e a textura que o desenho imitava.
    Segurar o dedo/mouse desmonta a pedra na rede de átomos.
    ------------------------------------------------------------ */
-const ROCK_W = 260, ROCK_H = 200;          /* espaço interno da pedra */
-const ROCK_PATH = 'M26 130 L14 94 L36 56 L74 30 L120 18 L170 24 L212 46 L240 82 '
-                + 'L248 122 L230 158 L188 180 L128 188 L72 176 L38 156 Z';
-const ROCK_CAMADAS = 15;                   /* fatias da extrusão */
-const ROCK_FUNDO = 4.2;                    /* px de profundidade por fatia */
-
-/* as fatias de trás: mesma silhueta, cada vez mais escura e mais funda */
-function rockExtrusao(){
-  const base = toRGB('#5E6C78');
-  let out = '';
-  for (let i = ROCK_CAMADAS; i >= 1; i--){
-    const t = i / ROCK_CAMADAS;            /* 1 = a mais funda */
-    const cor = asCSS(darken(base, 1 - t * 0.84));
-    out += `<svg class="rock-layer" viewBox="0 0 ${ROCK_W} ${ROCK_H}"`
-         + ` style="--z:${(-ROCK_FUNDO * i).toFixed(1)}px" aria-hidden="true">`
-         + `<path fill="${cor}" d="${ROCK_PATH}"/></svg>`;
-  }
-  return out;
-}
 const COLS = 5, ROWS = 4, DEPS = 3;        /* rede 3D: colunas, fileiras, camadas */
 const CELL_X = 48, CELL_Y = 44, CELL_Z = 84;
-let rockSeq = 0;
 
 /* sorteio determinístico: a pedra sai igual em toda máquina e toda recarga */
 const rng = (seed) => () => {
@@ -6352,55 +6282,10 @@ const rng = (seed) => () => {
 };
 
 function ROCK(){
-  const id = `rk${++rockSeq}`;
-  const cx = ROCK_W / 2, cy = ROCK_H / 2;
-  const rnd = rng(20260824 + rockSeq * 7919);
-
   return `
   <div class="rock-stage">
    <div class="rock-zoom">
-    <div class="rock-3d">
-    ${rockExtrusao()}
-    <svg class="rock-svg" viewBox="0 0 ${ROCK_W} ${ROCK_H}" aria-hidden="true">
-      <defs>
-        <linearGradient id="${id}g" x1="0" y1="0" x2=".55" y2="1">
-          <stop offset="0"   stop-color="#8B9AA5"/>
-          <stop offset=".45" stop-color="#5F707C"/>
-          <stop offset="1"   stop-color="#36454F"/>
-        </linearGradient>
-        <filter id="${id}f" x="-12%" y="-10%" width="124%" height="146%"
-                color-interpolation-filters="sRGB">
-          <!-- borda comida, irregular -->
-          <feTurbulence type="fractalNoise" baseFrequency=".085" numOctaves="3" seed="4" result="en"/>
-          <feDisplacementMap in="SourceGraphic" in2="en" scale="9"
-                             xChannelSelector="R" yChannelSelector="G" result="src"/>
-          <!-- relevo da superfície -->
-          <feTurbulence type="fractalNoise" baseFrequency=".05" numOctaves="4" seed="9" result="n"/>
-          <feDiffuseLighting in="n" surfaceScale="4.2" diffuseConstant="1.05"
-                             lighting-color="#B4C3CC" result="dif">
-            <feDistantLight azimuth="228" elevation="52"/>
-          </feDiffuseLighting>
-          <feBlend in="dif" in2="src" mode="multiply" result="mix"/>
-          <!-- brilho seco de quartzo -->
-          <feSpecularLighting in="n" surfaceScale="4.2" specularConstant=".5"
-                              specularExponent="20" lighting-color="#DCEAF0" result="spe">
-            <feDistantLight azimuth="228" elevation="60"/>
-          </feSpecularLighting>
-          <feComposite in="spe" in2="src" operator="in" result="spe2"/>
-          <feComposite in="spe2" in2="mix" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" result="lit"/>
-          <feComposite in="lit" in2="src" operator="in" result="rock"/>
-          <!-- a sombra entra aqui dentro: assim não sobra filtro CSS por cima -->
-          <feDropShadow dx="0" dy="14" stdDeviation="10" flood-color="#030C16" flood-opacity=".7"/>
-        </filter>
-      </defs>
-      <g filter="url(#${id}f)">
-        <path fill="url(#${id}g)" d="${ROCK_PATH}"/>
-        <path fill="#000" opacity=".22" d="M120 18 L170 24 L188 62 L128 74 L96 44 Z"/>
-        <path fill="#fff" opacity=".07" d="M36 56 L74 30 L96 44 L64 96 L26 104 Z"/>
-        <path fill="#000" opacity=".18" d="M188 180 L128 188 L118 148 L196 132 L230 158 Z"/>
-      </g>
-    </svg>
-    </div>
+    <img class="rock-img" src="imagens/rock.webp" alt="" draggable="false">
     <div class="rock-glow"></div>
    </div>
   </div>`;
@@ -8136,37 +8021,23 @@ function paintCube(cube, F){
 }
 
 /* ------------------------------------------------------------
-   O BARQUINHO DE LEGO
-   treze peças básicas montadas em fiadas. Pressionar espalha as
-   peças pelo palco; o botão Refazer traz todas de volta.
+   O LEGO EM 3D — só a tela e o anel; quem monta, explode e refaz é o
+   módulo do Three.js (ver "O LEGO EM 3D", mais abaixo).
    ------------------------------------------------------------ */
-const LEGO_W = 240, LEGO_H = 200;
-const RED = '#D8443A', RED2 = '#B4352D', BLUE = '#2F6FB5',
-      WHITE = '#DDE6EC', YEL = '#F0B44A';
-
-const BOAT = [
-  /* casco, fiada de baixo */
-  { x:  20, y: 139, w: 2, c: RED  }, { x:  68, y: 139, w: 2, c: RED  },
-  { x: 116, y: 139, w: 2, c: RED  }, { x: 164, y: 139, w: 2, c: RED  },
-  /* casco, segunda fiada */
-  { x:  44, y: 113, w: 2, c: RED2 }, { x:  92, y: 113, w: 2, c: RED2 },
-  { x: 140, y: 113, w: 2, c: RED2 },
-  /* convés e proa */
-  { x:  68, y:  87, w: 2, c: BLUE }, { x: 116, y:  87, w: 2, c: BLUE },
-  { x: 164, y:  87, w: 1, c: WHITE },
-  /* cabine */
-  { x:  92, y:  61, w: 2, c: WHITE }, { x: 140, y:  61, w: 1, c: YEL },
-  /* chaminé */
-  { x: 104, y:  35, w: 1, c: YEL  }
-];
-
 function LEGO(){
-  const bricks = BOAT.map((b, i) =>
-    `<i class="brick" data-hx="${b.x}" data-hy="${b.y}" data-w="${b.w}"
-        style="--w:${b.w};--c:${b.c};--hx:${b.x}px;--hy:${b.y}px;--d:${i * 16}ms"></i>`
-  ).join('');
-  return `<div class="lego-stage">${bricks}</div>
-    <button class="lego-redo" type="button" title="Juntar as peças de novo">↺ Refazer</button>`;
+  return `<div class="lego-viewer">
+      <canvas class="lego-cv"></canvas>
+      <svg class="lego-anel" viewBox="0 0 80 80" aria-hidden="true">
+        <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(232,241,245,.18)" stroke-width="3"/>
+        <circle class="lego-anel-f" cx="40" cy="40" r="34" fill="none" stroke="#45C7B0"
+                stroke-width="3.5" stroke-dasharray="213.6" stroke-dashoffset="213.6"
+                transform="rotate(-90 40 40)" stroke-linecap="round"/>
+        <text class="lego-anel-t" x="40" y="44" text-anchor="middle" fill="rgba(232,241,245,.8)"
+              font-size="12" font-family="IBM Plex Mono, ui-monospace, monospace"></text>
+      </svg>
+    </div>
+    <button class="lego-redo" type="button"
+            title="Montar outro objeto com as mesmas peças">↺ Refazer</button>`;
 }
 
 /* monta o botão "?" e os elementos que ele revela, um por clique */
@@ -8241,9 +8112,10 @@ const REVEALS = (list, cfg) => {
         : r.qtit).replace(/'/g, '&#39;');
     return `<div class="reveal-item ${r.kind || ''} ${r.tone || ''}${r.nowrap ? ' nowrap' : ''}${r.bullet ? ' bullet' : ''}${r.flip ? ' flip' : ''}${
   r.aberto ? ' aberto' : ''}${r.fixo ? ' fixo' : ''}${r.nu ? ' nua' : ''}${
-  r.entra ? ' desliza' : ''}${r.sodist ? ' so-dist' : ''}${zoomable}" hidden
+  (r.entra || r.desde) ? ' desliza' : ''}${r.sodist ? ' so-dist' : ''}${zoomable}" hidden
                  data-x="${r.x}" data-y="${r.y}"
                  ${r.entra ? `data-entra="${r.entra}"` : ''}
+                 ${r.desde ? `data-desde="${r.desde.join(',')}"` : ''}
                  ${r.saiDe ? `data-saide='${r.saiDe}'` : ''}
                  ${r.sai ? `data-sai="${r.sai}"` : ''}
                  ${r.reto ? `data-reto="1"` : ''}
@@ -8508,6 +8380,7 @@ function go(n, instant){
      cristal da face que o cubo mostra, que é o que o dataset.rede da lupa
      guarda. Depois da transição: medir a lente com o slide ainda girando
      daria um vidro menor que o real, e o retículo sairia miúdo. */
+  ligaLego(sl2);                              /* o lego 3D só anda no slide dele */
   clearTimeout(reabreT);
   if (sl2 && !sl2.classList.contains('quantum-on')){
     const ret = sl2.querySelector('.reveal-item.reticulo:not([hidden])');
@@ -8594,6 +8467,14 @@ function m4olhar(olho, alvo, cima){
 function m4esfera(c, r){
   return [r,0,0,0, 0,r,0,0, 0,0,r,0, c[0],c[1],c[2],1];
 }
+/* a matriz de uma pedrinha: o giro dela (g, em colunas), o achatamento em
+   cada eixo (s) e o tamanho (r), no ponto c */
+function m4peca(c, g, s, r){
+  return [g[0] * s[0] * r, g[1] * s[0] * r, g[2] * s[0] * r, 0,
+          g[3] * s[1] * r, g[4] * s[1] * r, g[5] * s[1] * r, 0,
+          g[6] * s[2] * r, g[7] * s[2] * r, g[8] * s[2] * r, 0,
+          c[0], c[1], c[2], 1];
+}
 /* matriz de uma haste do ponto a ao ponto b, com raio dado.
    A malha do bastão vai de y=0 a y=1 com raio 1, então basta
    girar o eixo Y até a direção da haste. */
@@ -8639,6 +8520,55 @@ function malhaEsfera(fatias, aneis){
   /* na esfera unitária a normal é a própria posição */
   return { pos: new Float32Array(pos), nor: new Float32Array(pos),
            idx: new Uint16Array(idx), n: idx.length };
+}
+/* UMA PEDRINHA: a esfera de poucos polígonos, com o raio de cada vértice
+   empurrado para dentro ou para fora por umas ondas sorteadas, e cada
+   face com a sua própria normal — o sombreamento chapado é o que faz o
+   olho ler lasca de pedra, e não bola amassada. O raio depende só da
+   direção do vértice, então a costura e os polos continuam fechados.
+   Quatro sementes, quatro pedrinhas diferentes (G3.pedrinhas). */
+function malhaPedrinha(k){
+  const rnd = rng(9100 + k * 131);
+  const ondas = Array.from({ length: 5 }, () => {
+    const d = [rnd() * 2 - 1, rnd() * 2 - 1, rnd() * 2 - 1];
+    const L = Math.hypot(d[0], d[1], d[2]) || 1;
+    return { d: d.map(v => v / L), f: 1.6 + rnd() * 2.6,
+             fase: rnd() * 6.283, amp: 0.05 + rnd() * 0.08 };
+  });
+  const raio = (x, y, z) => 1 + ondas.reduce((s, o) =>
+    s + o.amp * Math.sin(o.f * (x * o.d[0] + y * o.d[1] + z * o.d[2]) + o.fase), 0);
+  const base = malhaEsfera(7, 5);
+  const P = [];
+  for (let i = 0; i < base.pos.length; i += 3){
+    const x = base.pos[i], y = base.pos[i + 1], z = base.pos[i + 2], r = raio(x, y, z);
+    P.push([x * r, y * r, z * r]);
+  }
+  const pos = [], nor = [], idx = [];
+  for (let t = 0; t < base.idx.length; t += 3){
+    const a = P[base.idx[t]], b = P[base.idx[t + 1]], c = P[base.idx[t + 2]];
+    const u = [b[0] - a[0], b[1] - a[1], b[2] - a[2]];
+    const v = [c[0] - a[0], c[1] - a[1], c[2] - a[2]];
+    let n = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
+    const L = Math.hypot(n[0], n[1], n[2]);
+    if (L < 1e-6) continue;                  /* triângulo sem área, nos polos */
+    n = n.map(q => q / L);
+    /* a normal aponta para fora da pedrinha */
+    if (n[0] * (a[0] + b[0] + c[0]) + n[1] * (a[1] + b[1] + c[1])
+        + n[2] * (a[2] + b[2] + c[2]) < 0) n = n.map(q => -q);
+    [a, b, c].forEach(p => { idx.push(pos.length / 3); pos.push(p[0], p[1], p[2]); nor.push(n[0], n[1], n[2]); });
+  }
+  return { pos: new Float32Array(pos), nor: new Float32Array(nor),
+           idx: new Uint16Array(idx), n: idx.length };
+}
+/* um giro qualquer (eixo e ângulo sorteados), em colunas, como o m4peca pede */
+function giroSorteado(rnd){
+  const d = [rnd() * 2 - 1, rnd() * 2 - 1, rnd() * 2 - 1];
+  const L = Math.hypot(d[0], d[1], d[2]) || 1;
+  const x = d[0] / L, y = d[1] / L, z = d[2] / L;
+  const t = rnd() * Math.PI * 2, c = Math.cos(t), s = Math.sin(t), k = 1 - c;
+  return [c + x * x * k,     y * x * k + z * s, z * x * k - y * s,
+          x * y * k - z * s, c + y * y * k,     z * y * k + x * s,
+          x * z * k + y * s, y * z * k - x * s, c + z * z * k];
 }
 function malhaBastao(lados){
   const pos = [], nor = [], idx = [];
@@ -8728,28 +8658,46 @@ function programa(gl, vs, fs){
 }
 
 /* --- cena 1: a rede da pedra --- */
+/* A PEDRA DESMONTADA: os blocos de que ela é feita. São pedrinhas, e não
+   esferas — cada uma com a sua forma irregular (forma: uma das quatro
+   malhas de G3.pedrinhas), o seu giro e o seu achatamento —, pequenas e
+   muitas, na cor da pedra da foto. Soltas: sem hastes entre elas. Saem de
+   dentro do contorno da pedra (pedra) e se arrumam em camadas (rede), com
+   um desalinhamento pequeno para não parecerem peças de fábrica. */
 function cenaPedra(){
   const rnd = rng(20260828);
-  const cols = 5, fil = 4, cam = 3, ex = 46, ey = 44, ez = 60;
-  const at = [], lig = [];
+  const cols = 7, fil = 5, cam = 4, ex = 34, ey = 32, ez = 44;
+  /* Os tons da rocha da foto: areia, pardo, caramelo, ferrugem e o claro
+     dos veios. Mais quentes do que a foto parece pedir: a luz da cena é
+     fria e o halo atrás é verde-água, e um tom neutro chegava à tela
+     cinza-esverdeado. */
+  const TONS = [[0.74, 0.58, 0.40], [0.56, 0.41, 0.26], [0.70, 0.52, 0.32],
+                [0.78, 0.50, 0.26], [0.88, 0.76, 0.56]];
+  const at = [];
   for (let l = 0; l < cam; l++){
     const ox = l % 2 ? ex / 2 : 0, oy = l % 2 ? ey / 2 : 0;
     for (let r = 0; r < fil; r++)
       for (let c = 0; c < cols; c++){
         const ang = rnd() * Math.PI * 2, u = rnd(), v = rnd() * 2 - 1;
         const raio = Math.cbrt(u), sf = Math.sqrt(1 - v * v);
+        const tom = TONS[Math.floor(rnd() * TONS.length)], luz = 0.9 + rnd() * 0.2;
         at.push({
-          rede:  [ (c - (cols-1)/2) * ex + ox, -((r - (fil-1)/2) * ey + oy),
-                   (l - (cam-1)/2) * ez ],
+          rede:  [ (c - (cols-1)/2) * ex + ox + (rnd() - .5) * 5,
+                   -((r - (fil-1)/2) * ey + oy) + (rnd() - .5) * 5,
+                   (l - (cam-1)/2) * ez + (rnd() - .5) * 5 ],
           pedra: [ Math.cos(ang) * sf * raio * 96, v * raio * 62,
                    Math.sin(ang) * sf * raio * 62 ],
-          atraso: rnd() * 0.3, raio: 15, cor: [0.27, 0.79, 0.70], cel: false
+          atraso: rnd() * 0.3,
+          raio: 8 + rnd() * 4,
+          cor: tom.map(q => Math.min(1, q * luz)),
+          forma: Math.floor(rnd() * 4),
+          giro: giroSorteado(rnd),
+          esc: [0.8 + rnd() * 0.45, 0.65 + rnd() * 0.35, 0.8 + rnd() * 0.4],
+          cel: false
         });
       }
   }
-  for (let i = 0; i < at.length; i++)
-    if ((i % cols) !== cols - 1) lig.push([i, i + 1, 2.2]);
-  return { at, lig };
+  return { at, lig: [] };
 }
 
 /* Lamelas Cl–Mg–Cl empilhadas. Dentro de cada lamela, três camadas
@@ -9133,6 +9081,7 @@ function iniciaG3(canvas){
     G3.gl = feito.gl; G3.prog = feito.prog;
     G3.esfera = feito.esfera; G3.bastao = feito.bastao;
     G3.esferaP = feito.esferaP; G3.bastaoP = feito.bastaoP;
+    G3.pedrinhas = feito.pedrinhas;
     G3.canvas = canvas;
     return true;
   }
@@ -9175,6 +9124,8 @@ function iniciaG3(canvas){
      aparece, e sao mais de mil desenhos por quadro a economizar. */
   G3.esferaP = sobe(malhaEsfera(11, 8));
   G3.bastaoP = sobe(malhaBastao(6));
+  /* as quatro pedrinhas da pedra desmontada (cenaPedra) */
+  G3.pedrinhas = [0, 1, 2, 3].map(k => sobe(malhaPedrinha(k)));
 
   gl.enable(gl.DEPTH_TEST);
   gl.enable(gl.BLEND);
@@ -9184,7 +9135,8 @@ function iniciaG3(canvas){
 
   G3POR.set(canvas, { gl, prog: G3.prog,
                       esfera: G3.esfera,  bastao: G3.bastao,
-                      esferaP: G3.esferaP, bastaoP: G3.bastaoP });
+                      esferaP: G3.esferaP, bastaoP: G3.bastaoP,
+                      pedrinhas: G3.pedrinhas });
   return true;
 }
 
@@ -9499,6 +9451,7 @@ function desenhaG3(canvas){
     /* quem virou átomo de Rutherford é desenhado em DOM, e não aqui:
        duas coisas no mesmo lugar seriam uma esfera dentro da outra */
     if (a.ruth) return;
+    if (a.forma !== undefined) return;       /* pedrinha: desenhada logo abaixo */
     /* clarao curto ao arrancar e ao reencaixar */
     const fx = a.fx || 0;
     const b = 1 + 2.0 * fx + (a.cel ? 1.2 * G3.pulso + 1.6 * G3.drama : 0);
@@ -9508,6 +9461,28 @@ function desenhaG3(canvas){
     gl.uniformMatrix4fv(uModel, false, m4esfera(pos[i], a.raio * rc * (1 + 0.55 * fx)));
     gl.drawElements(gl.TRIANGLES, ESF.n, gl.UNSIGNED_SHORT, 0);
   });
+
+  /* AS PEDRINHAS da pedra desmontada: agrupadas pela malha, para trocar
+     de malha só quatro vezes. Foscas — pedra não brilha como íon. */
+  if (G3.pedrinhas && G3.atomos.some(a => a.forma !== undefined)){
+    gl.uniform1f(uEsp, 0.25);
+    gl.uniform1f(uCarga, 0);
+    G3.pedrinhas.forEach((M, k) => {
+      usa(M);
+      G3.atomos.forEach((a, i) => {
+        if (a.ruth || a.forma !== k) return;
+        const fx = a.fx || 0;
+        const b = 1 + 2.0 * fx + (a.cel ? 1.2 * G3.pulso + 1.6 * G3.drama : 0);
+        gl.uniform3f(uCor, a.cor[0] * b, a.cor[1] * b, a.cor[2] * b);
+        const rc = a.cel ? enc * (1 + 0.24 * G3.pulso + 0.30 * G3.drama) : 1;
+        gl.uniformMatrix4fv(uModel, false,
+          m4peca(pos[i], a.giro, a.esc, a.raio * rc * (1 + 0.55 * fx)));
+        gl.drawElements(gl.TRIANGLES, M.n, gl.UNSIGNED_SHORT, 0);
+      });
+    });
+    gl.uniform1f(uEsp, 0.85);
+    usa(ESF);                                /* o que vem depois desenha esferas */
+  }
 
   /* O MAR DE ELÉTRONS do metal: um núcleo claro para cada elétron e, por
      cima de tudo, um halo largo e ralo. Os halos se somam onde há mais
@@ -12265,9 +12240,9 @@ function restoreRock(it){
   fechaRede(it);
 }
 
-/* devolve o barquinho ao estado montado */
+/* devolve o lego ao estado montado */
 function restoreLego(it){
-  if (it.classList.contains('exploded')) rebuildLego(it);
+  legoRestaura(it);
 }
 const gestures = new Map();   /* elemento -> ponteiros ativos */
 let gesturing = false;        /* trava o swipe de troca de slide */
@@ -14800,6 +14775,14 @@ function revealItem(slide, it){
   if (arco){
     ox = arco.x; oy = arco.y;
   }
+  /* "desde": [dx, dy] — nasce ali perto, deslocado do próprio lugar, e
+     desliza até ele. Para uma entrada curta, que não vem de fora da tela:
+     a pedra do slide 2 surge duas células da grade (80px) à esquerda. */
+  else if (it.dataset.desde){
+    const [ddx, ddy] = it.dataset.desde.split(',').map(Number);
+    ox = parseFloat(it.style.left) + (ddx || 0);
+    oy = parseFloat(it.style.top)  + (ddy || 0);
+  }
   /* "entra": lado escolhido à mão, para quando o percurso importa mais
      que a direção do destino. Ganha de tudo. */
   else if (it.dataset.entra){
@@ -14885,7 +14868,7 @@ function revealItem(slide, it){
 /* a caixa "?" solta o próximo da lista; depois do último, recolhe tudo */
 deck.addEventListener('click', (e) => {
   const redo = e.target.closest('.lego-redo');
-  if (redo){ rebuildLego(redo.closest('.reveal-item')); return; }
+  if (redo){ legoRefaz(redo.closest('.reveal-item')); return; }
   const pdz = e.target.closest('.pd-redo');
   if (pdz){ refazPedra(pdz.closest('.pd')); return; }
   const pdr = e.target.closest('.pd');
@@ -15004,172 +14987,620 @@ document.addEventListener('pointerup', soltaPoli);
 document.addEventListener('pointercancel', soltaPoli);
 
 /* ------------------------------------------------------------
-   BARQUINHO: espalhar e juntar
-   os alvos são calculados em coordenadas do palco, então as peças
-   se espalham pela tela toda, e não só em volta do barquinho.
+   O LEGO EM 3D
+   A interação do app dos modelos atômicos (lego_interacao.html), com o
+   Three.js: o objeto gira sozinho e flutua; arrastar gira a vista;
+   segurar 1s enche o anel, a câmera treme e o objeto explode — as peças
+   voam, caem, quicam e param no chão.
+   O REFAZER não remonta o mesmo objeto: as MESMAS peças do chão voam e
+   se juntam no próximo (barco, casa, carro, foguete), trocando de cor no
+   caminho; se faltar peça, ela nasce do chão, e a que sobra afunda nele.
+   É a ideia da aula no próprio gesto: as peças básicas não mudam — o
+   que muda é como elas estão combinadas.
+   Aqui é a câmera que gira em volta de tudo (no original girava o
+   barco): assim as peças espalhadas e o chão giram juntos, e o plano em
+   que elas caíram se lê como 3D.
    ------------------------------------------------------------ */
-function explodeLego(it){
-  const bricks = [...it.querySelectorAll('.brick')];
-  if (!bricks.length) return;
-  const cs = getComputedStyle(it);
-  const base = parseFloat(cs.getPropertyValue('--base')) || 200;
-  const sc = (base / LEGO_W) * (getK(it) || 1);   /* escala do barquinho no palco */
-  const cx = parseFloat(it.style.left), cy = parseFloat(it.style.top);
-  const rnd = rng(4711);
+const LG = { U: 0.2, BH: 0.09, HOLD: 1.0, CHAO: -1.5, REW: 1.2, STAG: 0.6,
+             CAM_Y: 2.2, CAM_Z: 4.5, LOOK_Y: 0.6, ESC: 1.2, SOBE: 0.3 };
+const LG_COR = { RED: 0xdc2626, BLUE: 0x2563eb, DKBLUE: 0x1e3a8a, YELLOW: 0xfacc15,
+                 WHITE: 0xf0eeea, BROWN: 0x92400e, GREEN: 0x16a34a, ORANGE: 0xea580c,
+                 CYAN: 0x06b6d4, BLACK: 0x1f2937, CREAM: 0xe8d8b0 };
+/* uma peça: posição e tamanho em unidades do mundo */
+const lgB = (x, y, z, w, h, d, c) => ({ x, y, z, w, h, d, c });
+/* a peça padrão, 1x1, pela casa da grade (i, k) e pela fiada (j) */
+const lgU = (i, j, k, c) => lgB(i * LG.U, j * LG.BH, k * LG.U, LG.U, LG.BH, LG.U, c);
 
-  /* As peças se desmontam EM VOLTA do barquinho, não pelo palco inteiro.
-     Espalhadas de ponta a ponta da tela, elas cruzavam os textos e a
-     pedra e a turma perdia a ligação entre o objeto e o que saiu dele —
-     que é justamente o que este barquinho serve para mostrar.
+/* O BARCO — o do audiobook, peça por peça */
+function lgBarco(){
+  const P = [], U = LG.U, BH = LG.BH, C = LG_COR;
+  const add = (x, y, z, w, h, d, c) => P.push(lgB(x, y, z, w, h, d, c));
+  let z, x, w;
+  /* casco (fundo) */
+  for (z = -6; z <= 6; z++){
+    w = 5;
+    if (Math.abs(z) >= 6) w = 1;
+    else if (Math.abs(z) >= 5) w = 2;
+    else if (Math.abs(z) >= 4) w = 3;
+    else if (Math.abs(z) >= 3) w = 4;
+    for (x = -(w - 1); x <= (w - 1); x++) add(x * U, 0, z * U, U, BH, U, C.DKBLUE);
+  }
+  /* paredes, camada 1 */
+  for (z = -5; z <= 5; z++){
+    w = 4;
+    if (Math.abs(z) >= 5) w = 2;
+    else if (Math.abs(z) >= 4) w = 3;
+    add(-(w - 1) * U, BH, z * U, U, BH, U, C.RED);
+    add((w - 1) * U, BH, z * U, U, BH, U, C.RED);
+  }
+  add(0, BH, -6 * U, U, BH, U, C.RED);
+  add(0, BH, 6 * U, U, BH, U, C.RED);
+  /* paredes, camada 2 */
+  for (z = -4; z <= 4; z++){
+    w = (Math.abs(z) >= 4) ? 3 : 4;
+    add(-(w - 1) * U, BH * 2, z * U, U, BH, U, C.BLUE);
+    add((w - 1) * U, BH * 2, z * U, U, BH, U, C.BLUE);
+  }
+  /* convés */
+  for (z = -5; z <= 5; z++){
+    w = 4;
+    if (Math.abs(z) >= 5) w = 2;
+    else if (Math.abs(z) >= 4) w = 3;
+    for (x = -(w - 2); x <= (w - 2); x++) add(x * U, BH, z * U, U, BH, U, C.BROWN);
+  }
+  /* cabine */
+  for (z = -2; z <= 2; z++) add(0, BH * 3, z * U, U, BH, U, C.WHITE);
+  add(0, BH * 4, 0, U, BH, U, C.YELLOW);
+  add(0, BH * 4, -U, U, BH, U, C.YELLOW);
+  add(0, BH * 4, U, U, BH, U, C.YELLOW);
+  /* mastro */
+  const mW = U * 0.35;
+  add(0, BH * 5.2, 0, mW, BH * 2, mW, C.BROWN);
+  add(0, BH * 7.2, 0, mW, BH * 2, mW, C.BROWN);
+  /* bandeira */
+  add(U * 0.35, BH * 8.8, 0, U * 0.5, BH * 0.7, U * 0.12, C.GREEN);
+  add(U * 0.35, BH * 8.1, 0, U * 0.5, BH * 0.7, U * 0.12, C.ORANGE);
+  /* vigias */
+  for (z = -2; z <= 2; z += 2){
+    add(-3 * U + U * 0.1, BH * 2, z * U, U * 0.15, U * 0.15, U * 0.05, C.CYAN);
+    add(3 * U - U * 0.1, BH * 2, z * U, U * 0.15, U * 0.15, U * 0.05, C.CYAN);
+  }
+  return P;
+}
 
-     A grade é 3x5 medida no próprio barquinho (largura W e altura H que
-     ele tem NO PALCO), então ela acompanha o tamanho e a posição dele:
-     mudar base ou x/y no slide continua funcionando sozinho. O centro
-     sobe um pouco (H * .06) para a fiada de baixo não cair em cima do
-     botão Refazer, que nasce logo abaixo do barquinho. */
-  const W = LEGO_W * sc, H = LEGO_H * sc;
-  const px = W * 0.48, py = H * 0.46;            /* passo da grade */
-  const ox = cx, oy = cy - H * 0.06;
-  const slots = [];
-  for (let r = -1; r <= 1; r++)
-    for (let c = -2; c <= 2; c++) slots.push([ox + c * px, oy + r * py]);
-  for (let i = slots.length - 1; i > 0; i--){
-    const j = Math.floor(rnd() * (i + 1));
-    [slots[i], slots[j]] = [slots[j], slots[i]];
+/* A CASA: gramado, paredes com porta e janelas, telhado em degraus */
+function lgCasa(){
+  const P = [], C = LG_COR, u = (i, j, k, c) => P.push(lgU(i, j, k, c));
+  for (let i = -4; i <= 4; i++) for (let k = -3; k <= 3; k++) u(i, 0, k, C.GREEN);
+  for (let j = 1; j <= 3; j++)
+    for (let i = -3; i <= 3; i++)
+      for (let k = -2; k <= 2; k++){
+        if (Math.abs(i) !== 3 && Math.abs(k) !== 2) continue;   /* só a borda */
+        if (k === 2 && i === 0 && j <= 2) continue;              /* a porta */
+        const janela = j === 2 && ((k === 2 && Math.abs(i) === 2)
+                    || (Math.abs(i) === 3 && k === 0) || (k === -2 && Math.abs(i) === 1));
+        u(i, j, k, janela ? C.CYAN : C.CREAM);
+      }
+  /* telhado de duas águas, em degraus, correndo ao longo de x */
+  for (let s = 0; s <= 3; s++)
+    for (let i = -4; i <= 4; i++)
+      (s < 3 ? [-(3 - s), 3 - s] : [0]).forEach(k => u(i, 4 + s, k, C.RED));
+  /* as empenas: fecham as pontas do telhado */
+  [-4, 4].forEach(i => {
+    for (let k = -2; k <= 2; k++) u(i, 4, k, C.CREAM);
+    for (let k = -1; k <= 1; k++) u(i, 5, k, C.CREAM);
+    u(i, 6, 0, C.CREAM);
+  });
+  u(2, 7, -1, C.BROWN); u(2, 8, -1, C.BROWN);                   /* chaminé */
+  return P;
+}
+
+/* O CARRO: rodas, chassi, capô com faróis, cabine envidraçada */
+function lgCarro(){
+  const P = [], C = LG_COR, u = (i, j, k, c) => P.push(lgU(i, j, k, c));
+  [-4, -3, 3, 4].forEach(i => [-2, 2].forEach(k => u(i, 0, k, C.BLACK)));
+  for (let i = -5; i <= 5; i++) for (let k = -2; k <= 2; k++) u(i, 1, k, C.BLUE);
+  for (let i = 2; i <= 5; i++) for (let k = -2; k <= 2; k++)
+    u(i, 2, k, (i === 5 && Math.abs(k) === 1) ? C.YELLOW : C.BLUE);    /* capô e faróis */
+  for (let i = -5; i <= -3; i++) for (let k = -2; k <= 2; k++)
+    u(i, 2, k, (i === -5 && Math.abs(k) === 1) ? C.RED : C.BLUE);      /* porta-malas e lanternas */
+  for (let i = -2; i <= 1; i++){ u(i, 2, -2, C.BLUE); u(i, 2, 2, C.BLUE); }
+  for (let i = -2; i <= 1; i++){ u(i, 3, -2, C.CYAN); u(i, 3, 2, C.CYAN); }
+  for (let k = -1; k <= 1; k++){ u(1, 3, k, C.CYAN); u(-2, 3, k, C.CYAN); }
+  for (let i = -2; i <= 1; i++) for (let k = -2; k <= 2; k++) u(i, 4, k, C.BLUE);
+  return P;
+}
+
+/* O FOGUETE: corpo branco com faixas, janela, aletas, bico e chama */
+function lgFoguete(){
+  const P = [], C = LG_COR, u = (i, j, k, c) => P.push(lgU(i, j, k, c));
+  for (let j = 0; j <= 10; j++)
+    for (let i = -1; i <= 1; i++)
+      for (let k = -1; k <= 1; k++){
+        let c = (j === 3 || j === 9) ? C.RED : C.WHITE;
+        if ((j === 6 || j === 7) && k === 1 && i === 0) c = C.CYAN;   /* a janela */
+        u(i, j, k, c);
+      }
+  [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([a, b]) => {
+    u(2 * a, 0, 2 * b, C.RED); u(3 * a, 0, 3 * b, C.RED);
+    u(2 * a, 1, 2 * b, C.RED); u(3 * a, 1, 3 * b, C.RED);
+    u(2 * a, 2, 2 * b, C.RED);
+  });
+  u(0, 11, 0, C.RED); u(1, 11, 0, C.RED); u(-1, 11, 0, C.RED);
+  u(0, 11, 1, C.RED); u(0, 11, -1, C.RED);
+  u(0, 12, 0, C.RED); u(0, 13, 0, C.YELLOW);
+  u(0, -1, 0, C.ORANGE);                                          /* a chama */
+  return P;
+}
+
+const LG_MODELOS = [lgBarco, lgCasa, lgCarro, lgFoguete];
+
+const LGS = { it: null, ren: null, cena: null, cam: null, grupo: null, geo: null,
+  pecas: [], sobras: [], modelo: 0, rotY: 0.5, rotX: 0, auto: true,
+  arrasto: false, pid: null, lx: 0, ly: 0, andou: 0,
+  segurando: false, t0: 0, tremor: 0, explodiu: false, voltando: false,
+  raf: 0, prev: 0, w: 0, h: 0 };
+const lgSuave = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+/* Uma peça: a caixa, o pino e as arestas, feitos UMA vez para a peça 1x1
+   e escalados para o tamanho de cada uma. É o que deixa uma peça virar
+   outra no Refazer: só a escala e a cor mudam. Material próprio, porque
+   a cor de cada uma anda sozinha. */
+function lgPeca(s){
+  const mat = new THREE.MeshPhongMaterial({ color: s.c, flatShading: true,
+                                            shininess: 30, specular: 0x222222 });
+  const g = new THREE.Group();
+  g.add(new THREE.Mesh(LGS.geo.caixa, mat));
+  const pino = new THREE.Mesh(LGS.geo.pino, mat);
+  pino.position.set(0, LG.BH / 2 + 0.015, 0);
+  g.add(pino);
+  g.add(new THREE.LineSegments(LGS.geo.aresta, LGS.geo.linha));
+  g.scale.set(s.w / LG.U, s.h / LG.BH, s.d / LG.U);
+  const p = { mesh: g, mat, orig: new THREE.Vector3(s.x, s.y, s.z),
+           esc: g.scale.clone(), escMundo: g.scale.clone().multiplyScalar(LG.ESC),
+           cor: new THREE.Color(s.c), meiaH: s.h / 2,
+           vel: new THREE.Vector3(), rotVel: new THREE.Vector3(), pousou: false,
+           de: new THREE.Vector3(), deQ: new THREE.Quaternion(),
+           deEsc: new THREE.Vector3(), deCor: new THREE.Color(), t: 0, espera: 0,
+           /* solta: arrancada à mão do objeto montado; volta: a caminho do lugar */
+           solta: false, volta: false };
+  g.userData.peca = p;                       /* o raio do dedo acha a peça por aqui */
+  return p;
+}
+const lgTira = (p) => { if (p.mesh.parent) p.mesh.parent.remove(p.mesh); p.mat.dispose(); };
+
+/* monta o modelo m inteiro, já no lugar */
+function lgMonta(m){
+  LGS.pecas.forEach(lgTira); LGS.sobras.forEach(lgTira);
+  LGS.sobras = [];
+  LGS.modelo = m;
+  LGS.grupo.position.y = LG.SOBE;
+  LGS.pecas = LG_MODELOS[m]().map(s => {
+    const p = lgPeca(s);
+    p.mesh.position.copy(p.orig);
+    LGS.grupo.add(p.mesh);
+    return p;
+  });
+  if (LGS.it) LGS.it.dataset.modelo = m;
+  LGS.puxando = null;
+  if (LGS.it) LGS.it.classList.remove('tirou');
+}
+
+function lgInicia(it){
+  if (typeof THREE === 'undefined') return false;   /* sem a biblioteca, sem lego */
+  if (LGS.ren && LGS.it === it) return true;
+  const cv = it.querySelector('.lego-cv');
+  if (!cv) return false;
+  LGS.it = it;
+  LGS.ren = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true });
+  LGS.ren.setClearColor(0x000000, 0);
+  LGS.cena = new THREE.Scene();
+  /* Névoa na cor do fundo do slide: o chão se dissolve no escuro com a
+     distância. Sem ela, a grade larga chegava a um horizonte onde as
+     linhas se amontoavam numa faixa clara. */
+  LGS.cena.fog = new THREE.Fog(0x0b1e30, 6, 13);
+  LGS.cam = new THREE.PerspectiveCamera(40, 1, 0.1, 120);
+  LGS.cena.add(new THREE.AmbientLight(0xfff6ee, 0.75));
+  const sol = new THREE.DirectionalLight(0xffffff, 0.92);
+  sol.position.set(5, 10, 7); LGS.cena.add(sol);
+  const luz2 = new THREE.DirectionalLight(0xffddb8, 0.28);
+  luz2.position.set(-4, 5, -6); LGS.cena.add(luz2);
+  /* O chão: só a grade, na cor da aula. O original tinha um piso creme
+     opaco; aqui o fundo escuro do slide faz esse papel. */
+  /* larga o bastante para o pan (até 3 para cada lado) não chegar à borda
+     dela; o passo das linhas é o mesmo, 0,2 */
+  const grade = new THREE.GridHelper(30, 150, 0x45C7B0, 0x45C7B0);
+  grade.material.transparent = true;
+  grade.material.opacity = 0.22;
+  grade.position.y = LG.CHAO + 0.003;
+  LGS.cena.add(grade);
+  LGS.geo = {
+    caixa:  new THREE.BoxGeometry(LG.U, LG.BH, LG.U),
+    pino:   new THREE.CylinderGeometry(0.04, 0.04, 0.03, 6),
+    aresta: new THREE.EdgesGeometry(new THREE.BoxGeometry(LG.U * 1.01, LG.BH * 1.01, LG.U * 1.01)),
+    linha:  new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.18 })
+  };
+  LGS.grupo = new THREE.Group();
+  LGS.grupo.scale.setScalar(LG.ESC);
+  LGS.cena.add(LGS.grupo);
+  lgMonta(0);
+
+  /* O gesto é da tela: arrastar gira a vista, segurar explode. O
+     stopPropagation deixa o resto do app de fora — senão o mesmo dedo
+     arrastaria o item inteiro pelo slide, ou passaria de slide. */
+  /* Três gestos no mesmo dedo, decididos por onde ele encosta e se anda:
+     parado 1s, explode; arrastando a partir de uma PEÇA do objeto montado,
+     tira aquela peça; arrastando a partir do vazio, gira a vista. */
+  /* PAN: dois dedos, ou Ctrl (Cmd no Mac) + arrastar com o botão
+     esquerdo, levam a câmera de lado e para cima/baixo sem girá-la —
+     nos mesmos moldes do giro: só FORA do objeto. Em cima de uma peça o
+     dedo é dela (tirar a peça, segurar para explodir). Cada dedo guarda
+     se encostou numa peça; com os dois no vazio, o segundo desfaz o que
+     o primeiro tinha começado (segurar, girar). */
+  LGS.alvoCam = new THREE.Vector3(0, LG.LOOK_Y, 0);
+  LGS.dedos = new Map();
+  const meio = () => {
+    const v = [...LGS.dedos.values()];
+    return { x: (v[0].x + v[1].x) / 2, y: (v[0].y + v[1].y) / 2 };
+  };
+  /* a peça que estiver na mão é largada e cai */
+  const larga = () => {
+    const p = LGS.puxando;
+    if (!p) return;
+    LGS.puxando = null;
+    p.mat.emissive.setHex(0x000000);
+    p.vel.set(0, 0, 0);
+    p.rotVel.set((Math.random() - .5) * 3, (Math.random() - .5) * 3, (Math.random() - .5) * 3);
+    p.pousou = false;
+  };
+  cv.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); e.stopPropagation();
+    try { cv.setPointerCapture(e.pointerId); } catch (_){}
+    /* a peça debaixo do dedo, se houver (explodido, não há objeto) */
+    const h = (!LGS.explodiu && !LGS.voltando) ? lgPega(e) : null;
+    LGS.dedos.set(e.pointerId, { x: e.clientX, y: e.clientY, peca: !!h });
+    LGS.auto = false;
+    if (LGS.dedos.size >= 2){
+      /* dois dedos: pan, se os dois estão fora do objeto; senão, este
+         segundo dedo é ignorado e o primeiro segue no que fazia */
+      if ([...LGS.dedos.values()].some(d => d.peca)) return;
+      LGS.segurando = false; LGS.tremor = 0; lgAnel(false);
+      LGS.alvo = null; larga();
+      LGS.arrasto = false;
+      LGS.pan = meio();
+      return;
+    }
+    LGS.arrasto = true; LGS.pid = e.pointerId;
+    LGS.lx = e.clientX; LGS.ly = e.clientY; LGS.andou = 0;
+    LGS.alvo = null; LGS.pan = null;
+    /* Ctrl + botão esquerdo, fora do objeto: pan */
+    LGS.panMouse = !!(e.ctrlKey || e.metaKey) && !h;
+    if (LGS.panMouse) return;
+    if (!LGS.explodiu && !LGS.voltando){
+      LGS.segurando = true; LGS.t0 = performance.now();
+      LGS.alvo = h;
+    }
+  });
+  cv.addEventListener('pointermove', (e) => {
+    const dd = LGS.dedos.get(e.pointerId);
+    if (!dd) return;
+    e.stopPropagation();
+    dd.x = e.clientX; dd.y = e.clientY;      /* guarda o "encostou numa peça" */
+    if (LGS.pan && LGS.dedos.size >= 2){
+      const m = meio();
+      lgPan(m.x - LGS.pan.x, m.y - LGS.pan.y);
+      LGS.pan = m;
+      return;
+    }
+    if (!LGS.arrasto || e.pointerId !== LGS.pid) return;
+    const dx = e.clientX - LGS.lx, dy = e.clientY - LGS.ly;
+    if (LGS.panMouse){
+      lgPan(dx, dy);
+      LGS.lx = e.clientX; LGS.ly = e.clientY;
+      return;
+    }
+    LGS.andou += Math.abs(dx) + Math.abs(dy);
+    if (LGS.andou > 6){ LGS.segurando = false; LGS.tremor = 0; lgAnel(false); }
+    if (LGS.puxando) lgMovePuxada(e);
+    else if (LGS.alvo && LGS.andou > 6 && !LGS.explodiu && !LGS.voltando){
+      lgTiraPeca(LGS.alvo);
+      lgMovePuxada(e);
+    } else if (!LGS.alvo){
+      LGS.rotY -= dx * 0.007;
+      LGS.rotX = Math.max(-0.3, Math.min(0.95, LGS.rotX + dy * 0.007));
+    }
+    LGS.lx = e.clientX; LGS.ly = e.clientY;
+  });
+  const solta = (e) => {
+    LGS.dedos.delete(e.pointerId);
+    /* fim do pan de dois dedos: o dedo que ficar não gira nada até sair */
+    if (LGS.pan){ if (LGS.dedos.size < 2) LGS.pan = null; return; }
+    if (e.pointerId !== LGS.pid) return;
+    LGS.arrasto = false; LGS.panMouse = false;
+    LGS.segurando = false; LGS.tremor = 0;
+    LGS.alvo = null;
+    lgAnel(false);
+    larga();                                 /* a peça largada cai até o chão */
+  };
+  cv.addEventListener('pointerup', solta);
+  cv.addEventListener('pointercancel', solta);
+  return true;
+}
+
+/* ---- tirar uma peça do objeto montado ----
+   O raio que sai do dedo acha a peça (a malha, e não as arestas); a peça
+   sai do objeto para a cena e anda num plano de frente para a câmera,
+   passando pelo ponto em que foi pega — assim ela acompanha o dedo sem
+   fugir para longe nem para perto. */
+function lgRaio(e){
+  const r = LGS.ren.domElement.getBoundingClientRect();
+  LGS.ray = LGS.ray || new THREE.Raycaster();
+  LGS.ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1,
+                                          -((e.clientY - r.top) / r.height) * 2 + 1), LGS.cam);
+  return LGS.ray;
+}
+/* O PAN: desloca o alvo da câmera nos eixos dela mesma (a direita e o
+   alto da tela), na medida em que o objeto acompanhe o dedo — o pixel da
+   tela vale, lá no alvo, 2·R·tan(fov/2) dividido pela altura da tela.
+   Com limite: a cena não pode ir embora da tela. */
+function lgPan(dx, dy){
+  const A = LGS.alvoCam, h = LGS.ren.domElement.getBoundingClientRect().height || 1;
+  const k = 2 * LGS.cam.position.distanceTo(A) * Math.tan(LGS.cam.fov * Math.PI / 360) / h;
+  const frente = new THREE.Vector3();
+  LGS.cam.getWorldDirection(frente);
+  const dir = new THREE.Vector3().crossVectors(frente, LGS.cam.up).normalize();
+  const cima = new THREE.Vector3().crossVectors(dir, frente).normalize();
+  A.addScaledVector(dir, -dx * k).addScaledVector(cima, dy * k);
+  A.x = Math.max(-3, Math.min(3, A.x));
+  A.z = Math.max(-3, Math.min(3, A.z));
+  A.y = Math.max(LG.CHAO, Math.min(2.5, A.y));
+}
+function lgPega(e){
+  const hits = lgRaio(e).intersectObjects(LGS.pecas.map(p => p.mesh), true);
+  for (const h of hits){
+    if (!h.object.isMesh) continue;
+    let o = h.object;
+    while (o && !o.userData.peca) o = o.parent;
+    if (o) return { p: o.userData.peca, ponto: h.point.clone() };
+  }
+  return null;
+}
+function lgTiraPeca(h){
+  const p = h.p;
+  LGS.alvo = null;
+  if (p.mesh.parent === LGS.grupo){
+    LGS.grupo.updateMatrixWorld(true);
+    const wp = new THREE.Vector3(), wq = new THREE.Quaternion(), ws = new THREE.Vector3();
+    p.mesh.matrixWorld.decompose(wp, wq, ws);
+    LGS.grupo.remove(p.mesh); LGS.cena.add(p.mesh);
+    p.mesh.position.copy(wp); p.mesh.quaternion.copy(wq); p.mesh.scale.copy(ws);
+  }
+  p.solta = true;
+  p.pousou = true;                           /* na mão, a gravidade não age */
+  p.mat.emissive.setHex(0x333333);           /* a peça na mão acende um pouco */
+  LGS.puxando = p;
+  const n = new THREE.Vector3();
+  LGS.cam.getWorldDirection(n);
+  LGS.plano = new THREE.Plane().setFromNormalAndCoplanarPoint(n, h.ponto);
+  LGS.offset = p.mesh.position.clone().sub(h.ponto);
+  LGS.it.classList.add('tirou');             /* o Refazer aparece para devolvê-la */
+}
+function lgMovePuxada(e){
+  const p = LGS.puxando, pt = new THREE.Vector3();
+  if (!p || !lgRaio(e).ray.intersectPlane(LGS.plano, pt)) return;
+  p.mesh.position.copy(pt).add(LGS.offset);
+  const chao = LG.CHAO + p.meiaH * LG.ESC + 0.005;
+  if (p.mesh.position.y < chao) p.mesh.position.y = chao;   /* não entra no chão */
+}
+/* o Refazer com o objeto montado: as peças tiradas voltam para o lugar */
+function lgDevolve(){
+  const soltas = LGS.pecas.filter(p => p.solta);
+  if (!soltas.length) return;
+  LGS.puxando = null;
+  LGS.grupo.position.y = LG.SOBE;
+  soltas.forEach((p, i) => {
+    p.mat.emissive.setHex(0x000000);
+    p.de.copy(p.mesh.position); p.deQ.copy(p.mesh.quaternion);
+    p.deEsc.copy(p.mesh.scale); p.deCor.copy(p.mat.color);
+    p.espera = i * 0.06; p.t = 0; p.volta = true; p.pousou = true;
+  });
+  LGS.voltando = true;
+  LGS.it.classList.remove('tirou');
+}
+
+/* o anel do segurar: enche e esquenta, do verde-água ao laranja */
+function lgAnel(on, hp, t){
+  const it = LGS.it, an = it && it.querySelector('.lego-anel');
+  if (!an) return;
+  an.classList.toggle('on', !!on);
+  if (!on) return;
+  const f = it.querySelector('.lego-anel-f'), tx = it.querySelector('.lego-anel-t');
+  f.setAttribute('stroke-dashoffset', (213.6 * (1 - hp)).toFixed(1));
+  f.setAttribute('stroke', `rgb(${Math.round(69 + 171 * hp)},${Math.round(199 - 106 * hp)},${Math.round(176 - 132 * hp)})`);
+  const resta = Math.max(0, Math.ceil((LG.HOLD - t) * 10) / 10);
+  tx.textContent = resta > 0 ? resta.toFixed(1) + 's' : '';
+}
+
+/* segurou 1s: as peças saem do objeto para a cena, cada uma com a sua
+   velocidade e o seu giro, e a gravidade faz o resto */
+function lgExplode(){
+  if (LGS.explodiu) return;
+  LGS.explodiu = true; LGS.segurando = false; LGS.tremor = 0;
+  lgAnel(false);
+  LGS.it.classList.add('exploded');          /* o botão Refazer aparece */
+  LGS.it.classList.remove('tirou');          /* daqui, o Refazer troca o objeto */
+  LGS.grupo.updateMatrixWorld(true);
+  LGS.pecas.forEach(p => {
+    const wp = new THREE.Vector3(), wq = new THREE.Quaternion(), ws = new THREE.Vector3();
+    p.mesh.matrixWorld.decompose(wp, wq, ws);
+    LGS.grupo.remove(p.mesh); LGS.cena.add(p.mesh);
+    p.mesh.position.copy(wp); p.mesh.quaternion.copy(wq); p.mesh.scale.copy(ws);
+    /* um pouco menos de força que no original: a tela aqui é menor */
+    const a = Math.random() * Math.PI * 2, pow = 1.0 + Math.random() * 2.2;
+    p.vel.set(Math.cos(a) * pow, 2 + Math.random() * 4, Math.sin(a) * pow);
+    p.rotVel.set((Math.random() - .5) * 8, (Math.random() - .5) * 8, (Math.random() - .5) * 8);
+    p.pousou = false;
+  });
+}
+
+/* REFAZER: o próximo objeto, com as peças que estão no chão */
+function lgRefaz(){
+  if (LGS.voltando) return;
+  /* montado, com peças tiradas: elas voltam, e o objeto é o mesmo */
+  if (!LGS.explodiu){ lgDevolve(); return; }
+  const prox = (LGS.modelo + 1) % LG_MODELOS.length;
+  const velhas = LGS.pecas;
+  const novas = LG_MODELOS[prox]().map(lgPeca);
+  LGS.grupo.position.y = LG.SOBE;
+  LGS.grupo.updateMatrixWorld(true);
+  novas.forEach((p, i) => {
+    const v = velhas[i];
+    if (v){
+      /* herda o lugar, o giro, o tamanho e a cor da peça que estava ali */
+      p.de.copy(v.mesh.position); p.deQ.copy(v.mesh.quaternion);
+      p.deEsc.copy(v.mesh.scale); p.deCor.copy(v.mat.color);
+      lgTira(v);
+    } else {
+      /* faltou peça: esta nasce do chão, pequenininha, num ponto qualquer */
+      const a = Math.random() * Math.PI * 2, r = 0.6 + Math.random() * 1.8;
+      p.de.set(Math.cos(a) * r, LG.CHAO + p.meiaH * LG.ESC, Math.sin(a) * r);
+      p.deQ.identity(); p.deEsc.set(0.001, 0.001, 0.001); p.deCor.copy(p.cor);
+    }
+    p.mesh.position.copy(p.de); p.mesh.quaternion.copy(p.deQ);
+    p.mesh.scale.copy(p.deEsc); p.mat.color.copy(p.deCor);
+    /* de baixo para cima e do meio para fora, como no original */
+    p.espera = (p.orig.y * 0.7 + Math.hypot(p.orig.x, p.orig.z) * 0.1) * LG.STAG;
+    p.t = 0; p.volta = true;
+    LGS.cena.add(p.mesh);
+  });
+  /* sobrou peça: ela afunda no chão */
+  LGS.sobras = velhas.slice(novas.length).map(s => { s.t = 0; s.deEsc.copy(s.mesh.scale); return s; });
+  LGS.pecas = novas;
+  LGS.modelo = prox;
+  LGS.it.dataset.modelo = prox;
+  LGS.voltando = true;
+  LGS.it.classList.remove('exploded');
+}
+
+function lgVolta(dt){
+  let fim = true;
+  const q0 = new THREE.Quaternion();
+  LGS.grupo.updateMatrixWorld(true);
+  LGS.pecas.forEach(p => {
+    if (!p.volta) return;                    /* as que ficaram no objeto não se mexem */
+    p.espera -= dt;
+    if (p.espera > 0){ fim = false; return; }
+    p.t = Math.min(1, p.t + dt / LG.REW);
+    if (p.t < 1) fim = false;
+    const k = lgSuave(p.t);
+    const alvo = LGS.grupo.localToWorld(p.orig.clone());
+    p.mesh.position.lerpVectors(p.de, alvo, k);
+    p.mesh.quaternion.slerpQuaternions(p.deQ, q0, k);
+    p.mesh.scale.lerpVectors(p.deEsc, p.escMundo, k);
+    p.mat.color.lerpColors(p.deCor, p.cor, k);
+  });
+  LGS.sobras = LGS.sobras.filter(s => {
+    s.t += dt / 0.6;
+    s.mesh.scale.copy(s.deEsc).multiplyScalar(Math.max(0.001, 1 - s.t));
+    if (s.t >= 1){ lgTira(s); return false; }
+    fim = false;
+    return true;
+  });
+  if (!fim) return;
+  /* todas no lugar: voltam a ser o objeto, e o objeto volta a girar */
+  LGS.pecas.forEach(p => {
+    if (!p.volta) return;
+    LGS.cena.remove(p.mesh); LGS.grupo.add(p.mesh);
+    p.mesh.position.copy(p.orig); p.mesh.quaternion.identity(); p.mesh.scale.copy(p.esc);
+    p.vel.set(0, 0, 0); p.rotVel.set(0, 0, 0); p.pousou = false;
+    p.volta = false; p.solta = false;
+  });
+  LGS.voltando = false; LGS.explodiu = false;
+}
+
+function lgTamanho(){
+  const cv = LGS.ren.domElement, w = cv.clientWidth, h = cv.clientHeight;
+  if (!w || !h || (w === LGS.w && h === LGS.h)) return;
+  LGS.w = w; LGS.h = h;
+  LGS.ren.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  LGS.ren.setSize(w, h, false);
+  LGS.cam.aspect = w / h;
+  LGS.cam.fov = w < h ? 55 : 40;
+  LGS.cam.updateProjectionMatrix();
+}
+
+function lgPasso(){
+  const it = LGS.it, sl = it && it.closest('.slide');
+  /* slide fora de cena não gasta quadro: o laço para e o go() o religa */
+  if (!it || !it.isConnected || !sl || !sl.classList.contains('is-active')){ LGS.raf = 0; return; }
+  LGS.raf = requestAnimationFrame(lgPasso);
+  const agora = performance.now(), dt = Math.min((agora - LGS.prev) / 1000, 0.05);
+  LGS.prev = agora;
+  if (it.hidden) return;                     /* ainda não revelado */
+  lgTamanho();
+
+  if (LGS.auto && !LGS.explodiu && !LGS.voltando) LGS.rotY += dt * 0.35;
+  if (!LGS.explodiu && !LGS.voltando)
+    LGS.grupo.position.y = LG.SOBE + Math.sin(agora * 0.0012) * 0.03;
+
+  if (LGS.segurando && !LGS.explodiu && !LGS.voltando){
+    const t = (agora - LGS.t0) / 1000, hp = Math.min(t / LG.HOLD, 1);
+    LGS.tremor = hp * 0.04;
+    lgAnel(true, hp, t);
+    if (t >= LG.HOLD) lgExplode();
   }
 
-  bricks.forEach((b, i) => {
-    const [tx, ty] = slots[i % slots.length];
-    /* o tremido também é medido no barquinho: tira o ar de grade sem
-       jogar peça nenhuma para fora do grupo */
-    const gx = tx + (rnd() - .5) * W * 0.26;       /* destino no palco */
-    const gy = ty + (rnd() - .5) * H * 0.24;
-    const hx = +b.dataset.hx, hy = +b.dataset.hy;
-    /* onde o centro desta peça está agora, em coordenadas do palco */
-    const nx = cx + (hx + b.dataset.w * 12 - LEGO_W / 2) * sc;
-    const ny = cy + (hy + 13 - LEGO_H / 2) * sc;
-    b.style.setProperty('--sx', (hx + (gx - nx) / sc).toFixed(1) + 'px');
-    b.style.setProperty('--sy', (hy + (gy - ny) / sc).toFixed(1) + 'px');
-    b.style.setProperty('--sr', ((rnd() - .5) * 320).toFixed(0) + 'deg');
-    b.style.setProperty('--d', (i * 18) + 'ms');
-    /* espalhar de novo desfaz o que já tinha sido encaixado */
-    b.classList.remove('posta', 'encaixou', 'pegando', 'perto');
-  });
-  it.classList.remove('completo');
-  it.classList.add('exploded');
-}
+  /* a câmera em órbita, na altura e distância do original */
+  const R = Math.hypot(LG.CAM_Z, LG.CAM_Y - LG.LOOK_Y);
+  const el = Math.atan2(LG.CAM_Y - LG.LOOK_Y, LG.CAM_Z) + LGS.rotX;
+  const tr = LGS.tremor;
+  /* em volta do alvo, que o pan desloca */
+  const A = LGS.alvoCam;
+  LGS.cam.position.set(A.x + Math.sin(LGS.rotY) * Math.cos(el) * R + tr * (Math.random() - .5),
+                       A.y + Math.sin(el) * R + tr * (Math.random() - .5),
+                       A.z + Math.cos(LGS.rotY) * Math.cos(el) * R);
+  LGS.cam.lookAt(A);
 
-function rebuildLego(it){
-  const bricks = [...it.querySelectorAll('.brick')];
-  /* na volta, as últimas a sair são as primeiras a chegar */
-  bricks.forEach((b, i) => {
-    b.style.setProperty('--d', ((bricks.length - i) * 16) + 'ms');
-    b.classList.remove('posta', 'encaixou', 'pegando', 'perto');
-  });
-  it.classList.remove('exploded', 'completo');
-}
-
-/* ------------------------------------------------------------
-   REMONTAR O BARQUINHO, PEÇA POR PEÇA
-   Espalhar é meio caminho: o que fecha a ideia é juntar de novo com a
-   própria mão. Cada tijolo se arrasta sozinho e conhece a casa dele
-   (--hx/--hy, as mesmas coordenadas com que o barquinho foi desenhado);
-   chegando perto, ele entra no lugar sozinho. A peça não some do dedo
-   por capricho: encaixar no meio do gesto é o que faz o encaixe
-   parecer ímã, e não sorte.
-   ------------------------------------------------------------ */
-const ENCAIXE_PECA = 32;   /* raio do encaixe, medido no desenho do barquinho */
-
-/* do desenho (240x200) até o pixel da tela: a escala do próprio
-   barquinho vezes a do palco */
-function escalaLego(it){
-  const cs = getComputedStyle(it);
-  const base = parseFloat(cs.getPropertyValue('--base')) || LEGO_W;
-  const k    = parseFloat(cs.getPropertyValue('--k'))    || 1;
-  return (base / LEGO_W) * k * (fitScale || 1);
-}
-
-/* onde a peça está agora, nas coordenadas do desenho */
-function poseBrick(b){
-  const cs = getComputedStyle(b);
-  return { x: parseFloat(cs.getPropertyValue('--sx')) || 0,
-           y: parseFloat(cs.getPropertyValue('--sy')) || 0 };
-}
-const casaBrick = (b) => ({ x: +b.dataset.hx, y: +b.dataset.hy });
-const longeDaCasa = (b, x, y) => {
-  const c = casaBrick(b);
-  return Math.hypot(x - c.x, y - c.y);
-};
-
-let arrastaBrick = null;
-deck.addEventListener('pointerdown', (e) => {
-  const b = e.target.closest && e.target.closest('.brick');
-  if (!b) return;
-  const it = b.closest('.reveal-item.lego');
-  /* montado, o toque no barquinho é o que o desmonta: aqui não é lugar
-     de arrastar peça. E peça já encaixada fica quieta. */
-  if (!it || !it.classList.contains('exploded')) return;
-  if (b.classList.contains('posta') || it.classList.contains('completo')) return;
-  e.preventDefault();
-  const p = poseBrick(b);
-  arrastaBrick = { b, it, id: e.pointerId, x: e.clientX, y: e.clientY,
-                   sx: p.x, sy: p.y, k: escalaLego(it) };
-  try { b.setPointerCapture(e.pointerId); } catch (_){}
-  b.classList.add('pegando');
-});
-
-document.addEventListener('pointermove', (e) => {
-  const a = arrastaBrick;
-  if (!a || e.pointerId !== a.id) return;
-  const nx = a.sx + (e.clientX - a.x) / a.k;
-  const ny = a.sy + (e.clientY - a.y) / a.k;
-  a.b.style.setProperty('--sx', nx.toFixed(1) + 'px');
-  a.b.style.setProperty('--sy', ny.toFixed(1) + 'px');
-  const d = longeDaCasa(a.b, nx, ny);
-  /* o aviso vem antes do encaixe: dá para ver que ela vai entrar */
-  a.b.classList.toggle('perto', d < ENCAIXE_PECA * 1.9);
-  if (d < ENCAIXE_PECA){ encaixaBrick(a.b, a.it); soltaBrick(); }
-});
-
-function soltaBrick(e){
-  const a = arrastaBrick;
-  if (!a || (e && e.pointerId !== a.id)) return;
-  arrastaBrick = null;
-  a.b.classList.remove('pegando', 'perto');
-  /* soltou longe da casa: a peça fica onde parou, e a rotação com que
-     ela caiu não volta — quem a pegou já a endireitou */
-  if (!a.b.classList.contains('posta')) a.b.style.setProperty('--sr', '0deg');
-}
-document.addEventListener('pointerup', soltaBrick);
-document.addEventListener('pointercancel', soltaBrick);
-
-/* a peça entra na casa dela e dá o estalo */
-function encaixaBrick(b, it){
-  b.classList.remove('pegando', 'perto', 'encaixou');
-  b.classList.add('posta');
-  void b.offsetWidth;                      /* reinicia o clarão */
-  b.classList.add('encaixou');
-  const faltam = [...it.querySelectorAll('.brick')]
-    .filter(x => !x.classList.contains('posta')).length;
-  if (!faltam) legoCompleto(it);
-}
-
-/* A última peça: o barquinho inteiro cresce, acende e assenta. A ênfase
-   é maior de propósito — é o fim do gesto, e o que ela diz é que aquilo
-   ali voltou a ser UM objeto, e não treze pedaços no mesmo lugar. */
-function legoCompleto(it){
-  const slide = it.closest('.slide');
-  it.classList.add('completo');
-  if (slide) confete(slide, parseFloat(it.style.left), parseFloat(it.style.top));
-  setTimeout(() => {
-    /* sai do estado desmontado: daqui em diante o barquinho é de novo o
-       barquinho, e um toque nele torna a espalhar as peças */
-    it.classList.remove('completo', 'exploded');
-    it.querySelectorAll('.brick').forEach(b => {
-      b.classList.remove('posta', 'encaixou');
-      b.style.setProperty('--d', '0ms');
+  /* a gravidade: nas peças da explosão e nas que a mão tirou e largou */
+  if (!LGS.voltando){
+    LGS.pecas.forEach(p => {
+      if (p.pousou || p === LGS.puxando || !(LGS.explodiu || p.solta)) return;
+      p.vel.y -= 12 * dt;
+      p.mesh.position.addScaledVector(p.vel, dt);
+      p.mesh.rotation.x += p.rotVel.x * dt;
+      p.mesh.rotation.y += p.rotVel.y * dt;
+      p.mesh.rotation.z += p.rotVel.z * dt;
+      const chao = LG.CHAO + p.meiaH * LG.ESC + 0.005;
+      if (p.mesh.position.y <= chao){
+        p.mesh.position.y = chao;
+        p.vel.y *= -0.2; p.vel.x *= 0.5; p.vel.z *= 0.5;
+        p.rotVel.multiplyScalar(0.35);
+        if (Math.abs(p.vel.y) < 0.15){ p.vel.set(0, 0, 0); p.rotVel.set(0, 0, 0); p.pousou = true; }
+      }
     });
-  }, 1000);
+  }
+  if (LGS.voltando) lgVolta(dt);
+  LGS.ren.render(LGS.cena, LGS.cam);
+}
+
+/* entrando no slide do lego: monta a cena (uma vez) e liga o laço */
+function ligaLego(sl){
+  const it = sl && sl.querySelector('.reveal-item.lego');
+  if (!it || !lgInicia(it)) return;
+  LGS.prev = performance.now();
+  if (!LGS.raf) LGS.raf = requestAnimationFrame(lgPasso);
+}
+/* o botão Refazer */
+function legoRefaz(it){ if (it && LGS.it === it) lgRefaz(); }
+/* voltar o slide devolve o objeto inteiro (o mesmo, sem trocar) */
+function legoRestaura(it){
+  it.classList.remove('exploded');
+  if (LGS.it !== it || !LGS.ren) return;
+  LGS.explodiu = LGS.voltando = LGS.segurando = false;
+  LGS.tremor = 0;
+  lgAnel(false);
+  if (LGS.alvoCam) LGS.alvoCam.set(0, LG.LOOK_Y, 0);   /* a câmera volta ao centro */
+  lgMonta(LGS.modelo);
 }
 
 /* tocar numa palavra solta o que estiver guardado dentro dela */
@@ -15225,10 +15656,8 @@ function tapItem(it){
     }
     return;
   }
-  if (it.classList.contains('lego')){
-    if (!it.classList.contains('exploded')) explodeLego(it);
-    return;
-  }
+  /* o lego explode por segurar 1s, na tela dele (lgInicia) */
+  if (it.classList.contains('lego')) return;
   /* camada de valência: o clique acende os 8, e o seguinte apaga */
   if (it.classList.contains('valencia')){ it.classList.toggle('octeto8'); return; }
   /* grão da imagem: dois cliques ampliam, e o terceiro par entra no retículo */
@@ -15285,7 +15714,7 @@ function tapItem(it){
 
 deck.addEventListener('pointerdown', (e) => {
   /* botões são botões, não alças de arrasto */
-  if (e.target.closest('.lego-redo, .pn-sair, .pn-vis, .poli-btn, .poli-nota')) return;
+  if (e.target.closest('.lego-redo, .lego-viewer, .pn-sair, .pn-vis, .poli-btn, .poli-nota')) return;
   /* molécula tridimensional ampliada: o dedo nela GIRA, não leva. Pequena
      ela continua sendo arrastada como todas as outras. */
   if (e.target.closest('.qm.tri.big')) return;
@@ -16746,6 +17175,7 @@ function coordsFor(slide){
          + `${it.dataset.of !== undefined ? `, face: ${it.dataset.of}` : ''}`
          + `, tone: '${tone}'`
          + `${it.dataset.entra ? `, entra: '${it.dataset.entra}'` : ''}`
+         + `${it.dataset.desde ? `, desde: [${it.dataset.desde}]` : ''}`
          + `${it.dataset.sai ? `, sai: '${it.dataset.sai}'` : ''}`
          + `${it.dataset.from ? `, from: '${it.dataset.from}'` : ''} }`;
   });
