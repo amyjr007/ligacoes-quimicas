@@ -1693,6 +1693,38 @@ body{
 }
 .pn.q-on .pn-sair{opacity:1;visibility:visible}
 .pn-sair:hover{border-color:var(--amber);transform:translateX(-50%) scale(1.06)}
+/* A caixa do METAL: nem o canto vivo do cristal iônico nem o traço
+   partido da molecular — moldura de aço, contínua, como a peça. */
+.pn.metalica{
+  background:linear-gradient(158deg,#262D35 0%,#12161B 100%);
+  border:1px solid rgba(190,205,220,.5);
+  border-radius:8px;
+  box-shadow:inset 0 0 60px rgba(190,205,220,.07);
+}
+.pn.metalica .pn-tit{color:#C9D6E2}
+.pn-barra{width:calc(var(--base) * 0.8px * var(--k));height:auto;display:block}
+/* A CHAVE DAS DUAS ESCALAS, na base de cada caixa: mostra o que se vê
+   (macroscópico) ou a organização dos átomos (submicroscópico). Sempre à
+   vista, e é por ela que se entra e se sai; a caixa reserva a faixa de
+   baixo para ela, que a cena 3D também deixa livre (SAIDA_PN). */
+.pn.tem-vis{padding-bottom:58px}
+.pn-vis{
+  position:absolute;left:50%;bottom:10px;transform:translateX(-50%);z-index:3;
+  padding:7px 16px;border-radius:999px;white-space:nowrap;
+  border:1px solid rgba(69,199,176,.6);
+  background:linear-gradient(180deg,#123447 0%,#0A1F2C 100%);
+  color:var(--paper);font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+  text-transform:uppercase;cursor:pointer;pointer-events:auto;
+  transition:transform .2s,border-color .3s ease,background .3s ease;
+}
+.pn-vis:hover{transform:translateX(-50%) scale(1.05)}
+.pn.molecular .pn-vis{border-color:rgba(240,180,74,.6)}
+.pn.metalica  .pn-vis{border-color:rgba(190,205,220,.65)}
+.pn-vis .pn-vis-b{display:none}
+.pn.q-on .pn-vis .pn-vis-a{display:none}
+.pn.q-on .pn-vis .pn-vis-b{display:inline}
+.pn.q-on .pn-vis{border-color:var(--amber);
+                 background:linear-gradient(180deg,#4A3512 0%,#2A1D08 100%)}
 
 /* Num slide de mundos confinados, a camada quântica não escurece a tela
    inteira: ela serve só de suporte para a cena 3D. O escuro vem da caixa. */
@@ -1701,6 +1733,13 @@ body{
    dedo. Quem lê o gesto é o próprio slide, e só quando o toque cai em
    cima de um íon — assim o cubo ao lado continua clicável. */
 .slide.rede-livre .q3d{pointer-events:none !important}
+/* Mundo confinado SEM rede aberta (o da água, que é feito de DOM): a tela
+   3D não está recortada em caixa nenhuma, então cobria o slide inteiro e
+   roubava todos os toques — as moléculas não se arrastavam, o botão de
+   sair não respondia e as outras caixas não abriam: a aula ficava presa.
+   Sem rede, ela não recebe o dedo. Com rede, ela é recortada na caixa
+   (abrePainel) e o resto do slide continua ao alcance. */
+.slide.q-confinado:not(.rede-on) .q3d{pointer-events:none}
 .slide.rede-livre .reveal-item.reticulo{pointer-events:none}
 .slide.q-confinado .q-wash,
 .slide.q-confinado .q-aurora,
@@ -2645,6 +2684,76 @@ body.ruth-movel .q-ruth .gas-id .carga.pegando{
          cursor:ew-resize;touch-action:none}
 /* o brilho que corre na água quando ela é agitada */
 .bq-brilho{opacity:calc(var(--agita,0) * .5)}
+
+/* ---------- o teste de condutividade da face 5 ----------
+   O aparelho do app de ácidos, visto de lado: fonte na prateleira, a
+   lâmpada no meio do circuito e os dois eletrodos suspensos sobre o
+   béquer. Medidas da face sem escala, como as do béquer. */
+.cd{position:relative;flex:1;display:flex;align-items:flex-start;justify-content:center;
+    transform:translate(var(--cdx,0px),var(--cdy,0px));
+    user-select:none;-webkit-user-select:none}
+/* Só as áreas de toque respondem ao dedo (pointer-events="all" nelas):
+   o vidro e a água, desenhados por cima da pedra, não podem roubá-lo. */
+.cd-svg{width:292px;height:auto;display:block;overflow:visible;pointer-events:none}
+.cd-pow,.cd-ele,.cd-ant,.cd-prox{cursor:pointer}
+/* o interruptor: vermelho desligado, verde ligado, e a luzinha em volta */
+.cd-pow-cap{fill:#C0392B;transition:fill .2s ease}
+.cd-pow-luz{fill:url(#cdLuzV);opacity:.5;transition:opacity .25s ease}
+.cd-pow-luz.v{fill:url(#cdLuzG);opacity:0}
+.cd.ligado .cd-pow-cap{fill:#35E065}
+.cd.ligado .cd-pow-luz{opacity:0}
+.cd.ligado .cd-pow-luz.v{opacity:1}
+.cd-pow:active .cd-pow-cap,.cd-ele:active .cd-ele-cap{transform:translateY(.6px)}
+/* a seta do botão da haste: para baixo com os eletrodos em cima, para
+   cima com eles mergulhados — como botão de elevador */
+.cd-seta{transform-box:fill-box;transform-origin:center;transition:transform .3s ease}
+.cd.baixo .cd-seta{transform:rotate(180deg)}
+/* A LÂMPADA. O brilho vem de fora, de 0 a 1 (cdBrilho): aqui fica só
+   o apagado e a transição curta, que amacia as falhas sem apagá-las. */
+.cd-bulbo{fill:rgba(223,230,238,.16);transition:fill .12s linear}
+.cd-fil{stroke:#2A2A2A;transition:stroke .12s linear}
+.cd-halo,.cd-aur{opacity:0;transition:opacity .12s linear,transform .12s linear;
+                 mix-blend-mode:screen}
+.cd-aur{transform-box:fill-box;transform-origin:center}
+/* O QUE ESTÁ NO BÉQUER troca pelas setas (data-sub): 0 o sal sólido,
+   1 a água, 2 o eletrólito fraco, 3 o forte. Um sai em fade enquanto o
+   outro entra. */
+.cd-liq,.cd-liq-f,.cd-copo,.cd-bico,.cd-term,.cd-nome,.cd-sal{transition:opacity .45s ease}
+.cd[data-sub="0"] .cd-liq,.cd[data-sub="0"] .cd-liq-f,.cd[data-sub="0"] .cd-copo{opacity:0}
+/* O SAL PURO vai ao bico de Meker, no lugar do béquer: fundido, conduz */
+.cd:not([data-sub="0"]) .cd-bico,.cd:not([data-sub="0"]) .cd-term{opacity:0}
+.cd:not([data-sub="0"]) .cd-bico .cd-hit{pointer-events:none}
+.cd-bk-liga,.cd-bk-val{cursor:pointer}
+.cd-bk-chama{
+  transform-box:fill-box;transform-origin:50% 100%;
+  transform:scaleY(0);opacity:0;
+  transition:transform .45s cubic-bezier(.3,.7,.4,1),opacity .45s ease;
+}
+.cd.bk-aceso .cd-bk-chama{transform:scaleY(var(--ch,1));opacity:1}
+.cd-bk-chama-i{transform-box:fill-box;transform-origin:50% 100%}
+.cd.bk-aceso .cd-bk-chama-i{animation:bkTremula .34s ease-in-out infinite alternate}
+.cd-bk-liga-c{fill:url(#cdBkOff);stroke:#29333A;stroke-width:3;
+              transition:fill .3s ease,stroke .3s ease}
+.cd.bk-aceso .cd-bk-liga-c{fill:url(#cdBkOn);stroke:#1E8E3A;
+                           filter:drop-shadow(0 0 6px rgba(60,230,110,.95))}
+.cd-bk-sal{transform-box:fill-box;transform-origin:50% 100%}
+.cd-nome{opacity:0}
+.cd[data-sub="0"]:not(.fundido) .cd-nome[data-s="0"],
+.cd[data-sub="0"].fundido .cd-nome[data-s="0l"],
+.cd[data-sub="1"]:not(.salgada) .cd-nome[data-s="1"],
+.cd[data-sub="1"].salgada .cd-nome[data-s="1d"],
+.cd[data-sub="2"] .cd-nome[data-s="2"],
+.cd[data-sub="3"] .cd-nome[data-s="3"]{opacity:1}
+.cd-ant:active path,.cd-prox:active path{transform:scale(.85)}
+.cd-ant path,.cd-prox path{transform-box:fill-box;transform-origin:center}
+/* a pedra de sal: só existe com a água no béquer */
+.cd-sal{opacity:0}
+.cd[data-sub="1"] .cd-sal{opacity:1}
+.cd[data-sub="1"].sumiu .cd-sal{opacity:0}
+.cd-sal-pega{cursor:grab}
+.cd.pegando .cd-sal-pega{cursor:grabbing}
+.cd:not([data-sub="1"]) .cd-sal-pega,.cd.sumiu .cd-sal-pega{pointer-events:none}
+.cd-sal-i{transform-box:fill-box;transform-origin:50% 100%}
 
 /* ---------- o pedaço de sal que se quebra ---------- */
 .pd{position:relative;flex:1;display:flex;align-items:center;justify-content:center;
@@ -4362,6 +4471,42 @@ const SLIDES = [
     ]
   },
   {
+    /* OS TRÊS TIPOS DE LIGAÇÃO, LADO A LADO. Era o slide 11 ("Contradizendo
+       Dalton"); veio para antes da ligação iônica, para a turma ver os
+       três tipos antes de estudar o primeiro.
+       Cada caixa tem, na base, a chave das duas escalas: o que se vê
+       (macroscópico) e a organização dos átomos (submicroscópico). Uma
+       caixa aberta de cada vez — as duas redes 3D (o sal e o ferro)
+       dividem o mesmo canvas do slide. */
+    title: 'Tipos de Ligações Químicas',
+    mini: 'Tipos de ligações químicas',     /* rótulo da miniatura */
+    tsize: 40,
+    content: '',
+    reveals: [
+      { nowrap: true,
+        text: 'O tipo de ligação depende da forma como os átomos estão combinados',
+        x: 640, y: 158, base: 26, tone: '' },
+      /* as três caixas saem no mesmo clique: follow 0 nas outras duas */
+      { kind: 'painel', estilo: 'ionica', tit: 'Na<sub>2</sub>O',
+        img: 'imagens/NaCl.png', rede: 'nacl',
+        x: 232, y: 424, base: 370, tone: '' },
+      { follow: 0, kind: 'painel', estilo: 'molecular', tit: 'H<sub>2</sub>O',
+        corpo: 'glass', campo: 'h2o',
+        x: 640, y: 424, base: 370, tone: '' },
+      { follow: 0, kind: 'painel', estilo: 'metalica', tit: 'Fe',
+        corpo: 'barra', rede: 'fe',
+        x: 1048, y: 424, base: 370, tone: '' },
+      /* terceiro clique: o nome da ligação, embaixo de cada caixa, na cor
+         da moldura dela */
+      { nowrap: true, text: '<span style="color:var(--aqua)">Iônico</span>',
+        x: 232, y: 648, base: 26, tone: '' },
+      { follow: 0, nowrap: true, text: '<span style="color:var(--amber)">Molecular</span>',
+        x: 640, y: 648, base: 26, tone: '' },
+      { follow: 0, nowrap: true, text: '<span style="color:#C9D6E2">Metálica</span>',
+        x: 1048, y: 648, base: 26, tone: '' }
+    ]
+  },
+  {
     /* OS CINCO COMPOSTOS IÔNICOS, NUM SLIDE SÓ.
        Eram cinco slides iguais em tudo menos a substância: mesma frase,
        mesma casa no palco, mesma imagem de onde se arranca um grão para
@@ -4486,22 +4631,6 @@ const SLIDES = [
     ]
   },
   {
-    /* a montar: por enquanto só o título */
-    title: 'Contradizendo Dalton: Compostos iônicos não são formados por moléculas',
-    mini: 'Composto iônico não forma moléculas',   /* rótulo da miniatura */
-    tsize: 24,                             /* cabe numa linha só */
-    content: '',
-    reveals: [
-      /* as duas caixas saem no mesmo clique: follow 0 no segundo */
-      { kind: 'painel', estilo: 'ionica', tit: 'Na<sub>2</sub>O',
-        img: 'imagens/NaCl.png', rede: 'nacl',
-        x: 340, y: 396, base: 587, tone: '' },
-      { follow: 0, kind: 'painel', estilo: 'molecular', tit: 'H<sub>2</sub>O',
-        corpo: 'glass', campo: 'h2o',
-        x: 933, y: 398, base: 592.5, tone: '' }
-    ]
-  },
-  {
     /* a montar: o texto de abertura e, depois, a lista de propriedades */
     title: 'Propriedades dos compostos iônicos',
     tsize: 40,
@@ -4526,7 +4655,8 @@ const SLIDES = [
           { n: '', top: true, t: '3. São quebradiços', extra: PEDRA },
           /* sem quebra: cabe numa linha só (262 de 292 unidades de face) */
           { n: '', top: true, t: '4. São geralmente solúveis na água', extra: BEQUER },
-          { n: '', top: true, t: '5. Conduzem eletricidade dissolvidos\nem água ou puros no estado líquido' } ] },
+          { n: '', top: true, t: '5. Conduzem eletricidade dissolvidos\nem água ou puros no estado líquido',
+            extra: COND } ] },
       /* Terceiro clique: a lupa. O cristal que ela mostra é o da face —
          começa no óxido de sódio e troca a cada virada. */
       /* A lupa e a legenda dela são ERGUIDAS de dentro do grão de MgO
@@ -4885,6 +5015,54 @@ const SLIDES = [
   }
 ];
 
+/* Uma barra de ferro, em perspectiva: o topo apanha a luz, a frente
+   escurece para baixo e a ponta fica na sombra. Os riscos finos na frente
+   são o acabamento de laminado, que é o que faz o olho ler aço e não
+   plástico cinza. */
+function BARRA_FE(){
+  return `<svg class="pn-barra" viewBox="0 0 300 150" aria-hidden="true">
+    <defs>
+      <linearGradient id="feTopo" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0"   stop-color="#EEF2F5"/>
+        <stop offset=".5"  stop-color="#B8C2CB"/>
+        <stop offset="1"   stop-color="#8E99A3"/>
+      </linearGradient>
+      <linearGradient id="feFrente" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0"   stop-color="#A3AEB8"/>
+        <stop offset=".18" stop-color="#D5DCE2"/>
+        <stop offset=".45" stop-color="#7F8A94"/>
+        <stop offset="1"   stop-color="#434C54"/>
+      </linearGradient>
+      <linearGradient id="fePonta" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#6E7982"/>
+        <stop offset="1" stop-color="#333A40"/>
+      </linearGradient>
+      <radialGradient id="feSombra" cx="50%" cy="50%" r="50%">
+        <stop offset="0" stop-color="#000" stop-opacity=".55"/>
+        <stop offset="1" stop-color="#000" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <ellipse cx="152" cy="118" rx="140" ry="12" fill="url(#feSombra)"/>
+    <polygon points="18,62 56,38 286,38 248,62" fill="url(#feTopo)"/>
+    <rect x="18" y="62" width="230" height="44" fill="url(#feFrente)"/>
+    <polygon points="248,62 286,38 286,82 248,106" fill="url(#fePonta)"/>
+    <g stroke="#FFFFFF" stroke-width=".6" opacity=".22">
+      <line x1="24" y1="70" x2="242" y2="70"/>
+      <line x1="30" y1="79" x2="236" y2="79"/>
+      <line x1="22" y1="90" x2="240" y2="90"/>
+      <line x1="34" y1="99" x2="230" y2="99"/>
+    </g>
+    <!-- as arestas vivas -->
+    <polyline points="18,62 248,62 286,38" fill="none" stroke="#FFFFFF"
+              stroke-width="1.1" opacity=".7"/>
+    <polyline points="18,106 248,106 286,82" fill="none" stroke="#1E2429"
+              stroke-width="1" opacity=".8"/>
+    <line x1="248" y1="62" x2="248" y2="106" stroke="#2B3238" stroke-width="1"/>
+    <!-- o brilho que corre no topo -->
+    <polygon points="70,44 96,44 76,56 50,56" fill="#FFFFFF" opacity=".45"/>
+  </svg>`;
+}
+
 /* Bico de Meker-Fisher: tripé com aro, o bico no meio e a cápsula de
    porcelana em cima. A vista é de cima e de frente, então enxergamos o
    sal dentro da cápsula derretendo. */
@@ -4962,6 +5140,405 @@ function BICO(){
       <i class="bk-tubo"><s class="bk-merc"></s></i>
       <b class="bk-num">25 °C</b>
     </div>
+  </div>`;
+}
+
+/* O TESTE DE CONDUTIVIDADE, trazido do app de ácidos (o do diálogo 1.8F)
+   e redesenhado de lado, em 2D: a fonte e a lâmpada na prateleira de
+   madeira, o béquer com a solução de sal e, sobre ele, os dois eletrodos
+   presos à haste. Dois botões: o on/off da fonte e o da haste, que desce
+   os eletrodos até a solução e os sobe de volta. A lâmpada só acende com
+   o circuito fechado — fonte ligada E as pontas dentro da água salgada.
+
+   O bloco dos eletrodos é desenhado em y = CD_CIMA; descer é só
+   transladar o grupo. Os dois fios pretos, que vão até ele, são
+   refeitos a cada quadro da descida (cdFioA / cdFioB). */
+const CD_CIMA = 52, CD_BAIXO = 92;       /* o bloco dos eletrodos: em cima e mergulhado */
+const CD_PONTA = 49;                     /* do bloco até a ponta dos eletrodos */
+const CD_AGUA = 132;                     /* a superfície da solução no béquer */
+const cdFioA = y => `M125 34 C150 44 176 ${(y - 22).toFixed(1)} 186 ${(y - 5).toFixed(1)}`;
+const cdFioB = y => `M66 2 C100 -18 214 ${(y - 44).toFixed(1)} 206 ${(y - 5).toFixed(1)}`;
+/* O carrossel do béquer, na ordem das setas, e o brilho que cada
+   conteúdo dá à lâmpada com o circuito fechado:
+     0  NaCl(s)    sólido, no bico de Meker: os íons presos no retículo não
+                   conduzem; fundido (801 °C) eles se soltam e a lâmpada
+                   acende forte (ver cdAlvo)
+     1  H2O        pura, quase não conduz; o brilho vem do sal que se
+                   dissolve nela (ver cdAlvo)
+     2  HgCl2(aq)  eletrólito fraco: pouco se dissocia, a lâmpada mal acende
+     3  KNO3(aq)   eletrólito forte: brilho máximo. (Era MgCl2, mas ao lado
+                   do HgCl2 as duas fórmulas se confundiam na projeção.) */
+const CD_FORCA = [0, 0, 0.18, 1];
+const CD_DISSOLVE = 14000;               /* ms para a pedra se dissolver toda */
+const CD_SAL_L = 13.5, CD_SAL_A = 14;    /* meia largura e meia altura da pedra */
+const CD_SAL_CASA = [138, 158];          /* na bancada, à esquerda do béquer */
+const CD_SAL_CHAO = 158, CD_SAL_FUNDO = 154;
+const CD_SAL_X = [177, 215];             /* por onde o centro dela anda dentro do copo */
+const CD_COPO = [162, 230], CD_BOCA = 106;
+/* O bico de Meker da face 2, em escala: o desenho dele (200 x 200) entra
+   pelo mesmo translate/scale, centrado sob os eletrodos e com a base na
+   bancada. A cápsula fica mais alta que a água do béquer, então com o
+   sal os eletrodos descem menos. */
+const CD_BK_X = 151, CD_BK_Y = 86.5, CD_BK_K = 0.45;
+const CD_BAIXO_BICO = 62;                /* as pontas encostam no sal da cápsula */
+const CD_SAL_TOPO = 108;                 /* o alto do sal, onde as pontas tocam */
+const CD_BK_AMB = 25, CD_BK_MAX = 1000;  /* °C: ambiente e a chama cheia */
+const CD_FUNDE = 3300;                   /* ms para o sal fundir (ou solidificar) de todo */
+function COND(){
+  /* a pedra de sal: o mesmo cristal isométrico do béquer da face 4 */
+  const a = 15, b = 7.5, h = 16, cx = 30, cy = 31;
+  const P = (x, z, y) => [ cx + (x - z) * a, cy + (x + z - 2) * b - (y - 1) * h ];
+  const pt = q => q.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ');
+  const pedra = `
+    <polygon points="${pt([P(0,2,2),P(2,2,2),P(2,2,0),P(0,2,0)])}" fill="url(#cdSlEsq)"/>
+    <polygon points="${pt([P(2,0,2),P(2,2,2),P(2,2,0),P(2,0,0)])}" fill="url(#cdSlDir)"/>
+    <polygon points="${pt([P(0,0,2),P(2,0,2),P(2,2,2),P(0,2,2)])}" fill="url(#cdSlTopo)"/>
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="${pt([P(0,2,2),P(0,0,2),P(2,0,2)])}"
+                stroke="#FFFFFF" stroke-width="1.1" opacity=".85"/>
+      <polyline points="${pt([P(0,2,2),P(2,2,2),P(2,0,2)])}"
+                stroke="#FFFFFF" stroke-width=".8" opacity=".45"/>
+      <polyline points="${pt([P(0,2,2),P(0,2,0),P(2,2,0),P(2,0,0)])}"
+                stroke="#5E6E7C" stroke-width=".9" opacity=".7"/>
+      <polyline points="${pt([P(2,2,2),P(2,2,0)])}"
+                stroke="#7C8C99" stroke-width=".8" opacity=".8"/>
+    </g>
+    <polygon points="${pt([P(0.25,0.25,2),P(1.15,0.25,2),P(0.95,1.1,2),P(0.3,0.95,2)])}"
+             fill="#FFFFFF" opacity=".5"/>`;
+  const nome = (s, html) =>
+    `<text class="cd-nome" data-s="${s}" x="196" y="189">${html}</text>`;
+  return `<div class="cd" data-y="${CD_CIMA}" data-sub="0" style="--ch:.98">
+    <svg class="cd-svg" viewBox="0 -14 300 206" aria-hidden="true">
+      <defs>
+        <linearGradient id="cdMad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0"   stop-color="#6A4224"/>
+          <stop offset=".45" stop-color="#9A6A40"/>
+          <stop offset="1"   stop-color="#63401F"/>
+        </linearGradient>
+        <linearGradient id="cdMadH" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#B07C4C"/>
+          <stop offset="1" stop-color="#6E4526"/>
+        </linearGradient>
+        <linearGradient id="cdFonte" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#F1F4F6"/>
+          <stop offset="1" stop-color="#B4BCC3"/>
+        </linearGradient>
+        <linearGradient id="cdMet" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0"   stop-color="#5E6973"/>
+          <stop offset=".32" stop-color="#DCE4EA"/>
+          <stop offset=".62" stop-color="#94A0AA"/>
+          <stop offset="1"   stop-color="#4E5860"/>
+        </linearGradient>
+        <linearGradient id="cdMetH" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0"   stop-color="#DCE4EA"/>
+          <stop offset=".55" stop-color="#94A0AA"/>
+          <stop offset="1"   stop-color="#4E5860"/>
+        </linearGradient>
+        <linearGradient id="cdGraf" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0"  stop-color="#141619"/>
+          <stop offset=".4" stop-color="#4C5259"/>
+          <stop offset="1"  stop-color="#1A1D21"/>
+        </linearGradient>
+        <!-- a solução de sal: o mesmo azul do béquer do app de ácidos -->
+        <linearGradient id="cdSol" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0"   stop-color="#4AA8E8" stop-opacity=".7"/>
+          <stop offset=".6"  stop-color="#2472A8" stop-opacity=".84"/>
+          <stop offset="1"   stop-color="#154C75" stop-opacity=".92"/>
+        </linearGradient>
+        <linearGradient id="cdVidro" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0"   stop-color="#BFD6E4" stop-opacity=".38"/>
+          <stop offset=".14" stop-color="#EAF4FA" stop-opacity=".16"/>
+          <stop offset=".42" stop-color="#FFFFFF" stop-opacity=".03"/>
+          <stop offset=".78" stop-color="#9FBACB" stop-opacity=".10"/>
+          <stop offset="1"   stop-color="#C6DCEA" stop-opacity=".34"/>
+        </linearGradient>
+        <radialGradient id="cdSombra" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#000000" stop-opacity=".5"/>
+          <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+        </radialGradient>
+        <!-- o brilho da lâmpada: núcleo que estoura e auréola larga -->
+        <radialGradient id="cdHalo" cx="50%" cy="50%" r="50%">
+          <stop offset="0"   stop-color="#FFFFEE"/>
+          <stop offset=".22" stop-color="#FFF2B9" stop-opacity=".95"/>
+          <stop offset=".5"  stop-color="#FFCD5F" stop-opacity=".45"/>
+          <stop offset="1"   stop-color="#FFB43C" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="cdAureola" cx="50%" cy="50%" r="50%">
+          <stop offset="0"  stop-color="#FFE18C" stop-opacity=".5"/>
+          <stop offset=".4" stop-color="#FFC355" stop-opacity=".2"/>
+          <stop offset="1"  stop-color="#FFAF37" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="cdLuzV" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#FF4030" stop-opacity=".7"/>
+          <stop offset="1" stop-color="#FF4030" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="cdLuzG" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#2EE060" stop-opacity=".85"/>
+          <stop offset="1" stop-color="#2EE060" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="cdAzul" cx="38%" cy="32%" r="70%">
+          <stop offset="0" stop-color="#6FA8E0"/>
+          <stop offset="1" stop-color="#1F5796"/>
+        </radialGradient>
+        <!-- o bico de Meker: metal, porcelana, fogo, o registro e o botão -->
+        <linearGradient id="cdBkMet" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0"   stop-color="#5E6973"/>
+          <stop offset=".32" stop-color="#DCE4EA"/>
+          <stop offset=".62" stop-color="#94A0AA"/>
+          <stop offset="1"   stop-color="#4E5860"/>
+        </linearGradient>
+        <linearGradient id="cdBkPorc" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#FFFFFF"/>
+          <stop offset="1" stop-color="#BFCAD2"/>
+        </linearGradient>
+        <radialGradient id="cdBkFogo" cx="50%" cy="100%" r="85%">
+          <stop offset="0"   stop-color="#FFF7C8"/>
+          <stop offset=".3"  stop-color="#FFC24A"/>
+          <stop offset=".68" stop-color="#FF6D22"/>
+          <stop offset="1"   stop-color="rgba(255,80,20,0)"/>
+        </radialGradient>
+        <linearGradient id="cdBkGas" x1="0" y1="1" x2="0" y2="0">
+          <stop offset="0" stop-color="#3A2A10"/>
+          <stop offset="1" stop-color="#F0B44A"/>
+        </linearGradient>
+        <radialGradient id="cdBkOff" cx="38%" cy="30%" r="70%">
+          <stop offset="0"  stop-color="#5A666F"/>
+          <stop offset=".7" stop-color="#232C33"/>
+        </radialGradient>
+        <radialGradient id="cdBkOn" cx="38%" cy="30%" r="70%">
+          <stop offset="0"   stop-color="#C6FFD4"/>
+          <stop offset=".55" stop-color="#2ACB52"/>
+          <stop offset="1"   stop-color="#0D7A2B"/>
+        </radialGradient>
+        <!-- as três faces da pedra de sal -->
+        <linearGradient id="cdSlTopo" x1=".15" y1="0" x2=".85" y2="1">
+          <stop offset="0"   stop-color="#FFFFFF"/>
+          <stop offset=".45" stop-color="#F4F8FB"/>
+          <stop offset="1"   stop-color="#DCE6EE"/>
+        </linearGradient>
+        <linearGradient id="cdSlEsq" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#D3DFE8"/>
+          <stop offset="1" stop-color="#A9B9C6"/>
+        </linearGradient>
+        <linearGradient id="cdSlDir" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#9DAEBC"/>
+          <stop offset="1" stop-color="#78899A"/>
+        </linearGradient>
+        <filter id="cdBrilho" x="-1" y="-1" width="3" height="3">
+          <feGaussianBlur stdDeviation="1.3" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <clipPath id="cdDentro">
+          <path d="M163.5 106 L163.5 170 A32.5 4.6 0 0 0 228.5 170 L228.5 106 Z"/>
+        </clipPath>
+      </defs>
+
+      <!-- as sombras de contato na bancada -->
+      <ellipse cx="30"  cy="172" rx="18" ry="3.2" fill="url(#cdSombra)"/>
+      <ellipse class="cd-copo" cx="196" cy="172" rx="42" ry="5.5" fill="url(#cdSombra)"/>
+      <ellipse cx="264" cy="172" rx="26" ry="3.4" fill="url(#cdSombra)"/>
+
+      <!-- o suporte de madeira: poste e prateleira -->
+      <rect x="24" y="46" width="12" height="126" fill="url(#cdMad)"/>
+      <rect x="6" y="38" width="146" height="8" rx="1.5" fill="url(#cdMadH)"/>
+      <line x1="6.5" y1="45.4" x2="151.5" y2="45.4" stroke="#4A2E17" stroke-width="1"/>
+
+      <!-- a fonte de alimentação -->
+      <rect x="16" y="2" width="60" height="36" rx="3" fill="url(#cdFonte)"
+            stroke="#8E979E" stroke-width="1"/>
+      <rect x="21" y="6" width="50" height="28" rx="2" fill="#D3D9DD"
+            stroke="#A7B0B7" stroke-width=".8"/>
+      <circle cx="58" cy="18" r="7.5" fill="#3A4148"/>
+      <circle cx="58" cy="18" r="5.6" fill="#4D565E"/>
+      <line x1="58" y1="18" x2="58" y2="12.6" stroke="#CFD6DC" stroke-width="1.3"
+            stroke-linecap="round"/>
+      <g stroke="#7C8790" stroke-width=".8" stroke-linecap="round">
+        <line x1="49.2" y1="22.5" x2="48" y2="23.4"/>
+        <line x1="58" y1="8.2" x2="58" y2="6.9"/>
+        <line x1="66.8" y1="22.5" x2="68" y2="23.4"/>
+      </g>
+      <!-- o interruptor, à esquerda do painel -->
+      <g class="cd-pow">
+        <circle class="cd-pow-luz" cx="31.5" cy="17.5" r="13"/>
+        <circle class="cd-pow-luz v" cx="31.5" cy="17.5" r="13"/>
+        <rect x="26.5" y="10.5" width="10" height="14" rx="2" fill="#5A2018"/>
+        <rect class="cd-pow-cap" x="27.5" y="11.2" width="8" height="12" rx="1.6"/>
+        <rect x="28.4" y="12" width="2.2" height="10" rx="1" fill="#FFFFFF" opacity=".28"/>
+        <text x="31.5" y="31" text-anchor="middle" font-family="IBM Plex Mono, ui-monospace, monospace"
+              font-size="5.4" font-weight="600" fill="#56606A">on/off</text>
+        <!-- a área de toque, bem maior que o botão -->
+        <rect x="16" y="2" width="30" height="36" fill="none" pointer-events="all"/>
+      </g>
+
+      <!-- a lâmpada: soquete na prateleira, bulbo de vidro, filamento -->
+      <circle class="cd-aur" cx="116" cy="13" r="46" fill="url(#cdAureola)"/>
+      <path d="M106 38 L108 27 L124 27 L126 38 Z" fill="url(#cdMet)"/>
+      <g stroke="#7E8A94" stroke-width=".7">
+        <line x1="107.6" y1="30.5" x2="124.4" y2="30.5"/>
+        <line x1="107" y1="34" x2="125" y2="34"/>
+      </g>
+      <g stroke="#40444A" stroke-width="1" stroke-linecap="round">
+        <line x1="112.5" y1="27" x2="112.5" y2="14"/>
+        <line x1="119.5" y1="27" x2="119.5" y2="14"/>
+      </g>
+      <path class="cd-fil" d="M112.5 14 q.875 -2.6 1.75 0 t1.75 0 t1.75 0 t1.75 0"
+            fill="none" stroke-width="1.15" stroke-linecap="round"/>
+      <path class="cd-bulbo" d="M109.5 27 C109.5 23 102.5 20 102.5 13 A13.5 13.5 0 1 1 129.5 13
+            C129.5 20 122.5 23 122.5 27 Z" stroke="rgba(230,240,248,.55)" stroke-width="1"/>
+      <ellipse cx="110.5" cy="7.5" rx="2.6" ry="4.8" fill="#FFFFFF" opacity=".45"
+               transform="rotate(28 110.5 7.5)"/>
+      <circle class="cd-halo" cx="116" cy="13" r="21" fill="url(#cdHalo)"/>
+
+      <!-- o fio vermelho: da fonte até a lâmpada -->
+      <path d="M76 26 C90 26 92 36 107 33" fill="none" stroke="#C0392B"
+            stroke-width="2.4" stroke-linecap="round"/>
+      <circle cx="76" cy="26" r="2.3" fill="#D8483A"/>
+      <circle cx="66" cy="2" r="2.3" fill="#2B2B2B"/>
+
+      <!-- a haste do suporte, o braço e a base -->
+      <rect x="244" y="166" width="40" height="6" rx="2" fill="#35404A"/>
+      <rect x="259.5" y="18" width="5" height="150" fill="url(#cdMet)"/>
+      <rect x="196" y="30" width="66" height="4" fill="url(#cdMetH)"/>
+      <rect x="256" y="26" width="12" height="12" rx="2" fill="#2B3A42"/>
+
+      <!-- o béquer, por trás: fundo, parede de trás e a solução -->
+      <ellipse class="cd-copo" cx="196" cy="170" rx="34" ry="5" fill="#0B1F2E" opacity=".72"/>
+      <path class="cd-copo" d="M162 106 L162 170 A34 5 0 0 0 230 170 L230 106"
+            fill="#0A1C29" opacity=".45"/>
+      <path class="cd-copo" d="M162 106 A34 5 0 0 1 230 106" fill="none"
+            stroke="#7B94A5" stroke-width="1.4" opacity=".75"/>
+      <g class="cd-liq" clip-path="url(#cdDentro)">
+        <rect x="160" y="${CD_AGUA}" width="72" height="44" fill="url(#cdSol)"/>
+        <ellipse cx="196" cy="${CD_AGUA}" rx="32.5" ry="4.6" fill="#7CC3EC" opacity=".5"/>
+        <path d="M163.5 ${CD_AGUA} A32.5 4.6 0 0 1 228.5 ${CD_AGUA}" fill="none"
+              stroke="#AEE0F7" stroke-width="1.3" opacity=".6"/>
+      </g>
+
+      <!-- O BICO DE MEKER, com o sal puro na cápsula (só no NaCl(s)). É o
+           desenho da face 2, nas coordenadas dele. Os eletrodos, que vêm
+           depois, descem até encostar no sal. -->
+      <g class="cd-bico" transform="translate(${CD_BK_X} ${CD_BK_Y}) scale(${CD_BK_K})">
+        <path d="M118 50 L146 176" stroke="url(#cdBkMet)" stroke-width="4"
+              fill="none" stroke-linecap="round"/>
+        <path d="M70 176 L130 176 L138 190 L62 190 Z"
+              fill="#EDF2F5" stroke="#8F9BA5" stroke-width="1.5" stroke-linejoin="round"/>
+        <rect x="93" y="120" width="14" height="52" rx="3" fill="url(#cdBkMet)"/>
+        <rect x="88" y="112" width="24" height="12" rx="3" fill="url(#cdBkMet)"/>
+        <rect x="70" y="156" width="26" height="9"  rx="4" fill="url(#cdBkMet)"/>
+        <g class="cd-bk-chama"><g class="cd-bk-chama-i">
+          <ellipse cx="100" cy="92" rx="19" ry="24" fill="url(#cdBkFogo)"/>
+          <ellipse cx="100" cy="102" rx="8" ry="13" fill="#7FD4FF" opacity=".75"/>
+        </g></g>
+        <ellipse cx="100" cy="56" rx="38" ry="10.3"
+                 fill="none" stroke="url(#cdBkMet)" stroke-width="4.5"/>
+        <path d="M63 58 L28 180" stroke="url(#cdBkMet)" stroke-width="4"
+              fill="none" stroke-linecap="round"/>
+        <path d="M137 58 L172 180" stroke="url(#cdBkMet)" stroke-width="4"
+              fill="none" stroke-linecap="round"/>
+        <path d="M52 49 Q100 98 148 49 L148 47 Q100 96 52 47 Z" fill="#AEBAC2"/>
+        <path d="M52 47 Q100 96 148 47" fill="url(#cdBkPorc)" stroke="#A8B4BC"
+              stroke-width="1.2"/>
+        <ellipse cx="100" cy="46" rx="48" ry="13"
+                 fill="#0C1B27" stroke="#E6EDF1" stroke-width="2.4"/>
+        <!-- o sal: montinho branco que vira poça dourada ao fundir -->
+        <ellipse class="cd-bk-sal" cx="100" cy="55" rx="24" ry="8" fill="#EDF3F6"/>
+        <!-- o registro do gás, sobre o tubo: arrastar muda a chama -->
+        <g class="cd-bk-val">
+          <rect x="97.5" y="118" width="5" height="50" rx="2.5" fill="url(#cdBkGas)"/>
+          <circle class="cd-bk-pino" cx="100" cy="143" r="7" fill="#E8F1F5"
+                  stroke="#F0B44A" stroke-width="2.4"/>
+          <rect class="cd-hit" x="80" y="106" width="40" height="72"
+                fill="none" pointer-events="all"/>
+        </g>
+        <!-- o botão de acender, na base -->
+        <g class="cd-bk-liga" transform="translate(150 184)">
+          <circle class="cd-bk-liga-c" r="11.5"/>
+          <circle class="cd-hit" r="22" fill="none" pointer-events="all"/>
+        </g>
+      </g>
+      <!-- o termômetro do bico, ao lado -->
+      <g class="cd-term">
+        <rect x="139.5" y="124" width="6" height="38" rx="3" fill="rgba(232,241,245,.12)"
+              stroke="rgba(232,241,245,.4)" stroke-width=".7"/>
+        <rect class="cd-bk-merc" x="140.8" y="160" width="3.4" height="0" fill="#DC3617"/>
+        <circle cx="142.5" cy="164" r="4" fill="#DC3617"
+                stroke="rgba(232,241,245,.4)" stroke-width=".7"/>
+        <text class="cd-bk-num" x="142.5" y="119" text-anchor="middle"
+              font-family="IBM Plex Mono, ui-monospace, monospace" font-size="7"
+              font-weight="600" fill="#F0B44A">${CD_BK_AMB} °C</text>
+      </g>
+
+      <!-- A PEDRA DE SAL, que só aparece com a água. O retângulo invisível
+           é a área de pega, maior que o cristal. -->
+      <g class="cd-sal" transform="translate(${CD_SAL_CASA[0] - CD_SAL_L} ${CD_SAL_CASA[1] - CD_SAL_A}) scale(.45)">
+        <g class="cd-sal-i">${pedra}</g>
+        <rect class="cd-sal-pega" x="-8" y="-8" width="76" height="78"
+              fill="none" pointer-events="all"/>
+      </g>
+
+      <!-- os fios pretos: lâmpada -> eletrodo A, fonte -> eletrodo B.
+           Acompanham a descida. -->
+      <path class="cd-fioA" d="${cdFioA(CD_CIMA)}" fill="none" stroke="#2B2B2B"
+            stroke-width="2.2" stroke-linecap="round"/>
+      <path class="cd-fioB" d="${cdFioB(CD_CIMA)}" fill="none" stroke="#2B2B2B"
+            stroke-width="2.2" stroke-linecap="round"/>
+
+      <!-- o que desce e sobe: a haste deslizante, o bloco e os eletrodos -->
+      <g class="cd-mov">
+        <rect x="194.5" y="-10" width="3" height="62" fill="#9AA0A6"/>
+        <rect x="183.5" y="57" width="5" height="44" rx="1.5" fill="url(#cdGraf)"/>
+        <rect x="203.5" y="57" width="5" height="44" rx="1.5" fill="url(#cdGraf)"/>
+        <rect x="178" y="47" width="36" height="10" rx="2" fill="#2B3A42"/>
+        <circle cx="186" cy="47" r="2" fill="#1A1A1A"/>
+        <circle cx="206" cy="47" r="2" fill="#1A1A1A"/>
+      </g>
+      <!-- A solução de novo, rala, POR CIMA dos eletrodos: é o que diz que
+           as pontas estão dentro dela quando descem. -->
+      <g class="cd-liq-f" clip-path="url(#cdDentro)">
+        <rect x="160" y="${CD_AGUA}" width="72" height="44" fill="#3E92BC" opacity=".3"/>
+      </g>
+      <!-- a presilha do braço, por onde a haste deslizante corre -->
+      <rect x="191" y="27" width="10" height="10" rx="2" fill="#2B3A42"/>
+
+      <!-- o vidro da frente do béquer -->
+      <path class="cd-copo" d="M162 106 L162 170 A34 5 0 0 0 230 170 L230 106"
+            fill="url(#cdVidro)" stroke="rgba(200,225,240,.5)" stroke-width="1.1"/>
+      <path class="cd-copo" d="M162 106 A34 5 0 0 0 230 106" fill="none"
+            stroke="#CFE3EF" stroke-width="1.4" opacity=".85"/>
+      <g class="cd-copo" stroke="#FFFFFF" stroke-width=".8" opacity=".35">
+        <line x1="166" y1="122" x2="173" y2="122"/>
+        <line x1="166" y1="138" x2="171" y2="138"/>
+        <line x1="166" y1="154" x2="173" y2="154"/>
+      </g>
+
+      <!-- o botão da haste, com a seta azul de elevador -->
+      <g class="cd-ele" transform="translate(262 112)">
+        <circle r="9" fill="#22303A" stroke="#11181D" stroke-width="1"/>
+        <circle class="cd-ele-cap" r="6.8" fill="url(#cdAzul)"/>
+        <path class="cd-seta" d="M-3.6 -1.8 L3.6 -1.8 L0 3.2 Z" fill="#CFEFFF"
+              filter="url(#cdBrilho)"/>
+        <circle r="18" fill="none" pointer-events="all"/>
+      </g>
+
+      <!-- embaixo do béquer: as setas do carrossel e o nome do conteúdo -->
+      <g class="cd-ant" transform="translate(160 186)">
+        <path d="M-4.5 0 L3.5 -5 L3.5 5 Z" fill="#45C7B0" filter="url(#cdBrilho)"/>
+        <rect x="-11" y="-10" width="22" height="20" fill="none" pointer-events="all"/>
+      </g>
+      <g class="cd-prox" transform="translate(232 186)">
+        <path d="M4.5 0 L-3.5 -5 L-3.5 5 Z" fill="#45C7B0" filter="url(#cdBrilho)"/>
+        <rect x="-11" y="-10" width="22" height="20" fill="none" pointer-events="all"/>
+      </g>
+      <g font-family="IBM Plex Mono, ui-monospace, monospace" font-size="9"
+         font-weight="600" fill="#E8F4FB" text-anchor="middle">
+        ${nome(0, 'NaCl<tspan font-size="6" dx="1">(s)</tspan>')}
+        ${nome('0l', 'NaCl<tspan font-size="6" dx="1">(l)</tspan>')}
+        ${nome(1, 'H<tspan font-size="6" dy="2">2</tspan><tspan dy="-2">O</tspan>')}
+        ${nome('1d', 'NaCl<tspan font-size="6" dx="1">(aq)</tspan>')}
+        ${nome(2, 'HgCl<tspan font-size="6" dy="2">2</tspan><tspan font-size="6" dy="-2" dx="1">(aq)</tspan>')}
+        ${nome(3, 'KNO<tspan font-size="6" dy="2">3</tspan><tspan font-size="6" dy="-2" dx="1">(aq)</tspan>')}
+      </g>
+    </svg>
   </div>`;
 }
 
@@ -7608,7 +8185,8 @@ const REVEALS = (list, cfg) => {
                               + `<div class="cx-corpo"${r.digita
                                   ? ` data-txt="${r.digita}"` : ''}>${
                                   r.digita ? '' : (r.corpo || '')}</div></div>`
-      : r.kind === 'painel'   ? `<div class="pn ${r.estilo || 'ionica'}"${
+      : r.kind === 'painel'   ? `<div class="pn ${r.estilo || 'ionica'}${
+                                  r.rede || r.campo ? ' tem-vis' : ''}"${
                                   r.rede ? ` data-rede="${r.rede}"` : ''}${
                                   r.campo ? ` data-campo="${r.campo}"` : ''}>`
                               + `<div class="pn-tit">${r.tit || ''}</div>`
@@ -7617,13 +8195,16 @@ const REVEALS = (list, cfg) => {
                                 : r.corpo === 'glass'
                                   ? `<div style="--base:${r.objBase
                                         || Math.round((r.base || 430) * 0.5)}">${GLASS()}</div>`
+                                : r.corpo === 'barra' ? BARRA_FE()
                                 : (r.corpo || '')}</div>`
                               + `<div class="pn-q">${
                                   r.campo ? MOLS_PN(r.base || 430,
                                                     (r.base || 430) * 0.84, 11) : ''}</div>`
+                              /* a chave das duas escalas (alternaPainel) */
                               + (r.rede || r.campo
-                                  ? `<button class="pn-sair" type="button" tabindex="-1"
-                                             title="Sair">&#8592; Voltar</button>` : '')
+                                  ? `<button class="pn-vis" type="button" tabindex="-1">`
+                                    + `<span class="pn-vis-a">Visão submicroscópica</span>`
+                                    + `<span class="pn-vis-b">Visão macroscópica</span></button>` : '')
                               + `</div>`
       : r.kind === 'reticulo' ? (r.lupa
           ? `<div class="rd-stage lupa"><i class="lupa-vidro"></i>`
@@ -7870,6 +8451,9 @@ const CAIXA = {
 const caixaDe = (a, b) =>
   !!CAIXA[Math.min(a, b) + '-' + Math.max(a, b)];
 
+/* a reabertura do retículo revelado, que espera a transição do slide */
+let reabreT = 0;
+
 function go(n, instant){
   const to = Math.max(0, Math.min(SLIDES.length - 1, n));
   const from = current;
@@ -7878,6 +8462,7 @@ function go(n, instant){
   clearTimeout(fxTimer);
   clearFx();
   descansaBequer();                          /* a experiência recomeça */
+  descansaCond();
   /* Quem sai de um slide submerso sobe junto. Antes a seta não deixava
      sair de dentro do mundo quântico, e por isso a questão não existia;
      agora que se passa a qualquer momento, o slide não pode ficar para
@@ -7890,6 +8475,7 @@ function go(n, instant){
   ligaAmpola();                              /* e o gás da ampola, no slide dela */
   if (to !== from) limpaRiscos();            /* virou a página: a folha é nova */
 
+  let espera = 0;                              /* quanto dura a transição */
   if (animate){
     const dir  = to > from ? 'next' : 'prev';
     /* A transição em caixa é a de abertura, e serve para marcar começo
@@ -7906,14 +8492,30 @@ function go(n, instant){
     void stage.offsetWidth;                    /* reinicia animação interrompida */
     slides[from].classList.add('is-leaving', `fx-${kind}-out-${dir}`);
     slides[to].classList.add(`fx-${kind}-in-${dir}`);
-    fxTimer = setTimeout(clearFx,
-      cube ? 950 : (t ? Math.round(t * 1000) + 220 : 750));
+    espera = cube ? 950 : (t ? Math.round(t * 1000) + 220 : 750);
+    fxTimer = setTimeout(clearFx, espera);
   }
 
   /* retículo que mora no slide: o laço 3D retoma ao entrar nele */
   const sl2 = slides[to];
   const cv2 = sl2 && sl2.querySelector('.q3d');
   if (cv2 && sl2.classList.contains('quantum-on') && iniciaG3(cv2)) lacoG3(cv2);
+
+  /* O RETÍCULO REVELADO VOLTA ABERTO. Saindo do slide, a lupa é fechada
+     junto com o mundo quântico (sobeDoMergulho) e, na volta, o vidro
+     estava lá mas vazio: o retículo só nascia no instante da revelação
+     (abreReticulo), e nada o montava de novo. Aqui ele é remontado — no
+     cristal da face que o cubo mostra, que é o que o dataset.rede da lupa
+     guarda. Depois da transição: medir a lente com o slide ainda girando
+     daria um vidro menor que o real, e o retículo sairia miúdo. */
+  clearTimeout(reabreT);
+  if (sl2 && !sl2.classList.contains('quantum-on')){
+    const ret = sl2.querySelector('.reveal-item.reticulo:not([hidden])');
+    if (ret) reabreT = setTimeout(() => {
+      if (slides[current] !== sl2 || sl2.classList.contains('quantum-on') || ret.hidden) return;
+      abreReticulo(ret);
+    }, espera + 50);
+  }
 
   counter.innerHTML = `<b>${current+1}</b> / ${SLIDES.length}`;
   progress.style.width = ((current+1) / SLIDES.length * 100) + '%';
@@ -7959,7 +8561,19 @@ const G3 = {
      cresceria e minguaria enquanto o retículo gira — que é justamente o
      laço que se quer cortar. */
   celD: 0,
-  agita: 0, funde: 0, fundeAlvo: 0, t9: 0, cliva: 0, clivaAlvo: 0, dissolve: 0
+  agita: 0, funde: 0, fundeAlvo: 0, t9: 0, cliva: 0, clivaAlvo: 0, dissolve: 0,
+  /* A corrente no sal fundido (face 5): conduz é o quanto a lâmpada está
+     acesa (0 a 1); corre é o caminho que os íons já andaram, em unidades. */
+  conduz: 0, corre: 0,
+  /* solvFica: na face 5 o íon solvatado fica à vista, na solução, em vez
+     de se afastar até sumir da lupa como na face 4 */
+  solvFica: false,
+  /* Várias redes abertas ao mesmo tempo (as caixas lado a lado do slide
+     dos tipos de ligação): o G3 é sempre a cena ATIVA — a que o dedo
+     comanda —, e as outras esperam em `outras`, cada uma com a sua tela e
+     o seu estado, desenhadas no mesmo quadro (lacoG3). pnAtivo é a caixa
+     da cena ativa. */
+  outras: [], pnAtivo: null
 };
 
 /* --- álgebra --- */
@@ -8256,7 +8870,8 @@ const CPK = {
   Na: [0.67, 0.36, 0.95],   /* roxo     */
   O:  [1.00, 0.05, 0.05],   /* vermelho */
   Mg: [0.54, 1.00, 0.00],   /* verde do magnésio */
-  Al: [0.75, 0.65, 0.65]    /* cinza rosado do alumínio */
+  Al: [0.75, 0.65, 0.65],   /* cinza rosado do alumínio */
+  Fe: [0.88, 0.40, 0.20]    /* laranja do ferro */
 };
 /* Raios na mesma escala para todos, tirados dos raios iônicos reais:
      Cl- 181pm -> 21   O2- 140pm -> 16   Na+ 102pm -> 12   Mg2+ 72pm -> 8  */
@@ -8268,6 +8883,10 @@ const REDES = {
   nacl: { forma: 'salgema',
           anion:  { sim: 'Cl', cor: CPK.Cl, raio: 21 },
           cation: { sim: 'Na', cor: CPK.Na, raio: 12 } },
+  /* metal: só cátions, na rede cúbica de corpo centrado do ferro; os
+     elétrons de valência não pertencem a nenhum deles — são o mar */
+  fe:   { forma: 'metal', mar: true,
+          cation: { sim: 'Fe', cor: CPK.Fe, raio: 12 } },
   mgo:  { forma: 'salgema',
           anion:  { sim: 'O',  cor: CPK.O,  raio: 16 },
           cation: { sim: 'Mg', cor: CPK.Mg, raio:  8 } },
@@ -8368,7 +8987,58 @@ function cenaRede(tipo){
   if (R.forma === 'antifluorita') return poeChao(redeAntifluorita(R));
   if (R.forma === 'camadas')      return poeChao(redeCamadas(R));
   if (R.forma === 'corindo')      return poeChao(redeCorindo(R));
+  if (R.forma === 'metal')        return poeChao(redeMetal(R));
   return poeChao(redeSalgema(R));
+}
+
+/* METAL: cúbico de corpo centrado, o do ferro. Os cátions ficam nos
+   vértices e no centro de cada cubo. Sem hastes: a ligação metálica não
+   aponta de um átomo para outro — ela é o mar de elétrons inteiro,
+   envolvendo todos (criaMar). */
+function redeMetal(R){
+  const n = 5, e = 64, h = (n - 1) / 2;     /* 4x4x4 cubos */
+  const at = [];
+  const poe = (i, j, k) => {
+    const p = [(i - h) * e, (j - h) * e, (k - h) * e];
+    at.push({ rede: p, pedra: p, atraso: 0,
+              ijk: [Math.round(i * 2), Math.round(j * 2), Math.round(k * 2)],
+              raio: R.cation.raio, cor: R.cation.cor,
+              carga: 1, cel: false });      /* cátion: o "+" na esfera */
+  };
+  for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) for (let k = 0; k < n; k++)
+    poe(i, j, k);
+  for (let i = 0; i < n - 1; i++) for (let j = 0; j < n - 1; j++) for (let k = 0; k < n - 1; k++)
+    poe(i + .5, j + .5, k + .5);
+  return { at, lig: [], ext: (n - 1) * e + 2 * R.cation.raio, n,
+           celula: { tam: 3, alinha: 0 } };
+}
+
+/* O MAR DE ELÉTRONS. Cada elétron vagueia pela rede inteira, trocando de
+   rumo aos poucos e rebatendo nas bordas dela: ninguém é de ninguém. É
+   essa nuvem em movimento, que envolve todos os cátions, que os mantém
+   juntos — e que conduz a corrente e o calor no metal. */
+function criaMar(c){
+  const rnd = rng(777);
+  const B = Math.max(...c.at.map(a => Math.abs(a.rede[0]))) + 12;
+  return Array.from({ length: 120 }, () => {
+    const d = [rnd() - .5, rnd() - .5, rnd() - .5];
+    const L = Math.hypot(d[0], d[1], d[2]) || 1;
+    return { p: [(rnd() * 2 - 1) * B, (rnd() * 2 - 1) * B, (rnd() * 2 - 1) * B],
+             v: [d[0] / L, d[1] / L, d[2] / L], B };
+  });
+}
+function andaMar(dt){
+  const vel = 0.05;                         /* 50 unidades por segundo */
+  G3.eletrons.forEach(el => {
+    for (let k = 0; k < 3; k++) el.v[k] += (Math.random() - .5) * 0.25;
+    const L = Math.hypot(el.v[0], el.v[1], el.v[2]) || 1;
+    for (let k = 0; k < 3; k++){
+      el.v[k] /= L;
+      el.p[k] += el.v[k] * vel * dt;
+      if (el.p[k] >  el.B){ el.p[k] =  el.B; el.v[k] = -Math.abs(el.v[k]); }
+      if (el.p[k] < -el.B){ el.p[k] = -el.B; el.v[k] =  Math.abs(el.v[k]); }
+    }
+  });
 }
 
 function redeSalgema(R){
@@ -8522,6 +9192,7 @@ function montaCena(modo){
   const c = REDES[modo] ? cenaRede(modo) : cenaPedra();
   limpaRuths();                            /* a cena anterior sai inteira */
   G3.atomos = c.at; G3.hastes = c.lig; G3.modo = modo;
+  G3.eletrons = (REDES[modo] && REDES[modo].mar) ? criaMar(c) : [];
   G3.celOff = [0, 0, 0]; G3.celD = 0;
   G3.cantos = c.cantos || [];
   G3.celC = [0, 0, 0];
@@ -8529,6 +9200,7 @@ function montaCena(modo){
   G3.voo = 0; G3.celQ = null;
   G3.agita = 0; G3.funde = 0; G3.fundeAlvo = 0;
   G3.cliva = 0; G3.clivaAlvo = 0; G3.dissolve = 0;
+  G3.conduz = 0; G3.corre = 0;
   G3.ext = c.ext || 0;
   G3.nRede = c.n || 0;
   G3.celula = c.celula || { tam: 3, alinha: 0 };
@@ -8654,6 +9326,23 @@ function desenhaG3(canvas){
   const dist = Math.hypot(off[0], off[1], off[2]);
   const enc  = encAtual();   /* a mesma conta de mundoDoAtomo, num lugar só */
   const cC   = G3.celC;
+  /* A CORRENTE NO SAL FUNDIDO. O eixo é a direita da tela, levada para o
+     mundo: (cos az, 0, -sen az). A faixa por onde os íons circulam é a
+     largura do retículo nesse eixo, folgada o bastante para o salto de um
+     lado ao outro acontecer fora da lente, onde ninguém vê. */
+  const corre = fu > 0.001 ? (G3.corre || 0) : 0;
+  const RX = Math.cos(G3.az), RZ = -Math.sin(G3.az);
+  let rMeio = 0, rW = 1;
+  if (corre || dis > 0.001){
+    let r0 = 1e9, r1 = -1e9;
+    G3.atomos.forEach(a => {
+      const b = a.rede[0] * RX + a.rede[2] * RZ;
+      if (b < r0) r0 = b;
+      if (b > r1) r1 = b;
+    });
+    rMeio = (r0 + r1) / 2;
+    rW = Math.max(1, (r1 - r0) / 2 * 1.35);
+  }
   const pos = G3.atomos.map(a => {
     const u = Math.max(0, Math.min(1, (G3.t - a.atraso) / (1 - a.atraso)));
     const k = suave(u);
@@ -8668,6 +9357,19 @@ function desenhaG3(canvas){
       p[0] += (a.chao[0] - a.rede[0]) * g;
       p[1] += (a.chao[1] - a.rede[1]) * g;
       p[2] += (a.chao[2] - a.rede[2]) * g;
+    }
+    /* Condução: fundido, cada íon está livre e a corrente o arrasta — o
+       cátion para a direita, rumo ao eletrodo negativo; o ânion para a
+       esquerda, rumo ao positivo. Quem sai da faixa por um lado volta
+       pelo outro, e o fluxo não acaba. O desvio é pesado pela fusão: ao
+       solidificar, cada íon desliza de volta ao seu lugar na rede. */
+    if (corre && a.carga){
+      const b = p[0] * RX + p[2] * RZ;
+      const s = b - rMeio + Math.sign(a.carga) * corre + rW;
+      const w = ((s % (2 * rW)) + 2 * rW) % (2 * rW) - rW;
+      const d = (w + rMeio - b) * fu;
+      p[0] += RX * d;
+      p[2] += RZ * d;
     }
     /* Agitação térmica: cresce com a temperatura, some no frio. */
     if (ag > 0.001){
@@ -8696,12 +9398,28 @@ function desenhaG3(canvas){
       const q = Math.max(0, Math.min(1, (dis - a.limiar) / 0.16));
       a.qSai = q;
       if (q > 0){
-        const e = q * q * 300;
+        /* Na face 5 o íon solvatado fica na solução, à vista: sai só um
+           pouco do cristal, levando a água consigo — é ali que a corrente
+           vai arrastá-lo. Na face 4 ele se afasta até sumir da lupa. */
+        const fica = G3.solvFica;
+        const e = q * q * (fica ? 45 : 300);
         p[0] += a.saida[0] * e;
-        p[1] += a.saida[1] * e + q * 42;
+        p[1] += a.saida[1] * e + q * (fica ? 10 : 42);
         p[2] += a.saida[2] * e;
+        /* A corrente na solução: cada íon solvatado anda o que ANDOU desde
+           que a água o soltou (a.vai, somado em lacoG3) — cátion para a
+           direita, ânion para a esquerda. Saindo da faixa por um lado,
+           volta pelo outro, fora da lente. */
+        if (a.vai){
+          const b = p[0] * RX + p[2] * RZ;
+          const s = b - rMeio + a.vai + rW;
+          const w = ((s % (2 * rW)) + 2 * rW) % (2 * rW) - rW;
+          const d = w + rMeio - b;
+          p[0] += RX * d;
+          p[2] += RZ * d;
+        }
       }
-    } else if (a.qSai) a.qSai = 0;
+    } else if (a.qSai || a.vai){ a.qSai = 0; a.vai = 0; }
     /* o estufado do reencaixe tambem vale com a celula ja no lugar */
     if (a.cel && (dist > 0.5 || G3.pulso > 0.002 || G3.drama > 0.002 || celGirada())){
       const z = enc * (1 + 0.24 * G3.pulso + 0.30 * G3.drama);
@@ -8791,6 +9509,29 @@ function desenhaG3(canvas){
     gl.drawElements(gl.TRIANGLES, ESF.n, gl.UNSIGNED_SHORT, 0);
   });
 
+  /* O MAR DE ELÉTRONS do metal: um núcleo claro para cada elétron e, por
+     cima de tudo, um halo largo e ralo. Os halos se somam onde há mais
+     elétrons, e o conjunto se lê como uma nuvem que corre entre os
+     cátions. Eles não escrevem profundidade: senão cada halo taparia o
+     que está atrás dele em vez de só tingir. */
+  if (G3.eletrons && G3.eletrons.length){
+    gl.uniform1f(uCarga, 0);
+    gl.uniform3f(uCor, 0.55, 0.88, 1.0);
+    G3.eletrons.forEach(el => {
+      gl.uniformMatrix4fv(uModel, false, m4esfera(el.p, 4.5));
+      gl.drawElements(gl.TRIANGLES, ESF.n, gl.UNSIGNED_SHORT, 0);
+    });
+    gl.depthMask(false);
+    gl.uniform1f(L('uOpaco'), G3.t * 0.13);
+    gl.uniform3f(uCor, 0.30, 0.62, 1.0);
+    G3.eletrons.forEach(el => {
+      gl.uniformMatrix4fv(uModel, false, m4esfera(el.p, 17));
+      gl.drawElements(gl.TRIANGLES, ESF.n, gl.UNSIGNED_SHORT, 0);
+    });
+    gl.depthMask(true);
+    gl.uniform1f(L('uOpaco'), G3.t);
+  }
+
   /* AS MOLÉCULAS DE ÁGUA QUE ARRANCAM OS ÍONS
      Cada uma se encosta no íon pelo lado certo: o oxigênio, que é o polo
      negativo da molécula, vira-se para o cátion; os hidrogênios, que são
@@ -8806,18 +9547,20 @@ function desenhaG3(canvas){
     const branco = [0.95, 0.97, 0.99];
     gl.uniform1f(uCarga, 0);
     let n = 0;
-    for (let i = 0; i < G3.atomos.length && n < 120; i++){
+    /* na face 5 a água não larga o íon: ele segue solvatado na solução */
+    const fica = G3.solvFica;
+    for (let i = 0; i < G3.atomos.length && n < (fica ? 400 : 120); i++){
       const a = G3.atomos[i];
       if (a.limiar === undefined) continue;
       const q = (dis - a.limiar) / 0.16;
-      if (q < -0.6 || q > 0.85) continue;
+      if (q < -0.6 || (!fica && q > 0.85)) continue;
       n++;
       /* ENTRAM E SAEM EM FADE.
          Antes elas apareciam de um quadro para o outro, já encostadas no
          íon — e o que se via era uma molécula surgindo do nada em cima
          dele. Agora vão ganhando corpo enquanto se aproximam e se
          apagam ao levar o seu íon embora. */
-      const op = Math.min(1, (q + 0.6) / 0.4) * Math.min(1, (0.85 - q) / 0.3);
+      const op = Math.min(1, (q + 0.6) / 0.4) * (fica ? 1 : Math.min(1, (0.85 - q) / 0.3));
       gl.uniform1f(L('uOpaco'), G3.t * op);
       const p = pos[i], u = a.saida;
       /* um perpendicular estável a u, para abrir o ângulo da molécula */
@@ -8847,6 +9590,47 @@ function desenhaG3(canvas){
   }
 }
 
+/* ---- várias redes, uma de cada vez no G3 ----
+   O que é da CENA (e não do contexto WebGL): o que precisa ser guardado
+   para outra cena ocupar o G3 e depois devolvê-lo intacto. */
+const CENA = ['atomos', 'hastes', 'modo', 'eletrons', 'celOff', 'celD', 'celC',
+  'cantos', 'volta', 'pulso', 'drama', 'voo', 'distAlvo', 'celQ', 'agita',
+  'funde', 'fundeAlvo', 'cliva', 'clivaAlvo', 'dissolve', 'conduz', 'corre',
+  'solvFica', 'ext', 'nRede', 'celula', 'dist', 'dist0', 'px', 'py', 'px0',
+  'py0', 'az', 'el', 't', 'alvo', 'slide'];
+const tiraCena = () => { const e = {}; CENA.forEach(k => { e[k] = G3[k]; }); return e; };
+const poeCena  = (e) => { CENA.forEach(k => { G3[k] = e[k]; }); };
+/* troca a cena ativa com a guardada em o (chamada duas vezes, desfaz) */
+function trocaCena(o){ const ativa = tiraCena(); poeCena(o.estado); o.estado = ativa; }
+/* o dedo encostou na tela de uma rede de fundo: ela passa a ser a ativa */
+function ativaCena(cv){
+  const i = G3.outras.findIndex(o => o.canvas === cv);
+  if (i < 0 || !G3.canvas) return false;
+  const o = G3.outras[i];
+  G3.outras[i] = { pn: G3.pnAtivo, canvas: G3.canvas, estado: tiraCena() };
+  poeCena(o.estado);
+  iniciaG3(o.canvas);
+  G3.pnAtivo = o.pn;
+  return true;
+}
+/* A tela de cada caixa com rede. A primeira usa a do slide; as outras
+   ganham uma cópia dela, no mesmo lugar. Cada uma é recortada na sua
+   caixa, e o recorte é também a área de toque. */
+function canvasDoPainel(slide, pn){
+  if (pn._cv && pn._cv.isConnected) return pn._cv;
+  const base = slide.querySelector('.q3d');
+  if (!base) return null;
+  let cv = base;
+  if ([...slide.querySelectorAll('.pn')].some(p => p !== pn && p._cv === base)){
+    cv = base.cloneNode(false);
+    cv.classList.add('q3d-extra');
+    cv.style.clipPath = 'inset(100%)';
+    base.after(cv);
+  }
+  pn._cv = cv;
+  return cv;
+}
+
 function lacoG3(canvas){
   const passo = () => {
     /* Slide fora de cena não desenha. Sem isto, um retículo que fica
@@ -8866,6 +9650,26 @@ function lacoG3(canvas){
     const fAlvo = G3.fundeAlvo || 0;
     G3.funde += (fAlvo - G3.funde) * (fAlvo < G3.funde ? 0.0075 : 0.015);
     if (Math.abs(fAlvo - G3.funde) < 0.002) G3.funde = fAlvo;
+    /* A corrente anda devagar — 18 unidades por segundo, um íon a cada
+       três — e só enquanto a lâmpada da face 5 estiver acesa. Conta pelo
+       relógio, e não por quadro: numa máquina lenta a velocidade é a
+       mesma. Solidificado de todo, o caminho zera para a próxima fusão. */
+    const agora = performance.now();
+    const dtC = Math.min(100, agora - (G3.correT || agora));
+    G3.correT = agora;
+    G3.corre = (G3.corre || 0) + (G3.conduz || 0) * 0.018 * dtC;
+    if (G3.funde === 0 && !fAlvo) G3.corre = 0;
+    /* Os íons solvatados (face 5, na água) andam cada um por conta própria,
+       a partir do instante em que a água os soltou — na mesma velocidade
+       e nos mesmos sentidos dos do sal fundido. */
+    if (G3.conduz && G3.dissolve > 0.001){
+      const v = G3.conduz * 0.018 * dtC;
+      G3.atomos.forEach(a => {
+        if (a.qSai > 0 && a.carga) a.vai = (a.vai || 0) + Math.sign(a.carga) * v * a.qSai;
+      });
+    }
+    /* o mar de elétrons do metal nunca para */
+    if (G3.eletrons && G3.eletrons.length) andaMar(dtC);
     /* A clivagem do retículo segue a da pedra no mesmo compasso: 0,10
        por quadro leva ~1s por plano, que é a duração da transição das
        peças de sal na face do cubo. O que se vê na mão e o que se vê na
@@ -8909,11 +9713,31 @@ function lacoG3(canvas){
     G3.atomos.forEach(a => { if (a.fx) a.fx = a.fx > 0.004 ? a.fx * 0.88 : 0; });
     G3.pulso = G3.pulso > 0.004 ? G3.pulso * 0.86 : 0;
     G3.drama = G3.drama > 0.004 ? G3.drama * 0.89 : 0;
-    desenhaG3(canvas);
+    /* a tela da cena ativa — que pode ser outra que a deste laço, quando
+       há mais de uma rede aberta e o dedo trocou de caixa */
+    const cvA = G3.canvas || canvas;
+    desenhaG3(cvA);
     poeRuths();                  /* os átomos seguem os íons deles */
+    /* AS OUTRAS REDES ABERTAS, no mesmo quadro: o estado de cada uma entra
+       no G3 só o tempo de andar um passo e ser desenhada na tela dela. O
+       mar de elétrons do metal continua correndo mesmo quando a cena dele
+       não é a que o dedo comanda. */
+    if (G3.outras.length){
+      G3.outras.forEach(o => {
+        if (!o.canvas.isConnected) return;
+        trocaCena(o);
+        if (iniciaG3(o.canvas)){
+          G3.t += (G3.alvo - G3.t) * 0.12;
+          if (G3.eletrons && G3.eletrons.length) andaMar(dtC);
+          desenhaG3(o.canvas);
+        }
+        trocaCena(o);
+      });
+      iniciaG3(cvA);
+    }
     const parado = Math.abs(G3.alvo - G3.t) < 0.002;
     if (parado && G3.alvo === 0){
-      G3.t = 0; desenhaG3(canvas); G3.laco = 0; return;
+      G3.t = 0; desenhaG3(cvA); G3.laco = 0; return;
     }
     G3.laco = requestAnimationFrame(passo);
   };
@@ -8923,7 +9747,8 @@ function lacoG3(canvas){
 /* --- entradas e saídas --- */
 function abreRede(it, modo, px, py, largura, altura){
   const slide = it.closest('.slide');
-  const cv = slide && slide.querySelector('.q3d');
+  /* a caixa com rede tem a sua tela (canvasDoPainel); o resto usa a do slide */
+  const cv = (it && it._cv) || (slide && slide.querySelector('.q3d'));
   if (!cv || !iniciaG3(cv)) return;
   montaCena(modo || 'pedra');
   G3.px = px !== undefined ? px : parseFloat(it.style.left);
@@ -9010,6 +9835,13 @@ function saiDaRede(slide){
 function fechaRede(it){
   const slide = it.closest ? it.closest('.slide') : it;
   if (!slide) return;
+  /* as redes abertas ao lado saem junto (saindo do slide, por exemplo) */
+  (G3.outras || []).forEach(o => {
+    o.canvas.style.clipPath = 'inset(100%)';
+    if (o.pn) o.pn.classList.remove('q-on');
+  });
+  G3.outras = [];
+  G3.pnAtivo = null;
   slide.classList.remove('quantum-on', 'rede-on', 'rede-livre');
   sincronizaTinta();     /* a folha da caneta acompanha o mundo aberto */
   /* a lente vai embora e leva com ela a medida e o giro em curso: sem
@@ -9030,7 +9862,9 @@ function fechaRede(it){
        .forEach(c => { c.classList.remove('mergulha'); c.style.opacity = ''; });
   G3.alvo = 0; G3.celOff = [0, 0, 0]; G3.celD = 0; G3.volta = 0; G3.pulso = 0;
   G3.drama = 0; G3.celQ = null;
-  const cv = slide.querySelector('.q3d');
+  /* o apagar anda na tela da cena que está fechando */
+  const cv = (G3.canvas && G3.canvas.closest('.slide') === slide)
+           ? G3.canvas : slide.querySelector('.q3d');
   if (cv && iniciaG3(cv)) lacoG3(cv);
 }
 /* ------------------------------------------------------------
@@ -11631,6 +12465,7 @@ function stepBack(slide){
     const back = +cube.dataset.face - 1;
     esfriaBico(slide);
     descansaBequer(slide);
+    descansaCond(slide);
     cube.dataset.face = back;
     cube.style.setProperty('--face', back);
     paintCube(cube, back);
@@ -11782,6 +12617,7 @@ function turnCube(slide, cube){
   const face = +cube.dataset.face;
   esfriaBico(slide);
   descansaBequer(slide);
+  descansaCond(slide);
   itemsOf(slide).forEach(it => {
     if (it.dataset.of !== undefined && +it.dataset.of === face && !it.hidden){
       acompanhaFace(it, cube);
@@ -12629,6 +13465,410 @@ function descansaBequer(raiz){
   });
 }
 
+/* O TESTE DE CONDUTIVIDADE (face 5).
+   Põe o bloco dos eletrodos na altura y e refaz os dois fios que descem
+   até ele. */
+function cdPoe(cd, y){
+  cd.dataset.y = y.toFixed(1);
+  const g = cd.querySelector('.cd-mov');
+  if (g) g.setAttribute('transform', `translate(0 ${(y - CD_CIMA).toFixed(2)})`);
+  const a = cd.querySelector('.cd-fioA'), b = cd.querySelector('.cd-fioB');
+  if (a) a.setAttribute('d', cdFioA(y));
+  if (b) b.setAttribute('d', cdFioB(y));
+}
+
+/* Circuito fechado: fonte ligada E as pontas dentro do béquer. Se a
+   lâmpada acende, e quanto, é o que está lá dentro que decide. */
+const cdFechado = cd => cd.classList.contains('ligado') && cd.classList.contains('molhado');
+
+/* O brilho que o conteúdo permite, de 0 a 1, ainda sem as falhas. A
+   água começa isolante e passa a conduzir à medida que o sal se
+   dissolve: são os íons soltos que levam a corrente. */
+function cdAlvo(cd){
+  if (!cdFechado(cd)) return 0;
+  const s = +cd.dataset.sub || 0;
+  if (s === 0) return cdBico(cd).m;           /* o quanto do sal já fundiu */
+  if (s !== 1) return CD_FORCA[s];
+  const d = cd._sal ? cd._sal.d : 0;
+  return d > 0 ? 0.08 + 0.92 * Math.pow(d, 1.2) : 0;
+}
+
+/* Pinta a lâmpada num brilho de 0 a 1: do fraco, brasa laranja no
+   filamento, ao forte, branco-amarelado com a auréola larga. */
+const cdHex = c => [1, 3, 5].map(i => parseInt(c.substr(i, 2), 16));
+const cdMistura = (c1, c2, k) => {
+  const a = cdHex(c1), z = cdHex(c2);
+  return a.map((v, i) => Math.round(v + (z[i] - v) * k)).join(',');
+};
+function cdBrilho(cd, b){
+  if (cd._b !== undefined && Math.abs(cd._b - b) < 0.004) return;
+  cd._b = b;
+  const acesa = b > 0.001;
+  cd.classList.toggle('acesa', acesa);
+  const halo = cd.querySelector('.cd-halo'), aur = cd.querySelector('.cd-aur');
+  const bulbo = cd.querySelector('.cd-bulbo'), fil = cd.querySelector('.cd-fil');
+  if (halo) halo.style.opacity = acesa ? Math.min(1, 0.13 + 0.9 * b).toFixed(3) : '';
+  if (aur){
+    aur.style.opacity = acesa ? (0.8 * b).toFixed(3) : '';
+    aur.style.transform = acesa ? `scale(${(0.5 + 0.5 * b).toFixed(3)})` : '';
+  }
+  if (bulbo) bulbo.style.fill = acesa
+    ? `rgba(${cdMistura('#F0CBA0', '#FFF3B0', b)},${(0.34 + 0.32 * b).toFixed(2)})` : '';
+  if (fil) fil.style.stroke = acesa
+    ? `rgb(${cdMistura('#EF5F22', '#FFF2C8', Math.min(1, b * 1.3))})` : '';
+}
+
+/* O laço do aparelho: dissolve a pedra que está na água e acende a
+   lâmpada no brilho que ela permite. Enquanto há pouco sal dissolvido a
+   corrente é instável — a lâmpada falha, dá piscadas — e as falhas vão
+   rareando até sumir na dissolução completa. Para sozinho quando não há
+   mais nada mudando. */
+function cdAnda(cd){
+  if (!cd || cd._a) return;
+  let t = performance.now();
+  const passo = (agora) => {
+    const sl = cd.closest('.slide');
+    if (!cd.isConnected || (sl && !sl.classList.contains('is-active'))){ cd._a = 0; return; }
+    const dt = Math.max(0, Math.min(64, agora - t)); t = agora;
+    const aquece = +cd.dataset.sub === 0 && cdBicoPasso(cd, dt);
+    const s = cdSal(cd), agua = +cd.dataset.sub === 1;
+    const dissolvendo = agua && s.naAgua && !s.pega && s.d < 1;
+    if (dissolvendo){
+      s.d = Math.min(1, s.d + dt / CD_DISSOLVE);
+      cdSalDesenha(cd);
+    }
+    const alvo = cdAlvo(cd);
+    /* A LUPA mostra o conteúdo que ela já recebeu — _lupaSub só troca no
+       meio do giro da lente (ver cdGiraLupa): o sal intacto ou fundido
+       (0); a pedra que a água desmancha, a solvatação da face 4 com os
+       íons ficando à vista (1); ou a solução já pronta, todos os íons
+       solvatados (2 e 3). Com a lâmpada acesa, os íons migram, tanto
+       mais depressa quanto mais ela brilha. */
+    const ls = cd._lupaSub === undefined ? (+cd.dataset.sub || 0) : cd._lupaSub;
+    G3.solvFica = ls >= 1;
+    G3.dissolve = ls === 1 ? s.d : (ls >= 2 ? 1 : 0);
+    G3.conduz = ls === (+cd.dataset.sub || 0) ? alvo : 0;
+    const instavel = alvo > 0 && agua && s.d < 1;
+    let b = alvo;
+    if (instavel){
+      const r = Math.pow(1 - s.d, 1.3);      /* 1 no começo, 0 no fim */
+      if (agora > (cd._falhaAte || 0) && Math.random() < dt / 1000 * 7 * r){
+        cd._falhaAte = agora + 50 + Math.random() * 150;
+        cd._falhaK = 0.15 + Math.random() * 0.45;
+      }
+      b = agora < cd._falhaAte ? alvo * cd._falhaK
+                               : alvo * (1 - 0.12 * r * Math.random());
+    }
+    cdBrilho(cd, b);
+    cd._a = (dissolvendo || instavel || aquece) ? requestAnimationFrame(passo) : 0;
+  };
+  cd._a = requestAnimationFrame(passo);
+}
+
+function cdLiga(cd){
+  if (!cd) return;
+  cd.classList.toggle('ligado');
+  cdAnda(cd);
+}
+
+/* As setas embaixo do béquer: trocam o conteúdo, em carrossel. Entrando
+   a água, ela vem limpa e com a pedra inteira de volta à bancada. */
+function cdTroca(cd, dir){
+  if (!cd) return;
+  const n = CD_FORCA.length;
+  const para = ((+cd.dataset.sub || 0) + dir + n) % n;
+  if (cdPega && cdPega.cd === cd){ cdPega = null; cd.classList.remove('pegando'); }
+  if (cdGas && cdGas.cd === cd) cdGas = null;
+  if (para === 1) cdSalCasa(cd);
+  /* o bico sai apagado e frio; o retículo da lupa se refaz no giro dela */
+  if (para !== 0) cdBicoApaga(cd, true);
+  cd.dataset.sub = para;
+  /* Com os eletrodos baixados — ou descendo —, eles vão à altura do
+     recipiente novo: a cápsula do bico fica mais alta que a água do
+     béquer. Vale também no meio de uma viagem: com cliques rápidos nas
+     setas, eles paravam na altura do conteúdo anterior, fora da água, e a
+     lâmpada ficava apagada com o circuito que devia estar fechado. Só a
+     subida (o botão da haste erguendo) não é desviada. */
+  const vaiBaixo = cd._t ? cd._desce : cd.classList.contains('baixo');
+  if (vaiBaixo){
+    cd._desce = true;
+    cdVai(cd, cdBaixo(cd), () => cd.classList.add('baixo'));
+  }
+  cdGiraLupa(cd);
+  cdAnda(cd);
+}
+
+/* ---- o bico de Meker (só no NaCl(s)) ----
+   A conta do calor é a do bico da face 2: a temperatura corre atrás da
+   que a chama permite, mais depressa com mais gás. Passando dos 801 °C o
+   sal funde aos poucos; abaixo, volta a solidificar. O retículo da lupa
+   agita e funde junto, como na face 2. */
+let cdGas = null;
+function cdBico(cd){
+  return cd._bk || (cd._bk = { T: CD_BK_AMB, m: 0, i: 55, aceso: false });
+}
+function cdBicoDesenha(cd){
+  const k = cdBico(cd);
+  const pino = cd.querySelector('.cd-bk-pino');
+  if (pino) pino.setAttribute('cy', (168 - (k.i - 10) / 90 * 50).toFixed(1));
+  const num = cd.querySelector('.cd-bk-num');
+  if (num) num.textContent = Math.round(k.T) + ' °C';
+  const merc = cd.querySelector('.cd-bk-merc');
+  if (merc){
+    const h = 35 * Math.max(0, Math.min(1, (k.T - CD_BK_AMB) / (CD_BK_MAX - CD_BK_AMB)));
+    merc.setAttribute('height', h.toFixed(1));
+    merc.setAttribute('y', (160 - h).toFixed(1));
+  }
+  const sal = cd.querySelector('.cd-bk-sal');
+  if (sal){
+    /* Menos achatada que a poça da face 2: aqui a cápsula é pequena e os
+       eletrodos passam na frente — a poça dourada precisa aparecer. */
+    sal.style.transform = `scale(${(1 + 0.4 * k.m).toFixed(3)},${(1 - 0.35 * k.m).toFixed(3)})`;
+    sal.style.fill = `rgb(${cdMistura('#EDF3F6', '#FFC857', k.m)})`;
+    sal.style.filter = k.m > 0.01
+      ? `drop-shadow(0 0 ${(12 * k.m).toFixed(1)}px rgba(255,170,50,1))` : '';
+  }
+  cd.style.setProperty('--ch', (0.35 + 1.15 * (k.i / 100)).toFixed(2));
+  cd.classList.toggle('bk-aceso', k.aceso);
+  cd.classList.toggle('fundido', k.m >= 0.5);   /* o nome vira NaCl(l) */
+}
+/* Um quadro do bico. Devolve true enquanto ainda há o que mudar. */
+function cdBicoPasso(cd, dt){
+  const k = cdBico(cd), i = k.i / 100;
+  const alvo = k.aceso ? CD_BK_AMB + (CD_BK_MAX - CD_BK_AMB) * i : CD_BK_AMB;
+  /* a taxa da face 2 é por quadro; aqui ela é corrigida pelo tempo real */
+  const taxa = k.aceso ? 0.006 + 0.013 * i : 0.011;
+  k.T += (alvo - k.T) * (1 - Math.pow(1 - taxa, dt / 16.7));
+  if (Math.abs(alvo - k.T) < 0.6) k.T = alvo;
+  const mAlvo = k.T >= FUSAO_NACL ? 1 : 0;
+  k.m = mAlvo > k.m ? Math.min(1, k.m + dt / CD_FUNDE) : Math.max(0, k.m - dt / CD_FUNDE);
+  cdBicoDesenha(cd);
+  G3.agita = Math.max(0, Math.min(1, (k.T - CD_BK_AMB) / (FUSAO_NACL - CD_BK_AMB)));
+  G3.fundeAlvo = mAlvo;
+  return k.T !== alvo || k.m !== mAlvo;
+}
+function cdBicoLiga(cd){
+  if (!cd) return;
+  const k = cdBico(cd);
+  k.aceso = !k.aceso;
+  cdBicoDesenha(cd);
+  cdAnda(cd);
+}
+/* o registro do gás: y do dedo, em coordenadas do desenho */
+function cdGasPoe(cd, y){
+  const by = (y - CD_BK_Y) / CD_BK_K;       /* nas coordenadas do bico */
+  cdBico(cd).i = Math.max(10, Math.min(100, 10 + (168 - by) / 50 * 90));
+  cdBicoDesenha(cd);
+  cdAnda(cd);
+}
+/* Apaga e esfria na hora — sem esperar o resfriamento — e devolve o
+   retículo da lupa inteiro, se o bico o tinha agitado. */
+function cdBicoApaga(cd, semLupa){
+  const k = cdBico(cd);
+  const estava = k.aceso || k.T > CD_BK_AMB + 1 || k.m > 0;
+  Object.assign(k, { T: CD_BK_AMB, m: 0, i: 55, aceso: false });
+  cdBicoDesenha(cd);
+  /* semLupa: quem refaz o retículo é o giro da lente (cdGiraLupa) */
+  if (estava && !semLupa){ G3.agita = 0; G3.funde = 0; G3.fundeAlvo = 0; G3.conduz = 0; G3.corre = 0; }
+}
+
+/* A LUPA VIRA COM O CONTEÚDO. Trocar o que está no béquer troca o que a
+   lupa mostra, e a troca é feita como a do giro do cubo (viraLupa): a
+   lente dá meia volta e o conteúdo novo entra de costas, no meio do
+   giro, quando ela está de perfil e não mostra nada. Assim o cristal não
+   vira nuvem de íons de um quadro para o outro. HgCl2 e KNO3 já chegam
+   dissolvidos, com os íons solvatados prontos para andar. */
+function cdGiraLupa(cd){
+  /* Já girando: se a troca ainda não aconteceu, ela lê o conteúdo na
+     hora e pega o novo; se já aconteceu, gira de novo no fim. */
+  if (cd._giroT2){
+    if (!cd._giroT1) cd._giroDeNovo = true;
+    return;
+  }
+  const aplica = () => {
+    cd._giroT1 = 0;
+    const ls = +cd.dataset.sub || 0;
+    cd._lupaSub = ls;
+    /* saindo do sal puro, o fundido volta a ser cristal aqui, escondido */
+    if (ls !== 0){ G3.agita = 0; G3.funde = 0; G3.fundeAlvo = 0; G3.corre = 0; }
+    G3.atomos.forEach(a => { a.vai = 0; });   /* a corrente recomeça do zero */
+    cdAnda(cd);
+  };
+  const slide = cd.closest('.slide');
+  const it = slide && slide.querySelector('.reveal-item.reticulo[data-lupa]');
+  if (!it || it.hidden){ aplica(); return; }
+  const g = geoLupa();                       /* medida de frente, para o giro todo */
+  it.classList.remove('virando');
+  void it.offsetWidth;
+  it.classList.add('virando');
+  G3.lupaPara = 1; G3.lupaG = g; G3.giro = performance.now();
+  cd._giroT1 = setTimeout(aplica, LUPA_GIRO / 2);
+  cd._giroT2 = setTimeout(() => {
+    cd._giroT2 = 0;
+    it.classList.remove('virando');
+    G3.lupaPara = 0; G3.giro = 0;
+    segueLupa();
+    if (cd._giroDeNovo){ cd._giroDeNovo = false; cdGiraLupa(cd); }
+  }, LUPA_GIRO + 20);
+}
+
+/* ---- a pedra de sal (só com a água) ----
+   Coordenadas do desenho, as mesmas do viewBox. A pedra não atravessa o
+   vidro: entra e sai do copo só pela boca. */
+let cdPega = null;
+function cdSal(cd){
+  return cd._sal || (cd._sal = { x: CD_SAL_CASA[0], y: CD_SAL_CASA[1], d: 0,
+                                 naAgua: false, dentro: false, pega: 0, q: 0 });
+}
+function cdSalDesenha(cd){
+  const s = cdSal(cd);
+  const g = cd.querySelector('.cd-sal'), i = cd.querySelector('.cd-sal-i');
+  if (g) g.setAttribute('transform',
+    `translate(${(s.x - CD_SAL_L).toFixed(1)} ${(s.y - CD_SAL_A).toFixed(1)}) scale(.45)`);
+  if (i){
+    i.style.transform = `scale(${(1 - 0.9 * s.d).toFixed(3)})`;
+    i.style.opacity = (1 - 0.88 * s.d).toFixed(3);
+  }
+  cd.classList.toggle('salgada', s.d > 0);  /* o nome vira NaCl(aq) */
+  cd.classList.toggle('sumiu', s.d >= 1);
+}
+function cdSalCasa(cd){
+  const s = cdSal(cd);
+  cancelAnimationFrame(s.q);
+  Object.assign(s, { x: CD_SAL_CASA[0], y: CD_SAL_CASA[1], d: 0,
+                     naAgua: false, dentro: false, pega: 0, q: 0 });
+  cd.classList.remove('pegando');
+  cdSalDesenha(cd);
+}
+/* fora do copo: sobre ele, só acima da boca — abaixo dali é parede */
+function cdSalCabe(x, y){
+  const sobre = x + CD_SAL_L > CD_COPO[0] && x - CD_SAL_L < CD_COPO[1];
+  return !(sobre && y + CD_SAL_A > CD_BOCA);
+}
+/* Colisão por eixo, como a do béquer da face 4: recusado o ponto, tenta
+   andar só na horizontal e só na vertical — a pedra desliza pelo vidro
+   em vez de travar nele. */
+function cdSalPoe(cd, x, y){
+  const s = cdSal(cd);
+  x = Math.max(14, Math.min(286, x));
+  y = Math.max(-6, y);
+  /* vinda de cima, alinhada com a boca: entra */
+  if (!s.dentro && s.y + CD_SAL_A <= CD_BOCA && y + CD_SAL_A > CD_BOCA
+      && x >= CD_SAL_X[0] && x <= CD_SAL_X[1]) s.dentro = true;
+  if (s.dentro){
+    s.x = Math.max(CD_SAL_X[0], Math.min(CD_SAL_X[1], x));
+    s.y = Math.min(CD_SAL_FUNDO, y);
+    if (s.y + CD_SAL_A <= CD_BOCA) s.dentro = false;   /* saiu pela boca */
+  } else {
+    y = Math.min(CD_SAL_CHAO, y);
+    if (cdSalCabe(x, y)){ s.x = x; s.y = y; }
+    else if (cdSalCabe(x, s.y)) s.x = x;
+    else if (cdSalCabe(s.x, y)) s.y = y;
+  }
+  cdSalDesenha(cd);
+}
+/* A queda: o tempo cresce com a raiz da altura, como na face 4. */
+function cdSalCai(cd, ate, agua){
+  const s = cdSal(cd);
+  cancelAnimationFrame(s.q);
+  const de = s.y, h = ate - de;
+  const dur = h > 0.5 ? 130 + Math.sqrt(h) * 46 : 0;
+  const t0 = performance.now();
+  const passo = (agora) => {
+    const k = dur ? Math.min(1, (agora - t0) / dur) : 1;
+    s.y = de + h * k * k;
+    cdSalDesenha(cd);
+    if (k < 1){ s.q = requestAnimationFrame(passo); return; }
+    s.q = 0;
+    s.naAgua = agua;
+    if (agua) cdAnda(cd);                   /* caiu na água: começa a dissolver */
+  };
+  s.q = requestAnimationFrame(passo);
+}
+/* Largada sobre o copo, cai dentro, na água; fora, cai na bancada. */
+function cdSalSolta(cd){
+  const s = cdSal(cd);
+  s.pega = 0;
+  const sobre = s.x + CD_SAL_L > CD_COPO[0] && s.x - CD_SAL_L < CD_COPO[1];
+  if (s.dentro || sobre){
+    s.x = Math.max(CD_SAL_X[0], Math.min(CD_SAL_X[1], s.x));
+    s.dentro = true;
+    cdSalCai(cd, CD_SAL_FUNDO, true);
+  } else {
+    cdSalCai(cd, CD_SAL_CHAO, false);
+  }
+}
+/* o dedo, em coordenadas do desenho: pela proporção do retângulo do SVG,
+   que não depende da escala do cubo */
+function cdLocal(cd, e){
+  const r = cd.querySelector('.cd-svg').getBoundingClientRect();
+  return { x: (e.clientX - r.left) / r.width * 300,
+           y: -14 + (e.clientY - r.top) / r.height * 206 };
+}
+
+/* O botão da haste desce os eletrodos até a solução, ou os sobe. A
+   lâmpada responde no instante em que as pontas tocam a água (ou saem
+   dela), e não no fim da viagem. No meio do caminho o botão não
+   responde. */
+function cdHaste(cd){
+  if (!cd || cd._t) return;
+  const desce = !cd.classList.contains('baixo');
+  cd._desce = desce;                        /* o rumo da viagem, para cdTroca */
+  cdVai(cd, desce ? cdBaixo(cd) : CD_CIMA,
+        () => cd.classList.toggle('baixo', desce));   /* a seta vira no fim */
+}
+/* até onde os eletrodos descem, e onde a ponta passa a tocar o conteúdo:
+   no sal da cápsula (NaCl puro) ou na água do béquer */
+const cdBaixo = cd => +cd.dataset.sub === 0 ? CD_BAIXO_BICO : CD_BAIXO;
+const cdMolha = (cd, y) => y + CD_PONTA > (+cd.dataset.sub === 0 ? CD_SAL_TOPO : CD_AGUA);
+/* leva o bloco dos eletrodos até a altura "para", em 0,9 s */
+function cdVai(cd, para, fim){
+  if (cd._t) cancelAnimationFrame(cd._t);
+  const de = parseFloat(cd.dataset.y) || CD_CIMA;
+  const t0 = performance.now();
+  const passo = (agora) => {
+    const k = Math.max(0, Math.min(1, (agora - t0) / 900));
+    const e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    const y = de + (para - de) * e;
+    cdPoe(cd, y);
+    cd.classList.toggle('molhado', cdMolha(cd, y));
+    cdAnda(cd);
+    if (k < 1){ cd._t = requestAnimationFrame(passo); return; }
+    cd._t = 0;
+    if (fim) fim();
+  };
+  cd._t = requestAnimationFrame(passo);
+}
+
+/* A face que sai leva o aparelho de volta ao começo: fonte desligada,
+   eletrodos em cima, lâmpada apagada, o sal sólido no béquer. */
+function descansaCond(raiz){
+  (raiz || document).querySelectorAll('.cd').forEach(cd => {
+    if (cd._t){ cancelAnimationFrame(cd._t); cd._t = 0; }
+    if (cd._a){ cancelAnimationFrame(cd._a); cd._a = 0; }
+    if (cdPega && cdPega.cd === cd) cdPega = null;
+    cd.classList.remove('ligado', 'baixo', 'molhado');
+    if (cdGas && cdGas.cd === cd) cdGas = null;
+    cd.dataset.sub = 0;
+    cdSalCasa(cd);
+    cdBicoApaga(cd);
+    cdPoe(cd, CD_CIMA);
+    G3.solvFica = false;                    /* a face 4 volta a levar os íons embora */
+    /* um giro da lente pela metade não sobrevive à troca de face */
+    if (cd._giroT1 || cd._giroT2){
+      clearTimeout(cd._giroT1); clearTimeout(cd._giroT2);
+      cd._giroT1 = cd._giroT2 = 0; cd._giroDeNovo = false;
+      const sl = cd.closest('.slide');
+      const it = sl && sl.querySelector('.reveal-item.reticulo[data-lupa]');
+      if (it) it.classList.remove('virando');
+      G3.lupaPara = 0; G3.giro = 0;
+    }
+    cd._lupaSub = undefined;
+    cd._b = undefined;
+    cdBrilho(cd, 0);
+  });
+}
+
 /* O cristal de cada propriedade. A face 4 volta ao NaCl: a pedra que
    entra no béquer é de sal, e seria estranho a lupa mostrar outro. */
 const REDE_DA_FACE = ['na2o', 'nacl', 'mgo', 'nacl', 'nacl'];
@@ -13400,7 +14640,14 @@ function abrePainel(pn){
   slide.classList.add('quantum-on');
   sincronizaTinta();     /* a folha da caneta acompanha o mundo aberto */
   if (pn.dataset.rede){
-    const cv = slide.querySelector('.q3d');
+    /* Outra caixa com rede já aberta: a cena dela não se apaga — vai para
+       o fundo e continua sendo desenhada, na tela dela (lacoG3). */
+    const ativo = G3.pnAtivo;
+    if (ativo && ativo !== pn && ativo.classList.contains('q-on')
+        && ativo.closest('.slide') === slide && G3.canvas)
+      G3.outras.push({ pn: ativo, canvas: G3.canvas, estado: tiraCena() });
+    G3.pnAtivo = pn;
+    const cv = canvasDoPainel(slide, pn);
     const r  = retanguloPainel(pn);
     if (cv) cv.style.clipPath =
       `inset(${r.y0.toFixed(0)}px ${(1280 - r.x1).toFixed(0)}px `
@@ -13415,14 +14662,38 @@ function fechaPainel(pn){
   if (!slide) return;
   pn.classList.remove('q-on');
   if (pn.dataset.rede){
-    const cv = slide.querySelector('.q3d');
-    fechaRede(slide);
-    if (cv) cv.style.clipPath = '';
+    const cv = pn._cv || slide.querySelector('.q3d');
+    const i = G3.outras.findIndex(o => o.pn === pn);
+    if (i >= 0){
+      G3.outras.splice(i, 1);                /* uma rede de fundo: sai sozinha */
+    } else if (G3.outras.length){
+      /* a ativa fecha e uma de fundo assume o lugar dela */
+      const o = G3.outras.shift();
+      poeCena(o.estado);
+      iniciaG3(o.canvas);
+      G3.pnAtivo = o.pn;
+      lacoG3(o.canvas);
+    } else {
+      fechaRede(slide);
+    }
+    /* Escondida por inteiro, e não sem recorte: sem recorte a tela cobria o
+       slide e roubava o toque das outras caixas quando outra rede abrisse. */
+    if (cv) cv.style.clipPath = 'inset(100%)';
   }
   /* o outro mundo pode continuar aberto: a classe do slide segue ele */
   if (slide.querySelector('.pn.q-on')) slide.classList.add('quantum-on');
   else slide.classList.remove('quantum-on');
   sincronizaTinta();     /* a folha da caneta acompanha o mundo aberto */
+}
+
+/* A CHAVE DAS DUAS ESCALAS: aberta, a caixa volta ao macroscópico;
+   fechada, abre a visão submicroscópica. As caixas abrem juntas: cada
+   rede 3D tem a sua tela e o seu estado (G3.outras), e a água é DOM. */
+function alternaPainel(pn){
+  const slide = pn && pn.closest('.slide');
+  if (!slide) return;
+  if (pn.classList.contains('q-on')) fechaPainel(pn);
+  else abrePainel(pn);
 }
 
 /* centro de um elemento em coordenadas do palco */
@@ -13621,8 +14892,18 @@ deck.addEventListener('click', (e) => {
   if (pdr){ bateNaPedra(pdr, e); return; }
   const bkb = e.target.closest('.bk-liga');
   if (bkb){ bicoLiga(bkb.closest('.bk')); return; }
+  const cdp = e.target.closest('.cd-pow');
+  if (cdp){ cdLiga(cdp.closest('.cd')); return; }
+  const cde = e.target.closest('.cd-ele');
+  if (cde){ cdHaste(cde.closest('.cd')); return; }
+  const cdt = e.target.closest('.cd-ant, .cd-prox');
+  if (cdt){ cdTroca(cdt.closest('.cd'), cdt.classList.contains('cd-ant') ? -1 : 1); return; }
+  const cdb = e.target.closest('.cd-bk-liga');
+  if (cdb){ cdBicoLiga(cdb.closest('.cd')); return; }
   const sair = e.target.closest('.pn-sair');
   if (sair){ fechaPainel(sair.closest('.pn')); return; }
+  const vis = e.target.closest('.pn-vis');
+  if (vis){ alternaPainel(vis.closest('.pn')); return; }
   const volt = e.target.closest('.q-voltar');
   if (volt){ saiDaRede(volt.closest('.slide')); return; }
   const rst = e.target.closest('.q-reset');
@@ -13636,6 +14917,54 @@ deck.addEventListener('click', (e) => {
     return;
   }
 });
+
+/* A pedra de sal da face 5: pega-se pelo retângulo de pega, e o dedo
+   segue pelo documento — o SVG inteiro ignora o toque fora das áreas
+   de pega, então o que conta é a captura. */
+deck.addEventListener('pointerdown', (e) => {
+  const h = e.target.closest && e.target.closest('.cd-sal-pega');
+  const cd = h && h.closest('.cd');
+  if (!cd || +cd.dataset.sub !== 1 || cd.classList.contains('sumiu')) return;
+  const s = cdSal(cd), p = cdLocal(cd, e);
+  cancelAnimationFrame(s.q); s.q = 0;
+  s.pega = 1; s.naAgua = false;             /* na mão, a dissolução para */
+  cdPega = { cd, id: e.pointerId, dx: s.x - p.x, dy: s.y - p.y };
+  try { h.setPointerCapture(e.pointerId); } catch (_){}
+  cd.classList.add('pegando');
+  e.preventDefault(); e.stopPropagation();
+});
+document.addEventListener('pointermove', (e) => {
+  const g = cdPega;
+  if (!g || e.pointerId !== g.id) return;
+  const p = cdLocal(g.cd, e);
+  cdSalPoe(g.cd, p.x + g.dx, p.y + g.dy);
+});
+const cdLarga = (e) => {
+  const g = cdPega;
+  if (!g || e.pointerId !== g.id) return;
+  cdPega = null;
+  g.cd.classList.remove('pegando');
+  cdSalSolta(g.cd);
+};
+document.addEventListener('pointerup', cdLarga);
+document.addEventListener('pointercancel', cdLarga);
+
+/* o registro do gás do bico (face 5, NaCl puro): tocar ou arrastar */
+deck.addEventListener('pointerdown', (e) => {
+  const v = e.target.closest && e.target.closest('.cd-bk-val');
+  const cd = v && v.closest('.cd');
+  if (!cd || +cd.dataset.sub !== 0) return;
+  cdGas = { cd, id: e.pointerId };
+  try { v.setPointerCapture(e.pointerId); } catch (_){}
+  cdGasPoe(cd, cdLocal(cd, e).y);
+  e.preventDefault(); e.stopPropagation();
+});
+document.addEventListener('pointermove', (e) => {
+  if (cdGas && e.pointerId === cdGas.id) cdGasPoe(cdGas.cd, cdLocal(cdGas.cd, e).y);
+});
+const cdSoltaGas = (e) => { if (cdGas && e.pointerId === cdGas.id) cdGas = null; };
+document.addEventListener('pointerup', cdSoltaGas);
+document.addEventListener('pointercancel', cdSoltaGas);
 
 /* ------------------------------------------------------------
    A NOTA DE AJUDA ANDA.
@@ -13862,7 +15191,10 @@ function tapItem(it){
   /* caixa de comparação: o toque entra no mundo quântico dela */
   if (it.classList.contains('painel')){
     const pn = it.querySelector('.pn');
-    if (pn && (pn.dataset.rede || pn.dataset.campo)) abrePainel(pn);
+    /* fechada, o toque na caixa também entra; aberta, o toque é do mundo
+       dela — quem sai é a chave da base */
+    if (pn && (pn.dataset.rede || pn.dataset.campo) && !pn.classList.contains('q-on'))
+      alternaPainel(pn);
     return;
   }
   /* Molécula do campo: um toque leva a 500%, outro devolve ao normal.
@@ -13953,7 +15285,7 @@ function tapItem(it){
 
 deck.addEventListener('pointerdown', (e) => {
   /* botões são botões, não alças de arrasto */
-  if (e.target.closest('.lego-redo, .pn-sair, .poli-btn, .poli-nota')) return;
+  if (e.target.closest('.lego-redo, .pn-sair, .pn-vis, .poli-btn, .poli-nota')) return;
   /* molécula tridimensional ampliada: o dedo nela GIRA, não leva. Pequena
      ela continua sendo arrastada como todas as outras. */
   if (e.target.closest('.qm.tri.big')) return;
@@ -13968,9 +15300,9 @@ deck.addEventListener('pointerdown', (e) => {
   /* átomo da molécula ampliada: idem — quem anda é o átomo, não a
      molécula inteira (levaAtomo cuida dele) */
   if (e.target.closest('.qsp-at')) return;
-  /* o bico, a pedra e o béquer têm interação própria: o cubo não gira
-     nem se arrasta por causa deles */
-  if (e.target.closest('.bk, .pd, .bq')) return;
+  /* o bico, a pedra, o béquer e o teste de condutividade têm interação
+     própria: o cubo não gira nem se arrasta por causa deles */
+  if (e.target.closest('.bk, .pd, .bq, .cd')) return;
   /* O átomo do octeto é fixo: a bola arranca elétron e o resto da área
      dele serve para fazer nascer um elétron. Nada ali move o átomo. */
   if (e.target.closest('.reveal-item[data-eatom]')) return;
@@ -14438,6 +15770,10 @@ function pontoPalco(e){
 
 deck.addEventListener('pointerdown', (e) => {
   const slide = e.target.closest('.slide.quantum-on');
+  /* o dedo na tela de uma rede de fundo: ela vira a ativa antes de tudo,
+     e o gesto — girar, pinçar, arrancar a célula — vai para ela */
+  const cvT = !puxando && e.target.closest && e.target.closest('.q3d');
+  if (cvT && cvT !== G3.canvas) ativaCena(cvT);
   if (!slide || !REDES[G3.modo]) return;
   if (e.target.closest(PEGAVEL)) return;
   if (e.target.closest('.q-board, .q-reset, .q-refazer, .q-voltar, .q-tit')) return;
@@ -14719,6 +16055,9 @@ deck.addEventListener('wheel', (e) => {
      como Ctrl + roda) aproxima e afasta a câmera. O passo acompanha o
      tamanho do delta: a roda do mouse dá saltos, o touchpad dá fatias. */
   const q = e.target.closest('.slide.quantum-on');
+  /* a roda sobre uma rede de fundo aproxima aquela, e não a ativa */
+  const cvR = e.target.closest && e.target.closest('.q3d');
+  if (cvR && cvR !== G3.canvas) ativaCena(cvR);
   if (q && REDES[G3.modo] && (e.ctrlKey || e.metaKey)){
     e.preventDefault();
     G3.voo = 0;                             /* a mão assume o comando */
