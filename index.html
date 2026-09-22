@@ -1890,6 +1890,26 @@ body{
 .slide.rede-on .q-voltar{opacity:1;visibility:visible}
 .q-voltar:hover{border-color:var(--amber);box-shadow:0 0 30px rgba(240,180,60,.45);transform:scale(1.05)}
 
+/* A SAÍDA DO MUNDO QUÂNTICO DOS RECIPIENTES.
+   Antes se saía com um toque em qualquer lugar da tela — e com a caneta
+   armada, riscar era um toque: a aula caía do mergulho no meio do traço.
+   Agora a saída é este botão (e o Esc), como no retículo. */
+.q-sair{
+  position:absolute;left:38px;top:30px;
+  padding:11px 22px 11px 16px;border-radius:999px;
+  border:1px solid rgba(240,180,60,.55);
+  background:linear-gradient(180deg,#4A3512 0%,#2A1D08 100%);
+  color:var(--paper);font-family:var(--mono);font-size:13px;letter-spacing:.14em;
+  text-transform:uppercase;cursor:pointer;pointer-events:auto;z-index:12;
+  box-shadow:0 0 22px rgba(240,180,60,.2);
+  transition:border-color .2s,box-shadow .2s,transform .2s,opacity .3s;
+  opacity:0;visibility:hidden;
+}
+/* só no mergulho de recipiente: no retículo quem sai é o q-voltar */
+.slide.zoom-on .q-sair{opacity:1;visibility:visible}
+.slide.rede-on .q-sair{opacity:0;visibility:hidden}
+.q-sair:hover{border-color:var(--amber);box-shadow:0 0 30px rgba(240,180,60,.45);transform:scale(1.05)}
+
 /* REFAZER e RESETAR: a mesma pastilha.
    Os dois dizem "volte ao começo" — um devolve o campo de moléculas, o
    outro devolve o retículo — e moram na MESMA quina, porque nunca
@@ -4273,7 +4293,7 @@ Al<sup>3+</sup> + O<sup>2−</sup> → <b>Al<sub>2</sub>O<sub>3</sub></b></div><
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v26.0';
+const VERSION = 'v26.1';
 
 const SLIDES = [
   {
@@ -8456,6 +8476,8 @@ const REVEALS = (list, cfg) => {
                    stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
                ><polyline points="23 4 23 10 17 10"/><path
                   d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>` : '')
+      + `<button class="q-sair" type="button" tabindex="-1"
+                 title="Sair do mundo quântico (Esc)">&#8592; Voltar</button>`
       + (tem3d ? `<div class="cel-rot">célula unitária</div>`
                + `<div class="rede-rot">Retículo Cristalino</div>` : '')
     : '';
@@ -12322,7 +12344,7 @@ function openQuantum(it){
   const q = slide.querySelector('.quantum');
   povoaCampo(q, it);
   it.classList.add('zoomed');
-  slide.classList.add('quantum-on');
+  slide.classList.add('quantum-on', 'zoom-on');   /* zoom-on: acende o botão Voltar */
   sincronizaTinta();     /* a folha da caneta acompanha o mundo aberto */
   /* a partir daqui o objeto fica pointer-events:none, então o "click"
      desta mesma tocada será roteado para o fundo. Marcamos a hora para
@@ -12496,7 +12518,7 @@ function closeQuantum(it){
   it.classList.remove('zoomed');
   const slide = it.closest('.slide');
   if (!slide) return;
-  slide.classList.remove('quantum-on', 'rede-on', 'rede-livre');
+  slide.classList.remove('quantum-on', 'rede-on', 'rede-livre', 'zoom-on');
   sincronizaTinta();     /* a folha da caneta acompanha o mundo aberto */
   paraConflito();
   limpaConflito(slide.querySelector('.quantum'));
@@ -16477,7 +16499,7 @@ deck.addEventListener('pointerdown', (e) => {
   if (cvT && cvT !== G3.canvas) ativaCena(cvT);
   if (!slide || !REDES[G3.modo]) return;
   if (e.target.closest(PEGAVEL)) return;
-  if (e.target.closest('.q-board, .q-reset, .q-refazer, .q-voltar, .q-tit')) return;
+  if (e.target.closest('.q-board, .q-reset, .q-refazer, .q-voltar, .q-sair, .q-tit')) return;
   /* A ampola e os átomos que saíram dela têm gesto próprio (ver
      montaAmpolaRede). Sem esta linha, o dedo neles pegava também o íon
      do retículo que estivesse atrás, e arrastar o átomo girava a cena. */
@@ -16727,21 +16749,14 @@ document.addEventListener('pointerup', soltaCelula);
 document.addEventListener('pointercancel', soltaCelula);
 
 
-/* com o mundo quântico aberto, um toque em qualquer lugar da tela volta.
-   O próprio objeto é exceção: lá quem alterna é o tapItem, e este
-   ouvinte não pode desfazer a abertura que acabou de acontecer. */
-document.addEventListener('click', (e) => {
+/* A SAÍDA DO MERGULHO É O BOTÃO VOLTAR (e o Esc), e mais nada.
+   Antes, um toque em qualquer lugar da tela saía. Com a caneta armada
+   isso não dava para usar: cada traço era lido como um toque, e a aula
+   caía do mundo quântico no meio do risco. */
+deck.addEventListener('click', (e) => {
+  if (!e.target.closest || !e.target.closest('.q-sair')) return;
   const z = deck.querySelector('.reveal-item.zoomed');
-  if (!z) return;
-  if (Date.now() - zoomAbertoEm < 350) return;        /* clique da própria abertura */
-  if (!e.target.closest) return;
-  /* mexer na barra ou nos painéis não é pedido de saída: abrir as
-     anotações no meio do mergulho não pode desfazer o mergulho */
-  if (e.target.closest('#bar, #puxador, #notes, #coords, #overview')) return;
-  const alvo = e.target.closest('.reveal-item');
-  /* mexer nas moléculas, no quadro ou na bola dele não é pedido de saída */
-  if (alvo === z || e.target.closest('.qm, .qmol, .q-board, .q-refazer, .q-tit')) return;
-  closeQuantum(z);
+  if (z) closeQuantum(z);
 });
 
 /* a barra da intensidade da chama */
