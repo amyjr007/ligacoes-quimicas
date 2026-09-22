@@ -3783,6 +3783,102 @@ body.ruth-movel .elem.pegando{cursor:grabbing;border-color:var(--aqua)}
 
    O material é o mesmo do resto: fundo de tinta escura, fio verde-água,
    monoespaçada em caixa alta no título e a fonte de leitura no corpo. */
+/* ---------- O RESUMO DA AULA ----------
+   A página que o aluno copia no caderno: um esquema de estudo por parte
+   do assunto, com caixas, setas de fluxo e as palavras-chave destacadas.
+   Abre por cima de tudo (botão Resumo, tecla R) e troca de parte pelas
+   abas, pelas setas de baixo ou pelas do teclado. */
+#resumo{
+  position:fixed;inset:0;z-index:120;
+  display:flex;flex-direction:column;
+  background:radial-gradient(120% 90% at 78% 8%,rgba(69,199,176,.10),transparent 55%),
+             linear-gradient(180deg,#0B2033 0%,#040D17 100%);
+  color:var(--paper);font-family:var(--body);
+}
+/* o display:flex acima ganharia do hidden do navegador: fechado é fechado */
+#resumo[hidden]{display:none}
+.rs-topo{
+  flex:none;display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  padding:16px 26px 12px;border-bottom:1px solid rgba(69,199,176,.22);
+}
+.rs-marca{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--aqua)}
+.rs-abas{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+.rs-aba{
+  padding:7px 13px;border-radius:999px;cursor:pointer;
+  border:1px solid rgba(232,241,245,.18);background:transparent;
+  color:var(--paper-dim);font-family:var(--body);font-size:13px;
+}
+.rs-aba b{font-family:var(--mono);font-weight:500;margin-right:6px;color:var(--aqua)}
+.rs-aba[aria-current="true"]{border-color:var(--amber);color:var(--paper);background:rgba(240,180,74,.12)}
+.rs-x{
+  width:36px;height:36px;border-radius:50%;cursor:pointer;display:grid;place-items:center;
+  border:1px solid rgba(232,241,245,.25);background:transparent;color:var(--paper);
+}
+.rs-x:hover{border-color:var(--aqua);color:var(--aqua)}
+.rs-corpo{flex:1;overflow:auto;padding:26px 26px 34px}
+.rs-pag{max-width:1180px;margin:0 auto}
+.rs-cab{margin-bottom:20px}
+.rs-parte{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--aqua)}
+.rs-cab h2{margin:6px 0 0;font-family:var(--display);font-weight:600;font-size:34px;line-height:1.15}
+.rs-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px}
+.rs-card{
+  background:linear-gradient(158deg,#143048 0%,#0A1F31 100%);
+  border:1px solid rgba(69,199,176,.3);border-radius:6px;padding:16px 18px;
+}
+/* um terço da largura por padrão; meio = metade; largo = a linha toda */
+.rs-card{grid-column:span 2}
+.rs-card.meio{grid-column:span 3}
+.rs-card.largo{grid-column:1/-1}
+.rs-card.chave{border-color:rgba(240,180,74,.6);box-shadow:inset 0 0 0 1px rgba(240,180,74,.15),0 0 28px rgba(240,180,74,.08)}
+.rs-card h3{
+  margin:0 0 10px;font-family:var(--mono);font-weight:500;font-size:12px;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--aqua);
+}
+.rs-card.chave h3{color:var(--amber)}
+.rs-card p,.rs-card li{font-size:17px;line-height:1.5;margin:0}
+.rs-card p + p{margin-top:8px}
+.rs-card ul,.rs-card ol{margin:0;padding-left:22px}
+.rs-card li + li{margin-top:5px}
+#resumo b{color:var(--amber);font-weight:600}
+#resumo sub,#resumo sup{font-size:.7em}
+/* o fluxo: nós ligados por setas com o verbo que as liga */
+.rs-fluxo{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+.rs-no{
+  padding:7px 15px;border-radius:999px;border:1px solid var(--aqua);
+  font-family:var(--display);font-weight:600;font-size:18px;white-space:nowrap;
+}
+.rs-no.q{border-color:var(--amber);color:var(--amber)}
+.rs-seta{font-family:var(--mono);font-size:12px;color:var(--paper-dim);white-space:nowrap}
+.rs-seta::after{content:' \2192';font-size:18px;color:var(--aqua)}
+.rs-duas{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.rs-ok,.rs-nao{list-style:none;padding-left:0!important}
+.rs-ok li::before{content:'\2713  ';color:var(--aqua);font-weight:600}
+.rs-nao li::before{content:'\2717  ';color:#FF8A7A;font-weight:600}
+.rs-sub{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--paper-dim);margin-bottom:6px}
+.rs-tab{width:100%;border-collapse:collapse;font-size:16px}
+.rs-tab th,.rs-tab td{padding:6px 8px;text-align:center;border-bottom:1px solid rgba(232,241,245,.1)}
+.rs-tab th{font-family:var(--mono);font-weight:500;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-dim)}
+.rs-eq{
+  margin-top:8px;padding:8px 12px;border-radius:4px;background:rgba(3,12,22,.45);
+  font-family:var(--mono);font-size:16px;line-height:1.7;
+}
+.rs-num{
+  display:inline-grid;place-items:center;width:26px;height:26px;margin-right:8px;border-radius:50%;
+  background:var(--amber);color:#0A1F31;font-family:var(--mono);font-weight:500;font-size:13px;
+}
+.rs-card p.rs-pq{margin-top:8px;font-size:15px;color:var(--paper-dim)}
+.rs-pq::before{content:'Por quê? ';font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--aqua)}
+/* anterior e próxima: setas pequenas no topo, ao lado do X */
+.rs-nav{
+  width:36px;height:36px;border-radius:50%;cursor:pointer;display:grid;place-items:center;
+  border:1px solid rgba(240,180,74,.55);background:transparent;color:var(--amber);
+  font-size:20px;line-height:1;padding:0 0 2px;
+}
+.rs-nav:hover:not(:disabled){background:rgba(240,180,74,.12)}
+.rs-nav:disabled{opacity:.3;cursor:default}
+@media (max-width:900px){ .rs-grid .rs-card{grid-column:1/-1} }
+@media (max-width:700px){ .rs-duas{grid-template-columns:1fr} .rs-cab h2{font-size:26px} }
+
 #notes{
   position:fixed;z-index:90;
   left:var(--nx,50%);top:var(--ny,50%);
@@ -3951,6 +4047,10 @@ body.ruth-movel .elem.pegando{cursor:grabbing;border-color:var(--aqua)}
   <button class="btn" id="notes-btn" title="Notas de aula deste slide (A)" aria-label="Notas de aula deste slide">
     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 015.5 3H14l5 5v12.5a1.5 1.5 0 01-1.5 1.5h-12A1.5 1.5 0 014 20.5z"/><path d="M14 3v5h5"/><path d="M8.5 13h7M8.5 17h4.5"/></svg>
   </button>
+  <!-- o resumo do assunto, para o aluno copiar -->
+  <button class="btn" id="resumo-btn" title="Resumo da aula (R)" aria-label="Resumo da aula">
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 016.5 3H20v15H6.5A2.5 2.5 0 004 20.5z"/><path d="M4 20.5A2.5 2.5 0 016.5 18H20v3H6.5A2.5 2.5 0 014 20.5z"/><path d="M8.5 7.5h7M8.5 11h5"/></svg>
+  </button>
   <div class="sep"></div>
   <button class="btn" id="pen-btn" title="Escrever na tela (P)" aria-label="Escrever na tela">
     <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.1 2.1 0 013 3L8 18l-4 1 1-4z"/><path d="M14 6l4 4"/></svg>
@@ -4007,6 +4107,140 @@ body.ruth-movel .elem.pegando{cursor:grabbing;border-color:var(--aqua)}
      estiver escrito é gravado no fechar — pelo botão, pelo Esc ou por um
      clique no fundo. Fica no navegador desta máquina; não vai para o
      arquivo da aula. -->
+<div id="resumo" hidden>
+  <div class="rs-topo">
+    <span class="rs-marca">Resumo da aula</span>
+    <nav class="rs-abas" aria-label="Partes do resumo">
+      <button class="rs-aba" type="button" data-ir="0"><b>1</b>Introdução à Química</button>
+      <button class="rs-aba" type="button" data-ir="1"><b>2</b>Ligações e Octeto</button>
+      <button class="rs-aba" type="button" data-ir="2"><b>3</b>Ganho ou perda de elétrons</button>
+      <button class="rs-aba" type="button" data-ir="3"><b>4</b>Propriedades dos iônicos</button>
+    </nav>
+    <button class="rs-nav" id="resumo-ant" type="button" title="Parte anterior (←)" aria-label="Parte anterior">‹</button>
+    <button class="rs-nav" id="resumo-prox" type="button" title="Próxima parte (→)" aria-label="Próxima parte">›</button>
+    <button class="rs-x" id="resumo-close" type="button" title="Fechar (Esc)" aria-label="Fechar o resumo">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="rs-corpo">
+    <section class="rs-pag" data-p="0">
+      <div class="rs-cab">
+        <div class="rs-parte">Parte 1 · Slides 2 e 3</div>
+        <h2>Introdução à Química</h2>
+      </div>
+      <div class="rs-grid">
+        <div class="rs-card largo chave"><h3>O ponto de partida</h3><div class="rs-fluxo">
+      <span class="rs-no q">Química</span><span class="rs-seta">estuda a</span>
+      <span class="rs-no">Matéria</span><span class="rs-seta">formada por</span>
+      <span class="rs-no">Átomos</span>
+    </div>
+    <p style="margin-top:12px"><b>Química</b> é a ciência que estuda a matéria e <b>produz novos materiais</b>.
+    O <b>átomo</b> é o <b>construtor básico</b> de toda matéria.</p></div>
+        <div class="rs-card"><h3>Modelo atômico de Dalton (1808)</h3><ol><li>Átomos são <b>esféricos</b>, como bolas de bilhar.</li>
+      <li>Há <b>diferentes tipos</b> de átomos.</li>
+      <li>Átomos se <b>combinam</b> para formar moléculas.</li></ol>
+    <p style="margin-top:8px">Para Dalton, o átomo era <b>maciço</b>, <b>indestrutível</b> e <b>indivisível</b>.</p></div>
+        <div class="rs-card"><h3>Elemento químico</h3><p>Cada <b>tipo de átomo</b> é um elemento químico.</p>
+    <p>Ex.: H (hidrogênio), Au (ouro), N (nitrogênio), C (carbono), O (oxigênio).</p></div>
+        <div class="rs-card"><h3>Molécula → Substância</h3><p><b>Molécula:</b> estrutura formada pela <b>combinação de átomos</b>. É a base de uma substância.</p>
+    <p><b>Substância química:</b> matéria formada por <b>moléculas todas idênticas</b>.</p>
+    <div class="rs-eq">H<sub>2</sub>O · NH<sub>3</sub> (amônia) · H<sub>2</sub>SO<sub>4</sub> · CO<sub>2</sub></div></div>
+        <div class="rs-card largo"><h3>O que Dalton sabia × o que não sabia</h3><div class="rs-duas">
+      <div><div class="rs-sub">Sabia</div><ul class="rs-ok">
+        <li>Os átomos se combinavam.</li><li>Não existem átomos isolados.</li></ul></div>
+      <div><div class="rs-sub">Não sabia</div><ul class="rs-nao">
+        <li><b>Como</b> os átomos se ligam.</li>
+        <li><b>Por que</b> se ligam em proporções específicas.</li></ul></div>
+    </div></div>
+      </div>
+    </section>
+    <section class="rs-pag" data-p="1" hidden>
+      <div class="rs-cab">
+        <div class="rs-parte">Parte 2 · Slides 4 a 6</div>
+        <h2>Ligações Químicas e a Teoria do Octeto</h2>
+      </div>
+      <div class="rs-grid">
+        <div class="rs-card"><h3>Ligações químicas</h3><ol><li>É o estudo das <b>possibilidades de combinações</b> entre átomos.</li>
+      <li>E de como essas combinações <b>influenciam nas propriedades</b> das substâncias.</li></ol></div>
+        <div class="rs-card"><h3>Por que os átomos se ligam? (G. N. Lewis, 1916)</h3><div class="rs-fluxo">
+      <span class="rs-no">Átomos isolados</span><span class="rs-seta">são</span>
+      <span class="rs-no">instáveis</span><span class="rs-seta">então</span>
+      <span class="rs-no">se combinam</span><span class="rs-seta">para atingir a</span>
+      <span class="rs-no q">estabilidade</span>
+    </div>
+    <p style="margin-top:10px">Na natureza, os átomos são encontrados <b>combinados</b>.</p></div>
+        <div class="rs-card"><h3>Ramsey e os gases inertes (1894)</h3><p>São substâncias formadas por <b>átomos isolados</b>.</p>
+    <p>Ramsey as chamou de <b>gases inertes</b>; anos depois receberam o nome de <b>gases nobres</b>.</p>
+    <div class="rs-eq">He · Ne · Ar · Kr · Xe · Rn</div>
+    <p style="margin-top:8px">Pergunta-chave: <b>qual o segredo da estabilidade dos gases nobres?</b></p></div>
+        <div class="rs-card largo chave"><h3>Teoria do Octeto</h3><p>A provável causa da <b>estabilidade</b> dos gases nobres é que, exceto o hélio, todos têm
+    <b>8 elétrons na camada de valência</b> (a última camada).</p>
+    <table class="rs-tab" style="margin-top:10px">
+      <tr><th>Gás nobre</th><th>He</th><th>Ne</th><th>Ar</th><th>Kr</th><th>Xe</th><th>Rn</th></tr>
+      <tr><td>e<sup>−</sup> de valência</td><td>2</td><td>8</td><td>8</td><td>8</td><td>8</td><td>8</td></tr>
+    </table>
+    <p style="margin-top:10px">Os outros átomos se ligam para <b>ficar com 8 elétrons na valência</b>, como um gás nobre.</p></div>
+      </div>
+    </section>
+    <section class="rs-pag" data-p="2" hidden>
+      <div class="rs-cab">
+        <div class="rs-parte">Parte 3 · Slides 7 a 11</div>
+        <h2>O Octeto e a previsão de ganho ou perda de elétrons</h2>
+      </div>
+      <div class="rs-grid">
+        <div class="rs-card largo chave"><h3>A regra</h3><p>O átomo <b>perde</b> ou <b>ganha</b> elétrons até ficar com a mesma distribuição do <b>gás nobre mais próximo</b>.</p>
+    <div class="rs-duas" style="margin-top:10px">
+      <div><div class="rs-sub">Perdeu elétrons</div><p><b>Cátion</b> (carga +)</p></div>
+      <div><div class="rs-sub">Ganhou elétrons</div><p><b>Ânion</b> (carga −)</p></div>
+    </div></div>
+        <div class="rs-card meio"><h3>Exemplos</h3><div class="rs-eq">Na: 2 – 8 – <b>1</b> → perde 1 e<sup>−</sup> → <b>Na<sup>+</sup></b>: 2 – 8 (igual ao Ne)<br>
+Cl: 2 – 8 – <b>7</b> → ganha 1 e<sup>−</sup> → <b>Cl<sup>−</sup></b>: 2 – 8 – 8 (igual ao Ar)</div></div>
+        <div class="rs-card meio"><h3>Tabela periódica e o octeto</h3><p>Os <b>elétrons de valência coincidem com a família</b> dos elementos representativos (bloco A).</p>
+    <table class="rs-tab" style="margin-top:8px">
+      <tr><th>Família</th><th>1A</th><th>2A</th><th>3A</th><th>5A</th><th>6A</th><th>7A</th></tr>
+      <tr><td>e<sup>−</sup> valência</td><td>1</td><td>2</td><td>3</td><td>5</td><td>6</td><td>7</td></tr>
+      <tr><td>Tendência</td><td>perde 1</td><td>perde 2</td><td>perde 3</td><td>ganha 3</td><td>ganha 2</td><td>ganha 1</td></tr>
+      <tr><td>Íon</td><td><b>+1</b></td><td><b>+2</b></td><td><b>+3</b></td><td><b>−3</b></td><td><b>−2</b></td><td><b>−1</b></td></tr>
+    </table>
+    <p style="margin-top:8px">Na <b>representação de Lewis</b>, os elétrons de valência aparecem como pontos em volta do símbolo.</p></div>
+        <div class="rs-card largo"><h3>Tipos de ligação</h3><p>O tipo de ligação depende da <b>forma como os átomos estão combinados</b>.</p>
+    <table class="rs-tab" style="margin-top:8px">
+      <tr><th>Iônica</th><th>Molecular</th><th>Metálica</th></tr>
+      <tr><td>Entre <b>íons</b> (cátions e ânions)</td><td>Átomos <b>compartilham</b> pares de elétrons</td><td>Cátions do metal num <b>mar de elétrons</b></td></tr>
+      <tr><td>Na<sub>2</sub>O, NaCl</td><td>H<sub>2</sub>O</td><td>Fe</td></tr>
+    </table></div>
+        <div class="rs-card meio"><h3>Ligação iônica (eletrovalente)</h3><p>É a ligação que ocorre <b>entre íons</b>: cátions (+) e ânions (−).</p>
+    <p>As substâncias formadas por ela são os <b>compostos iônicos</b>.</p>
+    <p>Eles <b>não formam moléculas</b>: os íons se organizam num <b>retículo cristalino</b>
+    (estudado com o difratômetro de raios X).</p>
+    <div class="rs-eq">NaCl · MgO · Na<sub>2</sub>O · MgCl<sub>2</sub> · Al<sub>2</sub>O<sub>3</sub></div></div>
+        <div class="rs-card meio"><h3>Fórmula: a inversão do nox</h3><p>A <b>carga</b> de um íon vira o <b>índice</b> do outro. Depois, simplifica se der.</p>
+    <div class="rs-eq">Na<sup>+</sup> + O<sup>2−</sup> → <b>Na<sub>2</sub>O</b><br>
+Mg<sup>2+</sup> + Cl<sup>−</sup> → <b>MgCl<sub>2</sub></b><br>
+Mg<sup>2+</sup> + O<sup>2−</sup> → Mg<sub>2</sub>O<sub>2</sub> → <b>MgO</b><br>
+Al<sup>3+</sup> + O<sup>2−</sup> → <b>Al<sub>2</sub>O<sub>3</sub></b></div></div>
+      </div>
+    </section>
+    <section class="rs-pag" data-p="3" hidden>
+      <div class="rs-cab">
+        <div class="rs-parte">Parte 4 · Slides 12 e 13</div>
+        <h2>Propriedades dos compostos iônicos</h2>
+      </div>
+      <div class="rs-grid">
+        <div class="rs-card largo chave"><h3>A origem das propriedades</h3><p>As propriedades desses compostos são <b>consequências diretas das ligações entre os íons no retículo cristalino</b>.</p></div>
+        <div class="rs-card"><h3>Estado físico</h3><p><span class="rs-num">1</span>São <b>sólidos cristalinos rígidos</b> à temperatura ambiente.</p><p class="rs-pq">Os íons ficam presos em posições fixas do retículo, atraídos por todos os vizinhos.</p></div>
+        <div class="rs-card"><h3>Fusão e ebulição</h3><p><span class="rs-num">2</span>Possuem <b>altos pontos de fusão e ebulição</b>.</p><p class="rs-pq">É preciso muita energia para vencer a atração entre os íons. O NaCl só funde a 801 °C.</p></div>
+        <div class="rs-card"><h3>Quebradiços</h3><p><span class="rs-num">3</span>São <b>quebradiços</b>.</p><p class="rs-pq">Uma pancada desloca uma camada de íons: cargas iguais ficam frente a frente, se repelem e o cristal se parte em planos (clivagem).</p></div>
+        <div class="rs-card meio"><h3>Solubilidade</h3><p><span class="rs-num">4</span>São geralmente <b>solúveis em água</b>.</p><p class="rs-pq">As moléculas de água envolvem os íons e os arrancam do retículo (solvatação).</p></div>
+        <div class="rs-card meio"><h3>Condutividade elétrica</h3><p><span class="rs-num">5</span>Conduzem eletricidade <b>dissolvidos em água</b> ou <b>fundidos</b> (estado líquido).</p><p class="rs-pq">Só conduz quem tem íons livres para se mover. No sólido os íons estão presos: não conduz.</p><table class="rs-tab" style="margin-top:10px">
+      <tr><th>NaCl sólido</th><th>NaCl fundido</th><th>NaCl na água</th></tr>
+      <tr><td>não conduz</td><td><b>conduz</b></td><td><b>conduz</b></td></tr>
+    </table></div>
+      </div>
+    </section>
+  </div>
+</div>
+
 <div id="notes" hidden>
   <div class="cab" id="notes-cab">
     <div>
@@ -4039,7 +4273,7 @@ body.ruth-movel .elem.pegando{cursor:grabbing;border-color:var(--aqua)}
    HTML. Se "content" existir, ele substitui as áreas tracejadas.
    Classes prontas: .bullets  .callout  .media  .two-col
    ============================================================ */
-const VERSION = 'v25.9';
+const VERSION = 'v26.0';
 
 const SLIDES = [
   {
@@ -6613,6 +6847,43 @@ function ordemLig(key){
   return b.filter(l => l[0] === b[0][0] && l[1] === b[0][1]).length;
 }
 
+/* OS GRADIENTES DAS MOLÉCULAS MORAM NUM LUGAR SÓ.
+   Cada desenho trazia os seus dentro de si, com o mesmo id em todas as
+   cópias (a mesma molécula sai igual, e a água do mundo quântico é até o
+   mesmo texto repetido). O navegador resolve url(#id) pela PRIMEIRA cópia
+   do documento — e quando essa primeira estava num elemento escondido
+   (o painel do H2O de outro slide, ainda não revelado), o gradiente não
+   era desenhado: a haste da água ficava sem tinta, invisível, e as
+   moléculas pareciam átomos soltos.
+   Agora cada gradiente é registrado uma vez num SVG de definições que
+   está sempre renderizado (tamanho zero, no começo da página), e os
+   desenhos só apontam para ele. */
+const MOL_DEFS = new Map();
+let molDefsSvg = null;
+function registraDefsMol(markup){
+  let novo = false;
+  markup.split(/(?=<(?:radial|linear)Gradient )/).forEach(m => {
+    const id = (m.match(/ id="([^"]+)"/) || [])[1];
+    if (id && !MOL_DEFS.has(id)){ MOL_DEFS.set(id, m); novo = true; }
+  });
+  if (novo) poeDefsMol();
+}
+function poeDefsMol(){
+  if (!document.body){
+    document.addEventListener('DOMContentLoaded', poeDefsMol, { once: true });
+    return;
+  }
+  if (!molDefsSvg){
+    molDefsSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    molDefsSvg.setAttribute('aria-hidden', 'true');
+    molDefsSvg.setAttribute('width', '0');
+    molDefsSvg.setAttribute('height', '0');
+    molDefsSvg.style.cssText = 'position:absolute;width:0;height:0;overflow:hidden;pointer-events:none';
+    document.body.prepend(molDefsSvg);      /* antes de tudo: é a primeira cópia */
+  }
+  molDefsSvg.innerHTML = '<defs>' + [...MOL_DEFS.values()].join('') + '</defs>';
+}
+
 function MOL_SVG(key){
   const g = MOLGEO[key] || MOLGEO.h2o;
   let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
@@ -6669,9 +6940,10 @@ function MOL_SVG(key){
 
   const bolas = g.map(([el, x, y, r]) =>
     `<circle cx="${x}" cy="${y}" r="${r}" fill="url(#mg-${el})"/>`).join('');
+  /* os gradientes vão para o SVG de definições único (registraDefsMol) */
+  registraDefsMol(defs + lig.map(b => b.def).join(''));
   return `<svg class="qm-svg" viewBox="${(x0 - 1).toFixed(1)} ${(y0 - 1).toFixed(1)} `
        + `${(x1 - x0 + 2).toFixed(1)} ${(y1 - y0 + 2).toFixed(1)}" aria-hidden="true">`
-       + `<defs>${defs}${lig.map(b => b.def).join('')}</defs>`
        + `${lig.map(b => b.haste).join('')}${bolas}</svg>`;
 }
 const AGUA_SVG = MOL_SVG('h2o');
@@ -17489,7 +17761,39 @@ function toggleOverview(force){
   if (show) montaMiniaturas();
 }
 
+/* ---------- o resumo da aula ---------- */
+const resumo = document.getElementById('resumo');
+let resumoParte = 0;
+function resumoVai(n){
+  const pags = resumo.querySelectorAll('.rs-pag');
+  resumoParte = Math.max(0, Math.min(pags.length - 1, n));
+  pags.forEach((p, i) => { p.hidden = i !== resumoParte; });
+  resumo.querySelectorAll('.rs-aba').forEach((a, i) =>
+    a.setAttribute('aria-current', i === resumoParte ? 'true' : 'false'));
+  document.getElementById('resumo-ant').disabled  = resumoParte === 0;
+  document.getElementById('resumo-prox').disabled = resumoParte === pags.length - 1;
+  resumo.querySelector('.rs-corpo').scrollTop = 0;   /* cada parte começa do alto */
+}
+function abreResumo(){ resumo.hidden = false; resumoVai(resumoParte); }
+function fechaResumo(){ resumo.hidden = true; }
+document.getElementById('resumo-btn').addEventListener('click', abreResumo);
+document.getElementById('resumo-close').addEventListener('click', fechaResumo);
+document.getElementById('resumo-ant').addEventListener('click', () => resumoVai(resumoParte - 1));
+document.getElementById('resumo-prox').addEventListener('click', () => resumoVai(resumoParte + 1));
+resumo.querySelectorAll('.rs-aba').forEach(a =>
+  a.addEventListener('click', () => resumoVai(+a.dataset.ir)));
+/* o toque no resumo é do resumo: nada chega à aula por baixo */
+['pointerdown', 'pointermove', 'pointerup', 'wheel'].forEach(t =>
+  resumo.addEventListener(t, e => e.stopPropagation()));
+
 document.addEventListener('keydown', (e) => {
+  /* Resumo aberto: o teclado é dele. As setas trocam de parte. */
+  if (!resumo.hidden){
+    if (e.key === 'Escape') fechaResumo();
+    else if (e.key === 'ArrowRight' || e.key === 'PageDown'){ e.preventDefault(); resumoVai(resumoParte + 1); }
+    else if (e.key === 'ArrowLeft'  || e.key === 'PageUp'){ e.preventDefault(); resumoVai(resumoParte - 1); }
+    return;
+  }
   if (!coords.hidden){                       /* painel aberto: só Esc responde */
     if (e.key === 'Escape') hideCoords();
     return;
@@ -17521,6 +17825,7 @@ document.addEventListener('keydown', (e) => {
     case 'o': case 'O': toggleOverview(); break;
     case 'c': case 'C': showCoords(); break;
     case 'a': case 'A': showNotes(); break;
+    case 'r': case 'R': abreResumo(); break;
     case 'q': case 'Q': modoQuadro(); break;
     case 'l': case 'L': modoLaser(); break;
     case 'd': case 'D': modoDiag(); break;
